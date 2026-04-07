@@ -462,6 +462,29 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .tap-hint{font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase;
   float:right;margin-top:3px;opacity:.7;font-family:'EB Garamond',serif}
 .tappable:hover .tap-hint{opacity:1;color:var(--gold)}
+/* ── SECTION HOOKS & CTAs ── */
+.sec-hook{font-size:15px;color:var(--text2);font-style:italic;line-height:1.65;
+  margin:6px 0 12px;padding-left:2px}
+.sec-hook em{color:var(--gold);font-style:normal}
+.tap-cta{display:inline-flex;align-items:center;gap:7px;margin-top:12px;
+  padding:9px 18px;background:var(--gold4);border:1px solid var(--gold3);
+  border-radius:2px;color:var(--gold);font-size:13px;letter-spacing:.18em;
+  text-transform:uppercase;font-family:'EB Garamond',serif;cursor:pointer;
+  transition:all .22s;font-style:normal}
+.tap-cta:hover{background:var(--gold3);border-color:var(--gold);color:var(--gold2)}
+.tap-cta .cta-arrow{font-size:16px;transition:transform .2s}
+.tap-cta:hover .cta-arrow{transform:translateX(3px)}
+.start-here-banner{background:var(--bg3);border:1px solid var(--gold3);
+  border-radius:3px;padding:14px 18px;margin-bottom:22px;display:flex;
+  align-items:flex-start;gap:12px}
+.start-here-banner .shb-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.start-here-banner .shb-text{font-size:14px;color:var(--text2);line-height:1.6}
+.start-here-banner .shb-text strong{color:var(--gold);font-weight:400}
+.start-here-banner .shb-steps{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+.shb-step{padding:5px 12px;background:var(--gold4);border:1px solid var(--gold3);
+  border-radius:2px;font-size:12px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--gold);cursor:pointer;font-family:'EB Garamond',serif;transition:all .2s}
+.shb-step:hover{background:var(--gold3)}
 #drawerOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:399}
 #drawerOverlay.open{display:block}
 #tierModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;
@@ -3087,16 +3110,26 @@ function renderReading(data, dateStr) {
       <div style="flex:1;height:1px;background:var(--div)"></div>
       <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3)">Full Reading</div>
       <div style="flex:1;height:1px;background:var(--div)"></div>
+    </div>
+    <div class="start-here-banner">
+      <div class="shb-icon">◈</div>
+      <div class="shb-text">
+        <strong>New to this? Here's where to start.</strong><br>
+        Every section below can be explored deeply — tap any heading or use the button to receive a personalised interpretation. If you're short on time, go straight to your priorities and moon phase. If you want depth, start with your Kin and numerology.
+        <div class="shb-steps">
+          <button class="shb-step" onclick="tapDreamspell()">My Kin energy today →</button>
+          <button class="shb-step" onclick="tapNumerology(${num?.ud||0},'${(num?.udM?.n||'').replace(/'/g,"\'")}')" >My numbers today →</button>
+          <button class="shb-step" onclick="tapMoon()">My moon phase →</button>
+        </div>
+      </div>
     </div>`;
   }
 
   // 6. NUMEROLOGY
   html += `<div class="r-section">
-    <div class="sec-label tappable" onclick="tapNumerology(${num?.ud||'—'},'${num?.udM?.n||''}')">
-      Numerology of the Day
-      <span class="tap-hint">↗ Interpret</span>
-    </div>
-    <div class="sec-hl">${r.numerology?.headline||`Universal Day ${num?.ud} — ${num?.udM?.n||''}`}</div>`;
+    <div class="sec-label">Numerology of the Day</div>
+    <div class="sec-hl tappable" onclick="tapNumerology(${num?.ud||'—'},'${num?.udM?.n||''}')" style="cursor:pointer">${r.numerology?.headline||`Universal Day ${num?.ud} — ${num?.udM?.n||''}`}</div>
+    <div class="sec-hook">The <em>Universal Day number</em> is today's collective frequency — everyone on the planet is moving through it. Your <em>Personal Day</em> is the intersection of that frequency with your unique numerological blueprint. The overlap between the two is where your day's deepest signal lives.</div>`;
   if (r.numerology?.body) {
     html += `<div class="sec-body">${prose(r.numerology.body)}</div>`;
   } else {
@@ -3126,21 +3159,36 @@ function renderReading(data, dateStr) {
       <div style="font-size:11px;color:var(--gold3);margin-top:8px;text-align:right">↗ Tap for insight</div>
     </div>`;
   });
-  html += `</div></div>`;
+  html += `<div style="margin-top:12px">
+    <button class="tap-cta" onclick="tapNumerology(${num?.ud||0},'${(num?.udM?.n||'').replace(/'/g,"\'")}')" style="font-size:12px">
+      How does today's number energy work for me? <span class="cta-arrow">→</span>
+    </button>
+  </div></div></div>`;
 
   html += `<div class="r-section">
-    <div class="sec-label tappable" onclick="tapMoon()">Lunar Landscape <span class="tap-hint">↗ Interpret</span></div>
+    <div class="sec-label">Lunar Landscape</div>
     <div class="sec-hl tappable" onclick="tapMoon()" style="cursor:pointer">${moon?.emoji||''} ${r.moon_section?.headline||(moon?.phase+' in '+moonSign)||''}</div>
-    <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-style:italic">Today's Moon — current sky position</div>
+    <div class="sec-hook">${
+      moon?.isBlack ? `<em>Black Moon day</em> — you are at the threshold of the lunar cycle's most inward moment. Energy is veiled, intuition is heightened. This is not a day to launch or force. Rest, observe, and let clarity come to you.` :
+      moon?.isShiva ? `<em>Shiva Moon day</em> — the first crescent has appeared. The new cycle begins in earnest. Your intentions now have momentum behind them. What you plant in the next 48 hours takes root.` :
+      moon?.phase?.includes('Full') ? `The <em>Full Moon</em> illuminates what has been building since the New Moon two weeks ago. Emotions run high — that's information, not noise. Something is ready to be seen clearly.` :
+      moon?.phase?.includes('New') ? `The <em>New Moon</em> is the universe's reset button. The slate is cleaner than it will be for another 29 days. What do you want this cycle to be about?` :
+      moon?.phase?.includes('Waning') ? `The <em>Waning Moon</em> supports release, completion, and reflection. This is not a time to begin — it's a time to clear space for what comes next.` :
+      moon?.phase?.includes('Waxing') || moon?.phase?.includes('Crescent') ? `The <em>Waxing Moon</em> builds momentum. Whatever you set in motion at the New Moon is growing. Support it — take one tangible action today.` :
+      `The Moon in <em>${moonSign||'the sky'}</em> shapes your emotional tone and instinctive responses today. It's the fastest-moving planet — its sign changes every 2.5 days.`
+    }</div>
     ${moon?.isBlack?`<div><span class="moon-badge badge-black">⚠️ Black Moon — 2 days before New Moon — threshold day</span></div>`:''}
     ${moon?.isShiva?`<div><span class="moon-badge badge-shiva">✨ Shiva Moon — 2 days after New Moon — auspicious</span></div>`:''}
     <div class="sec-body" style="margin-top:10px">${r.moon_section?.body ? prose(r.moon_section.body) : `<p>Today's Moon is in ${moonSign}, day ${moon?.cycle||'—'} of the lunar cycle (${moon?.phase||''}). ${moon?.toNew||'—'} days to the New Moon.</p>`}</div>
+    <button class="tap-cta" onclick="tapMoon()" style="margin-top:12px;font-size:12px">
+      What does this Moon mean for me today? <span class="cta-arrow">→</span>
+    </button>
   </div>`;
 
   if (r.astrology?.main_transit_headline || r.astrology?.main_transit_body) {
     html += `<div class="r-section">
       <div class="sec-label">Western Astrology — Today's Transits</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-style:italic">Current planetary positions in the sky today. "Your Moon" = natal chart. "The Moon" = today's sky position.</div>
+      <div class="sec-hook" style="margin-bottom:10px">Transits are the conversation between today's sky and your natal chart. <em>"Your Moon"</em> refers to where the Moon was when you were born — a permanent part of your chart. <em>"The Moon"</em> refers to where it is in the sky today. When today's planets touch your natal positions, it's personally meaningful. When they don't, the transit is still the collective weather — worth knowing.</div>
       <div class="sec-hl">${r.astrology?.main_transit_headline||''}</div>
       <div class="sec-body">${prose(r.astrology?.main_transit_body||r.astrology?.main_transit||'')}</div>
     </div>`;
@@ -3155,12 +3203,63 @@ function renderReading(data, dateStr) {
     </div>`;
   }
 
+  // ── Dreamspell personal hook ──────────────────────────────────────────
+  const dsHook = (() => {
+    if (!kin) return '';
+    const tone = kin.tone || '';
+    const seal = kin.seal || '';
+    const toneHooks = {
+      'Magnetic':'You are in a day of pure attraction — what you focus on, gathers. <em>Set your intention clearly this morning.</em>',
+      'Lunar':'The friction you feel between what you want and what's in the way is today's intelligence — it's showing you exactly where to direct energy.',
+      'Electric':'Something needs activating today — a conversation, a decision, a collaboration. Don't hold back what's ready to move.',
+      'Self-Existing':'What needs to be defined, planned, or given structure? The universe is asking you to be precise today.',
+      'Overtone':'You are being called to take command — not of others, but of your own direction. <em>What are you the authority on today?</em>',
+      'Rhythmic':'A day to create balance — equalise where there's been too much of one thing.',
+      'Resonant':'Your inner tuning fork is activated. Whatever feels most <em>true</em> right now — follow that signal.',
+      'Galactic':'Alignment check: are your actions matching your values? Today asks you to walk your talk.',
+      'Solar':'Intention becomes pulse. Be deliberate about what energy you send forward today.',
+      'Planetary':'Manifestation is high. One of the most powerful days for bringing ideas into physical form.',
+      'Spectral':'Something may dissolve today — and that is perfect. <em>What are you ready to release?</em>',
+      'Crystal':'Your energy belongs to the collective today. Who needs what you have to offer?',
+      'Cosmic':'Endurance and transcendence. What have you learned in this cycle? <em>Sit with the wholeness.</em>'
+    };
+    const sealHooks = {
+      'Dragon':'Primal, nurturing force — origins, ancestry, and deep care are in focus.',
+      'Wind':'What you say today carries unusual weight. Communication is charged.',
+      'Night':'The dreaming mind is available. Abundance and deep intuition.',
+      'Seed':'Something is germinating. Plant, plan, or prepare today.',
+      'Serpent':'Instinct over analysis — your body knows before your mind does.',
+      'World-Bridger':'A day of crossing over — transformation, the space between what was and what comes next.',
+      'Hand':'Healing and completion. Finish what matters most.',
+      'Star':'Beauty and elegance open doors today that logic cannot.',
+      'Moon':'Flow is available. <em>Don't push — move like water.</em>',
+      'Dog':'Loyalty, heart, and love. Who and what is truly important to you?',
+      'Monkey':'Play and illusion. Don't take anything too seriously — including yourself.',
+      'Human':'Free will is in focus. Your choices are especially consequential today.',
+      'Skywalker':'Expansion and exploration. Widen your horizon — mentally or physically.',
+      'Wizard':'Enchantment and receptivity. You carry unusual influence today.',
+      'Eagle':'Rise above the immediate. The bigger pattern is visible from altitude.',
+      'Warrior':'Ask the hard questions. Intelligence and fearlessness are your guides.',
+      'Earth':'Trust the signs. Synchronicity is the language of today.',
+      'Mirror':'What is your situation showing you about yourself? Reflection and order.',
+      'Storm':'Don't resist the disruption — it is the intelligence. <em>Transformation is the point.</em>',
+      'Sun':'Your life-force is high. <em>Let yourself shine without apology.</em>'
+    };
+    const toneMsg = toneHooks[tone] || '';
+    const sealMsg = sealHooks[seal] || '';
+    return [sealMsg, toneMsg].filter(Boolean).join(' ');
+  })();
+
   html += `<div class="r-section">
-    <div class="sec-label tappable" onclick="tapDreamspell()">Dreamspell · Law of Time <span class="tap-hint">↗ Interpret</span></div>
+    <div class="sec-label">Dreamspell · Law of Time</div>
     <div class="sec-hl tappable" onclick="tapDreamspell()" style="cursor:pointer">◈ ${r.dreamspell?.headline||kin?.full||''}${kin?.isGAP?`<span class="gap-badge">★ Portal</span>`:''}</div>
-    <div class="sec-body">${r.dreamspell?.body ? prose(r.dreamspell.body) : `<p>Kin ${kin?.kinNum||''} — ${kin?.full||''}. Tone ${kin?.toneNum||''} (${kin?.tone||''}) · Seal: ${kin?.seal||''}. ${kin?.isGAP?'Galactic Activation Portal — the veil between dimensions is thinner today. Pay attention to what arrives unexpectedly.':''}</p>`}</div>
-    <div style="margin-top:10px;padding:9px;background:var(--bg4);border:1px solid var(--div2);border-radius:2px">
-      <div style="font-size:13px;color:var(--text3);font-style:italic">${r.dreamspell?.disclaimer||'Dreamspell: Argüelles (1987) The Mayan Factor — modern system. Verify: tortuga.com/oracle'}</div>
+    ${dsHook ? `<div class="sec-hook">${dsHook}${kin?.isGAP?' <em>Today is a Galactic Activation Portal — heightened sensitivity, unusual synchronicities. Pay close attention.</em>':''}</div>` : ''}
+    <div class="sec-body">${r.dreamspell?.body ? prose(r.dreamspell.body) : `<p>Kin ${kin?.kinNum||''} — ${kin?.full||''}. Tone ${kin?.toneNum||''} (${kin?.tone||''}) · Seal: ${kin?.seal||''}.</p>`}</div>
+    <button class="tap-cta" onclick="tapDreamspell()">
+      What does my Kin mean for me today? <span class="cta-arrow">→</span>
+    </button>
+    <div style="margin-top:14px;padding:9px;background:var(--bg4);border:1px solid var(--div2);border-radius:2px">
+      <div style="font-size:12px;color:var(--text3);font-style:italic">${r.dreamspell?.disclaimer||"Dreamspell: Argüelles (1987) The Mayan Factor — a modern 20th-century system, distinct from the living K'iche Maya tzolkʼin. Verify: tortuga.com/oracle"}</div>
     </div>
   </div>`;
 
@@ -3168,7 +3267,7 @@ function renderReading(data, dateStr) {
     const pData = r.planetary_positions || r.key_planets || [];
     html += `<div class="r-section">
       <div class="sec-label">Planetary Positions</div>
-      <div style="font-size:14px;color:var(--text3);margin-bottom:14px;font-style:italic">Swiss Ephemeris (Astrodienst AG, ae_2026.pdf) · Tap any planet for a personalised interpretation</div>
+      <div class="sec-hook" style="margin-bottom:12px">These are where the planets actually are in the sky today, calculated from Swiss Ephemeris data. <em>Tap any planet</em> to receive a personalised interpretation — what this position means specifically for you, your work, and your relationships right now.</div>
       <div class="planet-grid" id="planetGrid">`;
     planets.forEach((p, i) => {
       const note = pData[i]?.note || '';
