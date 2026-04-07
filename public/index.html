@@ -3435,6 +3435,7 @@ function renderSkeletonReading(dateStr, tier) {
   const isGAP = _kinD.isGAP;
 
   // ── Moon (rough client-side calc) ────────────────────────────────
+  const today  = new Date(dateStr + 'T12:00:00Z');  // needed for moon calc
   const knownNew = new Date('2026-01-17T02:02:00Z');  // USNO verified
   const lunarCycle = 29.53058867;
   const moonAge = ((today - knownNew) / 86400000 % lunarCycle + lunarCycle) % lunarCycle;
