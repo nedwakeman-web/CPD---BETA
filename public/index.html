@@ -2668,11 +2668,42 @@ async function loadReading(dateStr, tier) {
   if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
 
   const tierStages = {
-    free:     ['Consulting the ephemeris…','Reading moon phase…','Calculating Universal Day…','Identifying Dreamspell Kin…','Preparing your daily snapshot…'],
-    seeker:   ['Consulting the ephemeris…','Reading planetary positions…','Calculating your numerology…','Mapping the lunar landscape…','Weaving four frameworks into your reading…'],
-    initiate: ['Consulting the ephemeris…','Reading planetary positions…','Mapping the month arc…','Building the wavespell…','Composing your Initiate reading…'],
-    mystic:   ['Consulting the ephemeris…','Reading natal chart transits…','Calculating yearly arc…','Mapping shadow themes…','Composing your Mystic reading…'],
-    oracle:   ['Consulting the ephemeris…','Reading planetary positions from Swiss Ephemeris…','Calculating your Dreamspell Kin, numerology and lunar phase…','Synthesising all four frameworks into a single voice…','The Oracle is writing your deep reading. Same depth on any screen…'],
+    free:     [
+      'Reading today’s Universal Day number…',
+      'Calculating your moon phase…',
+      'Identifying your Dreamspell Kin…',
+      'Computing your biorhythms…',
+      'Preparing your daily snapshot…'
+    ],
+    seeker:   [
+      'Consulting the Swiss Ephemeris…',
+      'Reading planetary positions…',
+      'Calculating your numerology — Universal Day, Personal Day, three energies…',
+      'Mapping the lunar landscape and moon phase…',
+      'Weaving numerology, astrology, Dreamspell and lunar into one voice…'
+    ],
+    initiate: [
+      'Consulting the Swiss Ephemeris…',
+      'Mapping this month’s lunation arc…',
+      'Building your Dreamspell wavespell arc…',
+      'Calculating shadow themes and growth edges…',
+      'Composing your Monthly Arc reading…'
+    ],
+    mystic:   [
+      'Consulting the Swiss Ephemeris…',
+      'Reading your natal chart transits…',
+      'Calculating your yearly numerology arc — pinnacles and challenges…',
+      'Mapping major transit themes to your natal positions…',
+      'Composing your Yearly Reading…'
+    ],
+    oracle:   [
+      'Consulting the Swiss Ephemeris…',
+      'Reading planetary positions from Swiss Ephemeris (Astrodienst AG)…',
+      'Calculating your Dreamspell Kin, numerology and lunar phase…',
+      'Mapping transits, aspects, shadow work and week ahead…',
+      'Synthesising all four frameworks into a single, personalised voice…',
+      'The Oracle is composing the full depth of your reading…'
+    ]
   };
   const stages = tierStages[activeTier] || tierStages.oracle;
 
@@ -2891,11 +2922,9 @@ async function loadReading(dateStr, tier) {
         const pct = Math.min(96, Math.round((elapsed / maxSec) * 100));
         const mins = Math.floor(elapsed/60), secs = elapsed % 60;
         const timeStr = (mins > 0 ? mins+'m ' : '') + secs + 's';
-        // Update skeleton status bar (primary — shown after immediate render)
+        // Update skeleton progress bar only (stage cycling handled by pbTimer)
         const skBar = document.getElementById('skProgressBar');
-        const skTxt = document.getElementById('skStatusText');
         if (skBar) skBar.style.width = pct + '%';
-        if (skTxt) skTxt.textContent = timeStr + ' — Oracle still composing…';
         // Fallback: update old elapsed elements if still present
         const elNote = document.getElementById('elapsedNote');
         const elText = document.getElementById('elapsedText');
@@ -3559,19 +3588,30 @@ function renderSkeletonReading(dateStr, tier) {
   const dispD   = NUM_DATA[dispNum] || {n:'—',m:''};
   const isMD    = [11,22,33,44].includes(dispNum);
 
+  // Pass stages into the skeleton for cycling display
+  const _skStages = tierStages[tier] || tierStages.oracle;
+  const _tierLabel = {free:'Daily Snapshot',seeker:'Full Reading',initiate:'Monthly Arc',mystic:'Yearly Reading',oracle:'Oracle Deep Dive'}[tier]||tier;
+  const _readyTime = {free:'instant',seeker:'1–2 min',initiate:'2–3 min',mystic:'3–4 min',oracle:'3–6 min'}[tier]||'';
+
   let html = `<div id="skeletonStatusBar" style="position:sticky;top:52px;z-index:90;
     background:var(--bg3);border-bottom:1px solid var(--gold3);padding:10px 24px;
     display:flex;align-items:center;gap:12px;transition:opacity .4s">
-    <div style="font-size:22px;animation:moonSpin 3s linear infinite">☽</div>
-    <div style="flex:1">
-      <div style="font-size:13px;color:var(--gold);letter-spacing:.12em">
-        Oracle is composing your ${tier==='oracle'?'deep ':tier==='mystic'?'yearly ':tier==='initiate'?'monthly ':tier==='seeker'?'personal ':''}reading…
+    <div style="font-size:20px;animation:moonSpin 3s linear infinite;flex-shrink:0">☽</div>
+    <div style="flex:1;min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold3)">${_tierLabel}</span>
+        <span style="font-size:12px;color:var(--text3)">·</span>
+        <span style="font-size:12px;color:var(--text3)">${_readyTime}</span>
+        <span style="font-size:12px;color:var(--text3)">·</span>
+        <span style="font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:2px"
+          onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">change</span>
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:2px" id="skStatusText">
-        Typically ready in ${tier==='oracle'?'3–6':tier==='seeker'?'1–2':'2–3'} minutes. Numbers, Kin and moon are accurate right now.
+      <div style="font-size:13px;color:var(--gold);letter-spacing:.04em;margin-top:3px;
+        transition:opacity .4s;font-style:italic" id="skStatusText">
+        ${_skStages[0]}
       </div>
     </div>
-    <div style="width:120px;height:2px;background:var(--div);border-radius:1px;overflow:hidden">
+    <div style="width:100px;height:2px;background:var(--div);border-radius:1px;overflow:hidden;flex-shrink:0">
       <div id="skProgressBar" style="height:100%;width:0%;background:var(--gold3);
         border-radius:1px;transition:width 1s linear"></div>
     </div>
@@ -3754,19 +3794,42 @@ function renderSkeletonReading(dateStr, tier) {
   html += `</div>`;
   cont.innerHTML = html;
 
-  // Animate progress bar during wait
+  // Animate progress bar + cycle stage messages during wait
   const pb = document.getElementById('skProgressBar');
   const st = document.getElementById('skStatusText');
   let elapsed = 0;
+  let stageIdx = 0;
   const maxSec = {oracle:360,mystic:240,initiate:180,seeker:120,free:60}[tier]||300;
+  const stageInterval = Math.max(12, Math.floor(maxSec / _skStages.length));
+
   const pbTimer = setInterval(() => {
     elapsed++;
     if (!document.getElementById('skeletonStatusBar')) { clearInterval(pbTimer); return; }
+
+    // Progress bar
     const pct = Math.min(95, Math.round((elapsed/maxSec)*100));
     if (pb) pb.style.width = pct + '%';
-    if (st && elapsed % 20 === 0) {
+
+    // Cycle stage messages
+    if (elapsed > 0 && elapsed % stageInterval === 0 && stageIdx < _skStages.length - 1) {
+      stageIdx++;
+      if (st) {
+        st.style.opacity = '0';
+        setTimeout(() => {
+          if (st) { st.textContent = _skStages[stageIdx]; st.style.opacity = '1'; }
+        }, 300);
+      }
+    }
+
+    // After all stages, show elapsed time
+    if (stageIdx >= _skStages.length - 1 && elapsed % 15 === 0) {
       const mins = Math.floor(elapsed/60), secs = elapsed%60;
-      st.textContent = (mins>0?mins+'m ':'')+secs+'s — Oracle still composing…';
+      if (st) {
+        st.style.opacity = '0';
+        setTimeout(() => {
+          if (st) { st.textContent = (mins>0?mins+'m ':'')+secs+'s — still composing, almost there…'; st.style.opacity = '1'; }
+        }, 300);
+      }
     }
   }, 1000);
 }
