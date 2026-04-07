@@ -2665,51 +2665,52 @@ const loadMsgs = [
 let pollingTimer = null;
 let activeJobId = null;
 
+const TIER_STAGES = {
+  free:     [
+    'Reading today’s Universal Day number…',
+    'Calculating your moon phase…',
+    'Identifying your Dreamspell Kin…',
+    'Computing your biorhythms…',
+    'Preparing your daily snapshot…'
+  ],
+  seeker:   [
+    'Consulting the Swiss Ephemeris…',
+    'Reading planetary positions…',
+    'Calculating your numerology — Universal Day, Personal Day, three energies…',
+    'Mapping the lunar landscape and moon phase…',
+    'Weaving numerology, astrology, Dreamspell and lunar into one voice…'
+  ],
+  initiate: [
+    'Consulting the Swiss Ephemeris…',
+    'Mapping this month’s lunation arc…',
+    'Building your Dreamspell wavespell arc…',
+    'Calculating shadow themes and growth edges…',
+    'Composing your Monthly Arc reading…'
+  ],
+  mystic:   [
+    'Consulting the Swiss Ephemeris…',
+    'Reading your natal chart transits…',
+    'Calculating your yearly numerology arc — pinnacles and challenges…',
+    'Mapping major transit themes to your natal positions…',
+    'Composing your Yearly Reading…'
+  ],
+  oracle:   [
+    'Consulting the Swiss Ephemeris…',
+    'Reading planetary positions from Swiss Ephemeris (Astrodienst AG)…',
+    'Calculating your Dreamspell Kin, numerology and lunar phase…',
+    'Mapping transits, aspects, shadow work and week ahead…',
+    'Synthesising all four frameworks into a single, personalised voice…',
+    'The Oracle is composing the full depth of your reading…'
+  ]
+};
+
 async function loadReading(dateStr, tier) {
   const activeTier = tier || currentTier || 'oracle';
   const cont = document.getElementById('readingContent');
 
   if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
 
-  const tierStages = {
-    free:     [
-      'Reading today’s Universal Day number…',
-      'Calculating your moon phase…',
-      'Identifying your Dreamspell Kin…',
-      'Computing your biorhythms…',
-      'Preparing your daily snapshot…'
-    ],
-    seeker:   [
-      'Consulting the Swiss Ephemeris…',
-      'Reading planetary positions…',
-      'Calculating your numerology — Universal Day, Personal Day, three energies…',
-      'Mapping the lunar landscape and moon phase…',
-      'Weaving numerology, astrology, Dreamspell and lunar into one voice…'
-    ],
-    initiate: [
-      'Consulting the Swiss Ephemeris…',
-      'Mapping this month’s lunation arc…',
-      'Building your Dreamspell wavespell arc…',
-      'Calculating shadow themes and growth edges…',
-      'Composing your Monthly Arc reading…'
-    ],
-    mystic:   [
-      'Consulting the Swiss Ephemeris…',
-      'Reading your natal chart transits…',
-      'Calculating your yearly numerology arc — pinnacles and challenges…',
-      'Mapping major transit themes to your natal positions…',
-      'Composing your Yearly Reading…'
-    ],
-    oracle:   [
-      'Consulting the Swiss Ephemeris…',
-      'Reading planetary positions from Swiss Ephemeris (Astrodienst AG)…',
-      'Calculating your Dreamspell Kin, numerology and lunar phase…',
-      'Mapping transits, aspects, shadow work and week ahead…',
-      'Synthesising all four frameworks into a single, personalised voice…',
-      'The Oracle is composing the full depth of your reading…'
-    ]
-  };
-  const stages = tierStages[activeTier] || tierStages.oracle;
+  const stages = TIER_STAGES[activeTier] || TIER_STAGES.oracle;
 
   const depthNote = {
     free:     `Daily Snapshot · instant`,
@@ -3593,7 +3594,7 @@ function renderSkeletonReading(dateStr, tier) {
   const isMD    = [11,22,33,44].includes(dispNum);
 
   // Pass stages into the skeleton for cycling display
-  const _skStages = tierStages[tier] || tierStages.oracle;
+  const _skStages = TIER_STAGES[tier] || TIER_STAGES.oracle;
   const _tierLabel = {free:'Daily Snapshot',seeker:'Full Reading',initiate:'Monthly Arc',mystic:'Yearly Reading',oracle:'Oracle Deep Dive'}[tier]||tier;
   const _readyTime = {free:'instant',seeker:'1–2 min',initiate:'2–3 min',mystic:'3–4 min',oracle:'3–6 min'}[tier]||'';
 
