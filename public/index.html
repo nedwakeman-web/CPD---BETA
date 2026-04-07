@@ -46,7 +46,8 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 
 /* ── STARS ── */
 #starCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.topbar{position:sticky;top:0;z-index:100}
+.topbar{position:sticky;top:0;z-index:100;transition:transform .3s ease}
+.topbar.hidden{transform:translateY(-100%)}
 .screen{position:relative;z-index:1}
 .modal-overlay{z-index:200}
 
@@ -71,11 +72,11 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .nav-hamburger{display:none;background:none;border:1px solid var(--div);color:var(--text3);
   padding:6px 10px;border-radius:2px;cursor:pointer;font-size:18px;line-height:1}
 .nav-hamburger:hover{border-color:var(--gold);color:var(--gold)}
-.nav-dropdown{display:none;position:absolute;top:52px;left:50%;transform:translateX(-50%);
-  background:var(--bg2);border:1px solid var(--div);border-radius:3px;padding:8px;
-  z-index:200;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
-.nav-dropdown.open{display:flex;flex-direction:column;gap:4px}
-.nav-dropdown .npill{width:100%;text-align:left;padding:10px 14px}
+.nav-dropdown{display:none;position:fixed;top:52px;left:0;right:0;
+  background:rgba(8,19,31,0.97);border-bottom:1px solid var(--div);padding:10px 16px;
+  z-index:199;backdrop-filter:blur(16px)}
+.nav-dropdown.open{display:flex;flex-direction:column;gap:3px}
+.nav-dropdown .npill{width:100%;text-align:left;padding:11px 14px;font-size:13px}
 
 @media(max-width:600px){
   .nav{display:none}
@@ -488,6 +489,14 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 /* ── COSMIC CONTEXT PAGE ── */
 .ctx-section{border:1px solid var(--div);background:var(--bg2);border-radius:3px;
   padding:22px 24px;margin-bottom:18px}
+
+/* ── SKELETON LOADING ANIMATION ── */
+@keyframes skPulse{0%{opacity:.35}50%{opacity:.7}100%{opacity:.35}}
+@keyframes moonSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.sk-line{height:14px;background:var(--div);border-radius:2px;margin-bottom:8px;
+  animation:skPulse 1.6s ease-in-out infinite}
+.sk-section{transition:opacity .5s}
+
 .ctx-section-label{font-size:10px;letter-spacing:.35em;text-transform:uppercase;
   color:var(--text3);margin-bottom:6px}
 .ctx-section-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);
@@ -971,7 +980,10 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill" onclick="showScreen('sp',this)">Profile</button>
   </div>
   <!-- Mobile hamburger (Sonia #50) -->
-  <button class="nav-hamburger" onclick="toggleMobileNav()" id="navHamburger">☰</button>
+  <button class="nav-hamburger" onclick="toggleMobileNav()" id="navHamburger">
+    <span id="hamburgerIcon">☰</span>
+    <span id="hamburgerLabel" style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-left:6px;color:var(--text3)">Menu</span>
+  </button>
   <div class="nav-dropdown" id="navDropdown">
     <button class="npill on" onclick="showScreen('sr',this);if(!currentReading)showModeSelector();closeMobileNav()">Reading</button>
     <button class="npill" onclick="showScreen('scard',this);renderCard();closeMobileNav()">Card</button>
@@ -1599,6 +1611,7 @@ function showScreen(id, btn) {
   if (id === 'sc') renderCalendar();
   if (id === 'sp') updateProfileSummary();
   if (id === 'sctx') renderContext();
+  updateHamburgerLabel(id);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2606,7 +2619,7 @@ async function loadReading(dateStr, tier) {
     seeker:   ['Consulting the ephemeris…','Reading planetary positions…','Calculating your numerology…','Mapping the lunar landscape…','Weaving four frameworks into your reading…'],
     initiate: ['Consulting the ephemeris…','Reading planetary positions…','Mapping the month arc…','Building the wavespell…','Composing your Initiate reading…'],
     mystic:   ['Consulting the ephemeris…','Reading natal chart transits…','Calculating yearly arc…','Mapping shadow themes…','Composing your Mystic reading…'],
-    oracle:   ['Consulting the ephemeris…','Reading planetary positions from Swiss Ephemeris…','Calculating your Dreamspell Kin, numerology and lunar phase…','Synthesising all four frameworks into a single voice…','The Oracle is writing your deep reading. This is the part worth waiting for…'],
+    oracle:   ['Consulting the ephemeris…','Reading planetary positions from Swiss Ephemeris…','Calculating your Dreamspell Kin, numerology and lunar phase…','Synthesising all four frameworks into a single voice…','The Oracle is writing your deep reading. Same depth on any screen…'],
   };
   const stages = tierStages[activeTier] || tierStages.oracle;
 
@@ -2791,6 +2804,10 @@ async function loadReading(dateStr, tier) {
       jobId, dateStr, tier: activeTier, startedAt: Date.now()
     }));
 
+    // ── IMMEDIATE RENDER: show all computed data right now ────────────
+    clearInterval(stageTimer);
+    renderSkeletonReading(dateStr, activeTier);
+
     const startedAt = Date.now();
     // Kill switch — if no response after 8 minutes, show clear error
     const maxWait = 8 * 60 * 1000;
@@ -2835,7 +2852,9 @@ async function loadReading(dateStr, tier) {
           sessionStorage.removeItem('cdp_active_job');
           currentReading = poll.result;
           saveToHistory(dateStr, poll.result);
-          renderReading(poll.result, dateStr);
+          const _sb = document.getElementById('skeletonStatusBar');
+          if (_sb) { _sb.style.transition='opacity .4s'; _sb.style.opacity='0'; setTimeout(()=>_sb.remove(),400); }
+          fillAISections(poll.result, dateStr);
           if (document.hidden) {
             document.title = '✦ Your Oracle Reading is Ready';
             setTimeout(() => { document.title = 'Cosmic Daily Planner'; }, 5000);
@@ -3284,15 +3303,538 @@ function isRawReading(r) {
 
 function toggleMobileNav() {
   const d = document.getElementById('navDropdown');
-  if (d) d.classList.toggle('open');
+  const ic = document.getElementById('hamburgerIcon');
+  if (d) {
+    const isOpen = d.classList.toggle('open');
+    if (ic) ic.textContent = isOpen ? '✕' : '☰';
+  }
 }
 function closeMobileNav() {
   const d = document.getElementById('navDropdown');
   if (d) d.classList.remove('open');
+  const ic = document.getElementById('hamburgerIcon');
+  if (ic) ic.textContent = '☰';
 }
 document.addEventListener('click', e => {
   if (!e.target.closest('.nav-hamburger') && !e.target.closest('.nav-dropdown')) closeMobileNav();
 });
+
+// ── Auto-hide topbar on scroll down, reveal on scroll up (Sonia #50) ──
+(function(){
+  let lastY = 0, ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const tb = document.querySelector('.topbar');
+        if (!tb) { ticking = false; return; }
+        const curY = window.scrollY;
+        const isMobile = window.innerWidth <= 600;
+        if (isMobile) {
+          if (curY > lastY && curY > 80) {
+            tb.classList.add('hidden');
+            closeMobileNav();
+          } else {
+            tb.classList.remove('hidden');
+          }
+        } else {
+          tb.classList.remove('hidden');
+        }
+        lastY = curY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+})();
+
+// ── Update hamburger label to show current page ──────────────
+function updateHamburgerLabel(screenId) {
+  const labels = {sr:'Reading',scard:'Card',sc:'Calendar',shist:'History',scompat:'Compat',sctx:'Context',sp:'Profile'};
+  const lbl = document.getElementById('hamburgerLabel');
+  if (lbl) lbl.textContent = labels[screenId] || 'Menu';
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// OPTIMISTIC IMMEDIATE RENDER — shows computed data instantly
+// AI sections fill in when the job completes (~3-6 min wait → 0)
+// ══════════════════════════════════════════════════════════════════
+
+function renderSkeletonReading(dateStr, tier) {
+  const cont = document.getElementById('readingContent');
+  if (!cont) return;
+
+  const date = new Date(dateStr + 'T12:00:00Z');
+  const dateLabel = date.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  // ── Compute everything client-side ──────────────────────────────
+  const ud  = clientUD(dateStr);
+  const udD = NUM_DATA[ud] || {n:'—', m:'', k:''};
+  const isMaster = [11,22,33,44].includes(ud);
+
+  const parts = dateStr.split('-').map(Number);
+  const uyRaw = String(parts[0]).split('').reduce((a,b)=>a+parseInt(b),0);
+  const uy = numReduce(uyRaw);
+  const um = numReduce(parts[1] + uy);
+  let pd=null, pm=null, py=null, lp=null, lpD={n:'—'}, pyD={n:'—'};
+  if (profile.birthDay && profile.birthMonth && profile.birthYear) {
+    pd = numReduce(ud + parseInt(profile.birthDay) + parseInt(profile.birthMonth));
+    pm = numReduce(parseInt(profile.birthMonth) + parseInt(profile.birthDay) + uy);
+    py = numReduce(parseInt(profile.birthDay) + parseInt(profile.birthMonth) + uy);
+    const lpRaw = parseInt(profile.birthDay) + parseInt(profile.birthMonth) +
+      String(profile.birthYear).split('').reduce((a,b)=>a+parseInt(b),0);
+    lp = numReduce(lpRaw); lpD = NUM_DATA[lp] || {n:'—'};
+    pyD = NUM_DATA[py] || {n:'—'};
+  }
+
+  // ── Dreamspell Kin ───────────────────────────────────────────────
+  const KS=['Dragon','Wind','Night','Seed','Serpent','World-Bridger','Hand','Star',
+    'Moon','Dog','Monkey','Human','Skywalker','Wizard','Eagle','Warrior','Earth','Mirror','Storm','Sun'];
+  const KT=['Magnetic','Lunar','Electric','Self-Existing','Overtone','Rhythmic',
+    'Resonant','Galactic','Solar','Planetary','Spectral','Crystal','Cosmic'];
+  const KC=['Red','White','Blue','Yellow'];
+  const GAP_KINS = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,52,53,54,55,56,57,58,59,60,61,62,63,64,
+    105,106,107,108,109,110,111,112,113,114,115,116,117,118,157,158,159,160,161,162,163,164,165,166,
+    167,168,169,170,211,212,213,214,215,216,217,218,219,220,221,222,223,224]);
+  const anchor = new Date('2024-07-08T12:00:00Z');
+  const today  = new Date(dateStr + 'T12:00:00Z');
+  let diff = Math.round((today - anchor) / 86400000);
+  let leaps = 0;
+  for (let y = 2024; y <= parts[0]; y++) {
+    const isLY = (y%4===0&&y%100!==0)||(y%400===0);
+    if (!isLY) continue;
+    const feb = new Date(y,1,29,12,0,0);
+    if (feb > anchor && feb < today) leaps++;
+  }
+  const kinNum = ((diff - leaps) % 260 + 260) % 260 + 1;
+  const si = (kinNum-1)%20, ti = (kinNum-1)%13;
+  const kinFull = KC[si%4]+' '+KT[ti]+' '+KS[si];
+  const isGAP = GAP_KINS.has(kinNum);
+
+  // ── Moon (rough client-side calc) ────────────────────────────────
+  const knownNew = new Date('2026-03-29T12:00:00Z');
+  const lunarCycle = 29.53059;
+  const moonAge = ((today - knownNew) / 86400000 % lunarCycle + lunarCycle) % lunarCycle;
+  const toNew = lunarCycle - moonAge;
+  const isBlack = toNew >= 0.6 && toNew <= 2.6;
+  const isShiva = moonAge >= 1.0 && moonAge <= 2.5;
+  const moonPhase = moonAge < 1.85 ? 'New Moon' : moonAge < 7.38 ? 'Waxing Crescent'
+    : moonAge < 9.22 ? 'First Quarter' : moonAge < 14.77 ? 'Waxing Gibbous'
+    : moonAge < 16.61 ? 'Full Moon' : moonAge < 22.15 ? 'Waning Gibbous'
+    : moonAge < 24.0  ? 'Last Quarter' : moonAge < 27.68 ? 'Waning Crescent' : 'Balsamic';
+  const moonEmoji = moonAge < 7.38 ? '🌙' : moonAge < 14.77 ? '🌔' : moonAge < 16.61 ? '🌕' : moonAge < 24 ? '🌖' : '🌘';
+
+  // ── Biorhythms ────────────────────────────────────────────────────
+  let bioHtml = '';
+  if (profile.birthDay && profile.birthMonth && profile.birthYear) {
+    const birth = new Date(`${profile.birthYear}-${String(profile.birthMonth).padStart(2,'0')}-${String(profile.birthDay).padStart(2,'0')}T12:00:00Z`);
+    const daysAlive = Math.round((today - birth) / 86400000);
+    const cycles = [{label:'Physical',period:23},{label:'Emotional',period:28},{label:'Intellectual',period:33}];
+    const bioVals = cycles.map(c => {
+      const val = Math.sin((2 * Math.PI * daysAlive) / c.period);
+      const pct = Math.round(val * 100);
+      const nextVal = Math.sin((2 * Math.PI * (daysAlive+1)) / c.period);
+      const isCrit = Math.abs(val) < 0.13 || (val >= 0 && nextVal < 0) || (val < 0 && nextVal >= 0);
+      const col = isCrit ? 'var(--gold)' : pct > 30 ? 'var(--teal)' : pct < -30 ? '#e08080' : 'var(--text2)';
+      const phase = isCrit ? '⚡ Critical' : pct > 60 ? 'High' : pct > 10 ? 'Rising' : pct > -10 ? 'Transition' : pct > -60 ? 'Falling' : 'Low';
+      return {...c, pct, isCrit, col, phase};
+    });
+    bioHtml = `<div style="background:var(--bg2);border:1px solid var(--div);border-radius:2px;padding:16px 18px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:rgba(240,237,230,0.75)">Biorhythms Today</div>
+        <span style="flex:1;height:1px;background:var(--div)"></span>
+        <span style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Cycles · Physical 23d · Emotional 28d · Intellectual 33d</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${bioVals.map(b => {
+          const bw = Math.abs(b.pct), bc = b.isCrit ? 'var(--gold)' : b.pct > 0 ? 'var(--teal)' : '#e08080';
+          const sign = b.pct > 0 ? '+' : '';
+          return `<div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 12px">
+            <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">${b.label}</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:${b.col};line-height:1">${sign}${b.pct}%</div>
+            <div style="height:2px;background:var(--div);border-radius:1px;margin:6px 0;overflow:hidden">
+              <div style="height:100%;width:${bw}%;background:${bc};border-radius:1px;${b.pct<0?'margin-left:'+(100-bw)+'%':''}"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text3)">${b.phase}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  // ── Numerology three energies ────────────────────────────────────
+  const teNums = {
+    morning:   { n: pd||ud,  lbl: pd ? 'Personal Day' : 'Universal Day' },
+    afternoon: { n: pm||um,  lbl: pm ? 'Personal Month' : 'Universal Month' },
+    evening:   { n: py||uy,  lbl: py ? 'Personal Year' : 'Universal Year' }
+  };
+  const curH = new Date().getHours();
+  const activeW = curH < 12 ? 'morning' : curH < 18 ? 'afternoon' : 'evening';
+  const energyHtml = ['morning','afternoon','evening'].map(k => {
+    const fb = teNums[k];
+    const fD = NUM_DATA[fb.n] || {n:'—',m:''};
+    const isM = [11,22,33,44].includes(fb.n);
+    const icons = {morning:'☀︎',afternoon:'◑',evening:'☽'};
+    const lbls  = {morning:'Morning',afternoon:'Afternoon',evening:'Evening'};
+    return `<div class="energy-card${activeW===k?' active-window':''} tappable"
+      onclick="tapEnergy('${k}',${fb.n},'${(fD.n||'').replace(/'/g,"\'")}','${(fD.m||'').replace(/'/g,"\'").slice(0,80)}…')"
+      title="Tap for deeper ${lbls[k]} guidance">
+      <div class="energy-time">${icons[k]} ${lbls[k]}${activeW===k?' <span style="color:var(--teal);font-size:11px">· Now</span>':''}</div>
+      <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:3px">${fb.lbl}</div>
+      <div class="energy-num" style="${isM?'color:var(--master)':''}">${fb.n}${isM?'<span style="font-size:14px">★</span>':''}</div>
+      <div class="energy-name">${fD.n}</div>
+      <div class="energy-guidance">${fD.m||''}</div>
+      <div style="font-size:11px;color:var(--gold3);margin-top:8px;text-align:right">↗ Tap for insight</div>
+    </div>`;
+  }).join('');
+
+  // ── AI skeleton placeholder ────────────────────────────────────
+  const skPulse = `<div class="sk-pulse"></div>`;
+  const skSection = (label, lines=3) => `
+    <div class="r-section sk-section" id="sk-${label.replace(/\s/g,'-').toLowerCase()}">
+      <div class="sec-label">${label}</div>
+      ${Array.from({length:lines}, (_,i) =>
+        `<div class="sk-line" style="width:${[92,78,85,68,90][i%5]}%;animation-delay:${i*0.12}s"></div>`
+      ).join('')}
+    </div>`;
+
+  // ── Build skeleton HTML ──────────────────────────────────────────
+  const dispNum = pd||ud;
+  const dispD   = NUM_DATA[dispNum] || {n:'—',m:''};
+  const isMD    = [11,22,33,44].includes(dispNum);
+
+  let html = `<div id="skeletonStatusBar" style="position:sticky;top:52px;z-index:90;
+    background:var(--bg3);border-bottom:1px solid var(--gold3);padding:10px 24px;
+    display:flex;align-items:center;gap:12px;transition:opacity .4s">
+    <div style="font-size:22px;animation:moonSpin 3s linear infinite">☽</div>
+    <div style="flex:1">
+      <div style="font-size:13px;color:var(--gold);letter-spacing:.12em">
+        Oracle is composing your ${tier==='oracle'?'deep ':tier==='mystic'?'full ':tier==='seeker'?'personal ':''}reading…
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px" id="skStatusText">
+        Typically ready in ${tier==='oracle'?'3–6':tier==='seeker'?'1–2':'2–3'} minutes. Numbers, Kin and moon are accurate right now.
+      </div>
+    </div>
+    <div style="width:120px;height:2px;background:var(--div);border-radius:1px;overflow:hidden">
+      <div id="skProgressBar" style="height:100%;width:0%;background:var(--gold3);
+        border-radius:1px;transition:width 1s linear"></div>
+    </div>
+  </div>`;
+
+  html += `<div id="sr-inner" style="max-width:840px;margin:0 auto;padding:0 24px 100px">`;
+
+  // Header
+  html += `<div class="r-head">
+    <div class="r-meta">Your Daily Reading</div>
+    <div class="r-date">${dateLabel}</div>
+    <div class="r-loc">${(profile.location||'').toUpperCase()}</div>
+  </div>`;
+
+  // Widgets
+  html += `<div class="widgets">
+    <div class="wgt">
+      <div class="wgt-label">Day</div>
+      <div class="wgt-icon" style="${isMD?'color:var(--master)':''}">
+        ${isMD?'★':''}</div>
+      <div class="wgt-val" style="${isMD?'color:var(--master)':''}">${dispNum}</div>
+      <div class="wgt-name">${dispD.n}</div>
+    </div>
+    <div class="wgt">
+      <div class="wgt-label">Moon</div>
+      <div class="wgt-icon">${moonEmoji}</div>
+      <div class="wgt-val" style="font-size:13px;line-height:1.3">${moonPhase}</div>
+    </div>
+    <div class="wgt">
+      <div class="wgt-label">Kin</div>
+      <div class="wgt-icon">${isGAP?'★':'◈'}</div>
+      <div class="wgt-val" style="font-size:11px;line-height:1.4">${kinFull}</div>
+    </div>
+    ${lp ? `<div class="wgt">
+      <div class="wgt-label">Life Path</div>
+      <div class="wgt-val" style="${[11,22,33,44].includes(lp)?'color:var(--master)':''}">${lp}</div>
+      <div class="wgt-name">${lpD.n}</div>
+    </div>` : '<div class="wgt"><div class="wgt-label">Profile</div><div class="wgt-name" style="font-size:13px;margin-top:8px">Add birth date<br>for personal readings</div></div>'}
+  </div>`;
+
+  // Moon badges
+  if (isBlack) html += `<div style="margin-bottom:16px"><span class="moon-badge badge-black">⚠️ Black Moon — 2 days before New Moon — threshold day</span></div>`;
+  if (isShiva) html += `<div style="margin-bottom:16px"><span class="moon-badge badge-shiva">✨ Shiva Moon — 2 days after New Moon — auspicious</span></div>`;
+
+  // AI placeholder: synthesis (will be replaced)
+  html += `<div id="ai-synthesis" class="synthesis sk-section">
+    ${Array.from({length:4},(_,i)=>`<div class="sk-line" style="width:${[88,95,72,60][i]}%;animation-delay:${i*0.1}s"></div>`).join('')}
+  </div>`;
+
+  // Biorhythms (real data)
+  if (bioHtml) html += bioHtml;
+
+  // AI priorities placeholder
+  html += `<div class="r-section sk-section" id="ai-priorities">
+    <div class="sec-label">Today’s Priorities</div>
+    ${Array.from({length:6},(_,i)=>`<div class="sk-line" style="width:${[90,65,88,55,85,60][i]}%;animation-delay:${i*0.08}s"></div>`).join('')}
+  </div>`;
+
+  // AI shadow placeholder
+  html += `<div class="shadow-box sk-section" id="ai-shadow">
+    <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55);margin-bottom:9px">Shadow Work</div>
+    ${Array.from({length:3},(_,i)=>`<div class="sk-line" style="width:${[95,80,55][i]}%;animation-delay:${i*0.1}s"></div>`).join('')}
+  </div>`;
+
+  // AI focus/ease placeholder
+  html += `<div class="two-col sk-section" id="ai-focus" style="margin-bottom:20px">
+    <div class="col-card">${Array.from({length:3},(_,i)=>`<div class="sk-line" style="width:${[70,60,75][i]}%;animation-delay:${i*0.1}s"></div>`).join('')}</div>
+    <div class="col-card">${Array.from({length:3},(_,i)=>`<div class="sk-line" style="width:${[65,75,55][i]}%;animation-delay:${i*0.12}s"></div>`).join('')}</div>
+  </div>`;
+
+  // Numerology (real data)
+  html += `<div class="r-section" id="sk-numerology">
+    <div class="sec-label">Numerology of the Day</div>
+    <div class="sec-hl">${isMD?'★ ':''} Universal Day ${dispNum} — ${dispD.n}</div>
+    <div class="sec-hook">The <em>Universal Day number</em> is today’s collective frequency. ${pd?`Your <em>Personal Day ${pd}</em> is the intersection of that frequency with your unique numerological blueprint.`:''}</div>
+    <div class="sec-body"><p>${dispD.m||''}</p>
+      ${pd?`<p>Personal Day ${pd} (${(NUM_DATA[pd]||{}).n||''}): ${(NUM_DATA[pd]||{}).m||''}</p>`:''}
+    </div>
+    <div style="font-size:13px;color:var(--text3);font-style:italic;margin:4px 0 12px">
+      Morning — your <em>day</em> energy &nbsp;·&nbsp; Afternoon — your <em>month</em> energy &nbsp;·&nbsp; Evening — your <em>year</em> energy
+    </div>
+    <div class="energies">${energyHtml}</div>
+    <div style="margin-top:12px">
+      <button class="tap-cta" onclick="tapNumerology(${dispNum},'${(dispD.n||'').replace(/'/g,"\'")}')" style="font-size:12px">
+        How does today’s number energy work for me? <span class="cta-arrow">→</span>
+      </button>
+    </div>
+  </div>`;
+
+  // Moon (real data + AI placeholder body)
+  html += `<div class="r-section" id="sk-moon">
+    <div class="sec-label">Lunar Landscape</div>
+    <div class="sec-hl tappable" onclick="tapMoon()" style="cursor:pointer">${moonEmoji} ${moonPhase}</div>
+    <div class="sec-hook">${
+      isBlack ? '<em>Black Moon day</em> — you are at the threshold of the lunar cycle’s most inward moment. Energy is veiled, intuition is heightened. This is not a day to launch or force.' :
+      isShiva ? '<em>Shiva Moon day</em> — the first crescent has appeared. What you plant in the next 48 hours takes root.' :
+      moonPhase === 'Full Moon' ? 'The <em>Full Moon</em> illuminates what has been building. Emotions run high — that’s information, not noise.' :
+      moonPhase === 'New Moon' ? 'The <em>New Moon</em> is the universe’s reset button. What do you want this cycle to be about?' :
+      moonPhase.includes('Waning') ? 'The <em>Waning Moon</em> supports release and completion. Clear space for what comes next.' :
+      'The <em>Waxing Moon</em> builds momentum. Take one tangible action today.'
+    }</div>
+    <div class="sec-body" id="ai-moon-body">
+      <p>Moon is ${moonPhase}, day ${Math.round(moonAge)} of the lunar cycle. ${Math.round(toNew)} days to the New Moon.</p>
+    </div>
+    <button class="tap-cta" onclick="tapMoon()" style="margin-top:12px;font-size:12px">
+      What does this Moon mean for me today? <span class="cta-arrow">→</span>
+    </button>
+  </div>`;
+
+  // Dreamspell (real data + AI placeholder body)
+  const dsHookText = (() => {
+    const toneHooks = {
+      'Magnetic':'You are in a day of pure attraction — what you focus on, gathers.',
+      'Lunar':'The friction between what you want and what’s in the way is today’s intelligence.',
+      'Electric':'Something needs activating today — a conversation, a decision, a collaboration.',
+      'Self-Existing':'What needs to be defined or given structure? The universe is asking you to be precise.',
+      'Overtone':'You are being called to take command of your own direction.',
+      'Rhythmic':'A day to create balance — equalise where there’s been too much of one thing.',
+      'Resonant':'Your inner tuning fork is activated. Whatever feels most <em>true</em> — follow that signal.',
+      'Galactic':'Alignment check: are your actions matching your values?',
+      'Solar':'Be deliberate about what energy you send forward today.',
+      'Planetary':'Manifestation is high. One of the most powerful days for bringing ideas into form.',
+      'Spectral':'Something may dissolve today — and that is perfect.',
+      'Crystal':'Your energy belongs to the collective today.',
+      'Cosmic':'What have you learned in this cycle? <em>Sit with the wholeness.</em>'
+    };
+    const sealHooks = {
+      'Dragon':'Primal, nurturing force — origins and deep care are in focus.',
+      'Wind':'What you say today carries unusual weight.',
+      'Night':'The dreaming mind is available. Abundance and deep intuition.',
+      'Seed':'Something is germinating. Plant, plan, or prepare.',
+      'Serpent':'Instinct over analysis — your body knows first.',
+      'World-Bridger':'A day of crossing over — transformation in the space between.',
+      'Hand':'Healing and completion. Finish what matters most.',
+      'Star':'Beauty and elegance open doors today that logic cannot.',
+      'Moon':'Flow is available. <em>Don’t push — move like water.</em>',
+      'Dog':'Loyalty, heart, and love. What is truly important to you?',
+      'Monkey':'Don’t take anything too seriously — including yourself.',
+      'Human':'Free will in focus. Your choices are especially consequential.',
+      'Skywalker':'Expansion and exploration. Widen your horizon.',
+      'Wizard':'Enchantment and receptivity. You carry unusual influence.',
+      'Eagle':'Rise above the immediate. The bigger pattern is visible.',
+      'Warrior':'Ask the hard questions. Intelligence and fearlessness.',
+      'Earth':'Trust the signs. Synchronicity is the language of today.',
+      'Mirror':'What is your situation showing you about yourself?',
+      'Storm':'Don’t resist the disruption — it is the intelligence.',
+      'Sun':'Your life-force is high. <em>Let yourself shine.</em>'
+    };
+    return [sealHooks[KS[si]]||'', toneHooks[KT[ti]]||''].filter(Boolean).join(' ');
+  })();
+
+  html += `<div class="r-section" id="sk-dreamspell">
+    <div class="sec-label">Dreamspell · Law of Time</div>
+    <div class="sec-hl tappable" onclick="tapDreamspell()" style="cursor:pointer">
+      ◈ Kin ${kinNum} — ${kinFull}${isGAP?'<span class="gap-badge">★ Portal</span>':''}
+    </div>
+    ${dsHookText ? `<div class="sec-hook">${dsHookText}${isGAP?' <em>★ Today is a Galactic Activation Portal — heightened sensitivity, unusual synchronicities.</em>':''}</div>` : ''}
+    <div class="sec-body" id="ai-dreamspell-body">
+      <p>Tone ${ti+1} (${KT[ti]}) · Seal: ${KS[si]} · ${KC[si%4]}.</p>
+    </div>
+    <button class="tap-cta" onclick="tapDreamspell()">
+      What does my Kin mean for me today? <span class="cta-arrow">→</span>
+    </button>
+    <div style="margin-top:14px;padding:9px;background:var(--bg4);border:1px solid var(--div2);border-radius:2px">
+      <div style="font-size:12px;color:var(--text3);font-style:italic">Dreamspell: Argüelles (1987) The Mayan Factor — modern system. Verify: tortuga.com/oracle</div>
+    </div>
+  </div>`;
+
+  // AI week ahead placeholder
+  html += `<div class="r-section sk-section" id="ai-week">
+    <div class="sec-label">The Week Ahead</div>
+    ${Array.from({length:5},(_,i)=>`<div class="sk-line" style="width:${[88,72,80,65,75][i]}%;animation-delay:${i*0.09}s"></div>`).join('')}
+  </div>`;
+
+  // AI quote placeholder
+  html += `<div class="r-section sk-section" id="ai-quote" style="text-align:center;padding:24px">
+    ${Array.from({length:3},(_,i)=>`<div class="sk-line" style="width:${[70,55,40][i]}%;margin:0 auto 8px;animation-delay:${i*0.1}s"></div>`).join('')}
+  </div>`;
+
+  html += `</div>`;
+  cont.innerHTML = html;
+
+  // Animate progress bar during wait
+  const pb = document.getElementById('skProgressBar');
+  const st = document.getElementById('skStatusText');
+  let elapsed = 0;
+  const maxSec = {oracle:360,mystic:240,initiate:180,seeker:120,free:60}[tier]||300;
+  const pbTimer = setInterval(() => {
+    elapsed++;
+    if (!document.getElementById('skeletonStatusBar')) { clearInterval(pbTimer); return; }
+    const pct = Math.min(95, Math.round((elapsed/maxSec)*100));
+    if (pb) pb.style.width = pct + '%';
+    if (st && elapsed % 20 === 0) {
+      const mins = Math.floor(elapsed/60), secs = elapsed%60;
+      st.textContent = (mins>0?mins+'m ':'')+secs+'s — Oracle still composing…';
+    }
+  }, 1000);
+}
+
+// ── Fill in AI sections when the Oracle completes ──────────────────
+function fillAISections(data, dateStr) {
+  const { reading: r, planets, moon, kin, num, aspects } = data;
+  const moonSign = planets ? (planets[1]?.sign||'') : '';
+
+  function fadeIn(el, html) {
+    if (!el) return;
+    el.classList.remove('sk-section');
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .5s';
+    el.innerHTML = html;
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.style.opacity = '1'; }));
+  }
+
+  // Synthesis
+  const synthEl = document.getElementById('ai-synthesis');
+  if (synthEl && r?.synthesis) {
+    const synthText = String(r.synthesis||'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'$1').trim();
+    fadeIn(synthEl, `<div class="synthesis tappable" onclick="tapSynthesis()" title="Tap for deeper insight">${synthText}<div class="tap-hint">↗ Go deeper</div></div>`);
+  }
+
+  // Priorities
+  const priEl = document.getElementById('ai-priorities');
+  if (priEl && r?.priorities?.length) {
+    let ph = '<div class="r-section"><div class="sec-label">Today’s Priorities</div>';
+    r.priorities.forEach((pri, i) => {
+      const st = (pri.title||'').replace(/'/g,"\'").slice(0,80);
+      const sr = (pri.rationale||'').replace(/'/g,"\'").slice(0,150);
+      const sa = (pri.action||'').replace(/'/g,"\'").slice(0,100);
+      ph += `<div class="priority-item tappable" onclick="tapPriority('${st}','${sr}','${sa}')" title="Tap for specific guidance">
+        <div class="pri-num">${i+1}</div>
+        <div style="flex:1">
+          <div class="pri-title">${pri.title||''} <span style="font-size:12px;color:var(--gold3)">↗</span></div>
+          <div class="pri-body">${pri.rationale||pri.body||''}</div>
+          ${pri.action?`<div class="pri-action">→ ${pri.action}</div>`:''}
+        </div>
+      </div>`;
+    });
+    ph += '</div>';
+    fadeIn(priEl, ph);
+  }
+
+  // Shadow work
+  const swEl = document.getElementById('ai-shadow');
+  if (swEl && r?.shadow_work) {
+    const sw = cleanText(r.shadow_work);
+    fadeIn(swEl, `<div class="shadow-box tappable" onclick="tapShadow('${sw.replace(/'/g,"\'").slice(0,200)}')" title="Tap to go deeper">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+        <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55)">Shadow Work</div>
+        <div style="font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase">↗ Work with this</div>
+      </div>
+      <div class="shadow-text">${sw}</div>
+    </div>`);
+  }
+
+  // Focus/ease
+  const focEl = document.getElementById('ai-focus');
+  if (focEl && (r?.focus_on?.length || r?.ease_off?.length)) {
+    fadeIn(focEl, `<div class="two-col">
+      <div class="col-card"><div class="col-head">Focus On</div>${(r.focus_on||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}</div>
+      <div class="col-card"><div class="col-head">Ease Off</div>${(r.ease_off||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}</div>
+    </div>`);
+  }
+
+  // Moon body
+  const moonEl = document.getElementById('ai-moon-body');
+  if (moonEl && r?.moon_section?.body) {
+    moonEl.innerHTML = prose(r.moon_section.body);
+    moonEl.style.transition = 'opacity .5s';
+    moonEl.style.opacity = '0';
+    requestAnimationFrame(() => requestAnimationFrame(() => { moonEl.style.opacity = '1'; }));
+  }
+
+  // Dreamspell body
+  const dsEl = document.getElementById('ai-dreamspell-body');
+  if (dsEl && r?.dreamspell?.body) {
+    dsEl.innerHTML = prose(r.dreamspell.body);
+  }
+
+  // Week ahead
+  const wkEl = document.getElementById('ai-week');
+  if (wkEl && r?.week_ahead?.length) {
+    let wh = '<div class="r-section"><div class="sec-label">The Week Ahead</div><div class="week-grid">';
+    r.week_ahead.forEach(d => {
+      const ud = clientUD(d.date||'');
+      const udD = NUM_DATA[ud]||{n:''};
+      wh += `<div class="week-day tappable" onclick="tapWeekDay('${(d.day||'').replace(/'/g,"\'")}','${(d.kin||'').replace(/'/g,"\'")}',${ud},'${(d.note||'').replace(/'/g,"\'").slice(0,100)}')">
+        <div class="week-day-name">${(d.day||'').substring(0,3)}</div>
+        <div class="week-ud" style="${[11,22,33,44].includes(ud)?'color:var(--master)':''}">${ud}</div>
+        <div class="week-ud-label">${udD.n||''}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${(d.kin||'').split(' ').slice(0,2).join(' ')}</div>
+      </div>`;
+    });
+    wh += '</div></div>';
+    fadeIn(wkEl, wh);
+  }
+
+  // Quote
+  const qtEl = document.getElementById('ai-quote');
+  if (qtEl && r?.daily_gift?.quote) {
+    const dg = r.daily_gift;
+    fadeIn(qtEl, `<div class="r-section" style="text-align:center">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(18px,3vw,24px);
+        font-style:italic;color:var(--text);line-height:1.6;margin-bottom:12px;
+        cursor:pointer" onclick="tapGift()">
+        “${dg.quote}”
+      </div>
+      <div style="font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3)">
+        — ${dg.attribution||''}
+      </div>
+    </div>`);
+  }
+
+  // Now render the remaining full sections (astrology, planets, aspects etc)
+  // by doing a full re-render that replaces sr-inner with the complete reading
+  setTimeout(() => {
+    renderReading(data, dateStr);
+  }, 800);
+}
+
 
 function renderReading(data, dateStr) {
   const { reading: r, planets, moon, kin, num, aspects } = data;
@@ -3524,25 +4066,39 @@ function renderReading(data, dateStr) {
     </div>`;
   }
   const te = r.numerology?.three_energies;
-  const teM = { morning: num?.pd||num?.ud, afternoon: num?.pm||num?.mEn, evening: num?.py||num?.yEn };
+  // Three Energies: Morning=Personal Day, Afternoon=Personal Month, Evening=Personal Year
+  const _teParts = (currentDate||TODAY).split('-').map(Number);
+  const _teUY = numReduce(String(_teParts[0]||new Date().getFullYear()).split('').reduce((a,b)=>a+parseInt(b),0));
+  const _teUM = numReduce((_teParts[1]||new Date().getMonth()+1) + _teUY);
+  const teM = {
+    morning:   { n: num?.pd||num?.ud,  lbl: num?.pd ? 'Personal Day' : 'Universal Day' },
+    afternoon: { n: num?.pm||_teUM,    lbl: num?.pm ? 'Personal Month' : 'Universal Month' },
+    evening:   { n: num?.py||_teUY,    lbl: num?.py ? 'Personal Year' : 'Universal Year' }
+  };
+  html += `<div style="font-size:13px;color:var(--text3);font-style:italic;margin:4px 0 12px">
+    Morning — your <em>day</em> energy ·   Afternoon — your <em>month</em> energy ·   Evening — your <em>year</em> energy
+  </div>`;
   html += `<div class="energies">`;
-  [['morning','☀ Morning'],['afternoon','◑ Afternoon'],['evening','☽ Evening']].forEach(([k,lbl])=>{
+  [['morning','☀︎ Morning'],['afternoon','◑ Afternoon'],['evening','☽ Evening']].forEach(([k,lbl])=>{
     const e = te?.[k];
-    const fallbackNum = teM[k];
+    const fb = teM[k];
+    const fallbackNum = fb.n;
     const fallbackD = NUM_DATA[fallbackNum] || {};
     const guidance = e?.guidance || fallbackD.m || '';
     const num2 = e?.num||fallbackNum||'';
     const name2 = e?.name||fallbackD.n||'';
+    const isMaster = [11,22,33,44].includes(num2);
     html += `<div class="energy-card${activeWindow===k?' active-window':''} tappable"
-      onclick="tapEnergy('${k}',${num2},'${name2.replace(/'/g,"\\'")}','${guidance.replace(/'/g,"\\'").slice(0,80)}…')"
+      onclick="tapEnergy('${k}',${num2},'${name2.replace(/'/g,"\'")}','${guidance.replace(/'/g,"\'").slice(0,80)}…')"
       title="Tap for deeper ${lbl} guidance">
       <div class="energy-time">${lbl}${activeWindow===k?' <span style="color:var(--teal);font-size:11px">· Now</span>':''}</div>
-      <div class="energy-num" style="${[11,22,33,44].includes(e?.num||fallbackNum)?'color:var(--master)':''}">${num2}</div>
+      <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:3px">${e?'':fb.lbl}</div>
+      <div class="energy-num" style="${isMaster?'color:var(--master)':''}">${num2}${isMaster?'<span style="font-size:14px">★</span>':''}</div>
       <div class="energy-name">${name2}</div>
       <div class="energy-guidance">${guidance}</div>
       <div style="font-size:11px;color:var(--gold3);margin-top:8px;text-align:right">↗ Tap for insight</div>
     </div>`;
-  });
+  })  });
   html += `<div style="margin-top:12px">
     <button class="tap-cta" onclick="tapNumerology(${num?.ud||0},'${(num?.udM?.n||'').replace(/'/g,"\'")}')" style="font-size:12px">
       How does today's number energy work for me? <span class="cta-arrow">→</span>
