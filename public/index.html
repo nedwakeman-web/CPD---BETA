@@ -514,6 +514,8 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
   color:var(--text3);flex-shrink:0;opacity:.65}
 .mode-btn.mode-quick .mode-btn-title{color:var(--teal)}
 .mode-btn.mode-quick:hover,.mode-btn.mode-quick.selected{border-color:var(--teal2);background:rgba(129,205,182,0.05)}
+.mode-btn.mode-free .mode-btn-title{color:var(--gold)}
+.mode-btn.mode-free:hover,.mode-btn.mode-free.selected{border-color:var(--gold);background:rgba(201,160,80,0.07)}
 .mode-btn.mode-deep .mode-btn-title{color:var(--master)}
 .mode-btn.mode-deep:hover,.mode-btn.mode-deep.selected{border-color:rgba(200,160,255,0.4);background:rgba(200,160,255,0.05)}
 .mode-start-btn{width:100%;padding:15px;background:none;border:1px solid var(--gold);
@@ -1280,29 +1282,37 @@ body.print-card-mode{background:#0D1E33}
     <div class="mode-title">How deep do you want to go today?</div>
     <div class="mode-sub">Your Oracle adapts to the time you have</div>
     <div class="mode-options">
+      <button class="mode-btn mode-free selected" id="modeFree" onclick="selectMode('free')">
+        <div class="mode-btn-icon">✦</div>
+        <div class="mode-btn-text">
+          <div class="mode-btn-title">Daily Snapshot</div>
+          <div class="mode-btn-desc">Instant — Universal Day, Moon, Dreamspell Kin. No wait.</div>
+        </div>
+        <div class="mode-btn-time">Instant</div>
+      </button>
       <button class="mode-btn mode-quick" id="modeQuick" onclick="selectMode('quick')">
         <div class="mode-btn-icon">⚡</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Quick Snapshot</div>
-          <div class="mode-btn-desc">Today's essential energy — number, moon, Kin, one action</div>
+          <div class="mode-btn-title">Full Reading</div>
+          <div class="mode-btn-desc">All frameworks — numerology, astrology, Dreamspell, priorities</div>
         </div>
         <div class="mode-btn-time">~2 min</div>
       </button>
-      <button class="mode-btn mode-standard selected" id="modeStandard" onclick="selectMode('standard')">
+      <button class="mode-btn mode-standard" id="modeStandard" onclick="selectMode('standard')">
         <div class="mode-btn-icon">☽</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Full Reading</div>
-          <div class="mode-btn-desc">All four frameworks — numerology, astrology, Dreamspell, lunar</div>
+          <div class="mode-btn-title">Deep Reading</div>
+          <div class="mode-btn-desc">Full Oracle with shadow work, week ahead, time windows</div>
         </div>
-        <div class="mode-btn-time">~10 min</div>
+        <div class="mode-btn-time">~5 min</div>
       </button>
       <button class="mode-btn mode-deep" id="modeDeep" onclick="selectMode('deep')">
         <div class="mode-btn-icon">◈</div>
         <div class="mode-btn-text">
           <div class="mode-btn-title">Oracle Deep Dive</div>
-          <div class="mode-btn-desc">Complete Oracle — week ahead, shadow work, daily gift, all aspects</div>
+          <div class="mode-btn-desc">Maximum depth — daily gift, all aspects, full week ahead</div>
         </div>
-        <div class="mode-btn-time">~20 min</div>
+        <div class="mode-btn-time">~8 min</div>
       </button>
     </div>
     <button class="mode-start-btn" onclick="startWithMode()">✦ Begin My Reading</button>
@@ -1678,24 +1688,26 @@ const TIERS = {
   }
 };
 
-let currentTier = 'oracle';
-let selectedMode = 'standard';
+let currentTier = 'free';
+let selectedMode = 'free';
 
 const MODE_TIERS = {
-  quick: 'seeker',
+  free:     'free',
+  quick:    'seeker',
   standard: 'oracle',
-  deep: 'oracle'
+  deep:     'oracle'
 };
 const MODE_LABELS = {
-  quick:    { icon:'⚡', label:'Quick Snapshot',  time:'~2 min' },
-  standard: { icon:'☽', label:'Full Reading',     time:'~10 min' },
-  deep:     { icon:'◈', label:'Oracle Deep Dive', time:'~20 min' }
+  free:     { icon:'✦', label:'Daily Snapshot',   time:'instant' },
+  quick:    { icon:'⚡', label:'Full Reading',      time:'~2 min' },
+  standard: { icon:'☽', label:'Deep Reading',      time:'~5 min' },
+  deep:     { icon:'◈', label:'Oracle Deep Dive',  time:'~8 min' }
 };
 
 function selectMode(mode) {
   selectedMode = mode;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
-  const map = {quick:'modeQuick', standard:'modeStandard', deep:'modeDeep'};
+  const map = {free:'modeFree', quick:'modeQuick', standard:'modeStandard', deep:'modeDeep'};
   document.getElementById(map[mode])?.classList.add('selected');
 }
 
