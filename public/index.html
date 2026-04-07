@@ -485,6 +485,44 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
   border-radius:2px;font-size:12px;letter-spacing:.15em;text-transform:uppercase;
   color:var(--gold);cursor:pointer;font-family:'EB Garamond',serif;transition:all .2s}
 .shb-step:hover{background:var(--gold3)}
+/* ── COSMIC CONTEXT PAGE ── */
+.ctx-section{border:1px solid var(--div);background:var(--bg2);border-radius:3px;
+  padding:22px 24px;margin-bottom:18px}
+.ctx-section-label{font-size:10px;letter-spacing:.35em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:6px}
+.ctx-section-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);
+  font-weight:300;margin-bottom:10px}
+.ctx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:14px 0}
+@media(max-width:500px){.ctx-grid{grid-template-columns:1fr}}
+.ctx-card{background:var(--bg3);border:1px solid var(--div);border-radius:2px;padding:16px}
+.ctx-card-num{font-family:'Cormorant Garamond',serif;font-size:42px;color:var(--gold);
+  font-weight:300;line-height:1;margin-bottom:4px}
+.ctx-card-num.master{color:var(--master)}
+.ctx-card-name{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--text2);
+  margin-bottom:8px}
+.ctx-card-body{font-size:15px;color:var(--text2);line-height:1.7}
+.ctx-transit-row{display:flex;align-items:flex-start;gap:14px;padding:14px 0;
+  border-bottom:1px solid var(--div2)}
+.ctx-transit-row:last-child{border-bottom:none}
+.ctx-planet-badge{min-width:44px;text-align:center;font-size:22px;flex-shrink:0}
+.ctx-transit-body{flex:1}
+.ctx-transit-head{font-size:15px;color:var(--gold);margin-bottom:3px}
+.ctx-transit-duration{font-size:12px;color:var(--text3);letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:6px}
+.ctx-transit-desc{font-size:15px;color:var(--text2);line-height:1.7}
+.ctx-today-link{margin-top:8px;font-size:13px;color:var(--teal);font-style:italic;
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.ctx-today-link:hover{opacity:.8}
+.ctx-blueprint-row{display:flex;align-items:flex-start;gap:16px;padding:16px 0;
+  border-bottom:1px solid var(--div2)}
+.ctx-blueprint-row:last-child{border-bottom:none;padding-bottom:0}
+.ctx-bp-num{font-family:'Cormorant Garamond',serif;font-size:38px;color:var(--gold);
+  font-weight:300;min-width:52px;text-align:center;flex-shrink:0;line-height:1}
+.ctx-bp-body{flex:1}
+.ctx-bp-name{font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:4px}
+.ctx-bp-title{font-size:17px;color:var(--text);margin-bottom:6px}
+.ctx-bp-desc{font-size:15px;color:var(--text2);line-height:1.7}
 #drawerOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:399}
 #drawerOverlay.open{display:block}
 #tierModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:300;
@@ -929,6 +967,7 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill" onclick="showScreen('sc',this)">Calendar</button>
     <button class="npill" onclick="showScreen('shist',this);renderHistory()">History</button>
     <button class="npill" onclick="showScreen('scompat',this);initCompatScreen()">Compat</button>
+    <button class="npill" onclick="showScreen('sctx',this);renderContext()">Context</button>
     <button class="npill" onclick="showScreen('sp',this)">Profile</button>
   </div>
   <!-- Mobile hamburger (Sonia #50) -->
@@ -939,6 +978,7 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill" onclick="showScreen('sc',this);closeMobileNav()">Calendar</button>
     <button class="npill" onclick="showScreen('shist',this);renderHistory();closeMobileNav()">History</button>
     <button class="npill" onclick="showScreen('scompat',this);initCompatScreen();closeMobileNav()">Compat</button>
+    <button class="npill" onclick="showScreen('sctx',this);renderContext();closeMobileNav()">Context</button>
     <button class="npill" onclick="showScreen('sp',this);closeMobileNav()">Profile</button>
   </div>
   <div class="topbar-right">
@@ -1089,6 +1129,18 @@ body.print-card-mode{background:#0D1E33}
 </div>
 
 <!-- PROFILE SCREEN -->
+<div id="sctx" class="screen">
+  <div id="sctxContent" style="max-width:840px;margin:0 auto;padding:0 24px 100px">
+    <div style="text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--div);margin-bottom:28px">
+      <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Your Cosmic Context</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(26px,4vw,38px);color:var(--gold);font-weight:300;letter-spacing:.04em">The Long View</div>
+      <div style="font-size:15px;color:var(--text3);margin-top:10px;font-style:italic">Read once. Return when something shifts. These energies are your backdrop — not your daily forecast.</div>
+    </div>
+    <div id="sctxInner">
+      <div style="text-align:center;padding:40px;color:var(--text3)">Loading your cosmic context…</div>
+    </div>
+  </div>
+</div>
 <div id="sp" class="screen">
   <div class="profile-head">
     <div class="profile-title">Your Cosmic Profile</div>
@@ -1546,7 +1598,339 @@ function showScreen(id, btn) {
   if (btn) btn.classList.add('on');
   if (id === 'sc') renderCalendar();
   if (id === 'sp') updateProfileSummary();
+  if (id === 'sctx') renderContext();
 }
+
+// ══════════════════════════════════════════════════════════
+// COSMIC CONTEXT PAGE
+// ══════════════════════════════════════════════════════════
+function renderContext() {
+  const el = document.getElementById('sctxInner');
+  if (!el) return;
+
+  // ── Numerology ──────────────────────────────────────────
+  const curYear = new Date().getFullYear();
+  const curMonth = new Date().getMonth() + 1;
+  const uyRaw = String(curYear).split('').reduce((a,b)=>a+parseInt(b),0);
+  const universalYear = numReduce(uyRaw);
+  const uyD = NUM_DATA[universalYear] || {n:'—',m:''};
+
+  let personalYear = null, pyD = {n:'—',m:''};
+  let lifePath = null, lpD = {n:'—',m:''};
+  let birthKinNum = null, birthKinFull = '', birthKinTone = '', birthKinSeal = '';
+
+  const KIN_SEALS=['Dragon','Wind','Night','Seed','Serpent','World-Bridger','Hand','Star',
+    'Moon','Dog','Monkey','Human','Skywalker','Wizard','Eagle','Warrior','Earth','Mirror','Storm','Sun'];
+  const KIN_TONES=['Magnetic','Lunar','Electric','Self-Existing','Overtone','Rhythmic',
+    'Resonant','Galactic','Solar','Planetary','Spectral','Crystal','Cosmic'];
+  const KIN_COLORS=['Red','White','Blue','Yellow'];
+
+  if (profile.birthDay && profile.birthMonth && profile.birthYear) {
+    const pyRaw = numReduce(parseInt(profile.birthDay)) + numReduce(parseInt(profile.birthMonth)) + numReduce(uyRaw);
+    personalYear = numReduce(pyRaw);
+    pyD = NUM_DATA[personalYear] || {n:'—',m:''};
+    const lpRaw = parseInt(profile.birthDay) + parseInt(profile.birthMonth) +
+      String(profile.birthYear).split('').reduce((a,b)=>a+parseInt(b),0);
+    lifePath = numReduce(lpRaw);
+    lpD = NUM_DATA[lifePath] || {n:'—',m:''};
+    const anchor = new Date('2026-03-31T12:00:00Z');
+    const bd = new Date(`${profile.birthYear}-${String(profile.birthMonth).padStart(2,'0')}-${String(profile.birthDay).padStart(2,'0')}T12:00:00Z`);
+    const days = Math.round((bd - anchor) / 86400000);
+    birthKinNum = ((52 - 1 + days) % 260 + 260) % 260 + 1;
+    const si = (birthKinNum - 1) % 20;
+    const ti = (birthKinNum - 1) % 13;
+    birthKinSeal = KIN_SEALS[si];
+    birthKinTone = KIN_TONES[ti];
+    const col = KIN_COLORS[si % 4];
+    birthKinFull = col + ' ' + birthKinTone + ' ' + birthKinSeal;
+  }
+
+  // ── Wavespell position ───────────────────────────────────
+  const anchor2 = new Date('2024-07-08T12:00:00Z');
+  const today = new Date(); today.setHours(12,0,0,0);
+  let rawDiff2 = Math.round((today - anchor2) / 86400000);
+  let gy = today.getFullYear(), gm = today.getMonth()+1, gd = today.getDate();
+  let leaps = 0;
+  for (let y = 2024; y <= gy; y++) {
+    const isLeap = (y%4===0&&y%100!==0)||(y%400===0);
+    if (!isLeap) continue;
+    const feb29 = new Date(y,1,29,12,0,0);
+    if (feb29 > anchor2 && feb29 < today) leaps++;
+  }
+  const todayKin = ((rawDiff2 - leaps) % 260 + 260) % 260 + 1;
+  const wavespellStart = Math.floor((todayKin - 1) / 13) * 13 + 1;
+  const wavespellDay = ((todayKin - 1) % 13) + 1;
+  const wsSi = (wavespellStart - 1) % 20;
+  const wsCol = KIN_COLORS[wsSi % 4];
+  const wsSeal = KIN_SEALS[wsSi];
+  const wavespellName = wsCol + ' ' + wsSeal + ' Wavespell';
+  const daysLeftInWs = 13 - wavespellDay;
+
+  // ── Chinese Zodiac (year of birth + current year) ────────
+  const CHINESE_ANIMALS = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
+  const CHINESE_ELEMENTS = ['Wood','Wood','Fire','Fire','Earth','Earth','Metal','Metal','Water','Water'];
+  function chineseYear(y) {
+    const base = 1900;
+    const idx = (y - base) % 12;
+    const eidx = (y - base) % 10;
+    return { animal: CHINESE_ANIMALS[((idx % 12) + 12) % 12], element: CHINESE_ELEMENTS[((eidx % 10) + 10) % 10] };
+  }
+  const curChinese = chineseYear(curYear);
+  let birthChinese = null;
+  if (profile.birthYear) birthChinese = chineseYear(parseInt(profile.birthYear));
+
+  // ── Dreamspell year bearer (Jul 26 previous to today) ───
+  const julAnchor = new Date(today >= new Date(gy,6,26) ? gy : gy-1, 6, 26, 12, 0, 0);
+  const ybDiff = Math.round((julAnchor - anchor2) / 86400000);
+  let ybLeaps = 0;
+  for (let y2 = 2024; y2 <= julAnchor.getFullYear(); y2++) {
+    const isLeap = (y2%4===0&&y2%100!==0)||(y2%400===0);
+    if (!isLeap) continue;
+    const feb29 = new Date(y2,1,29,12,0,0);
+    if (feb29 > anchor2 && feb29 <= julAnchor) ybLeaps++;
+  }
+  const ybKin = ((ybDiff - ybLeaps) % 260 + 260) % 260 + 1;
+  const ybSi = (ybKin - 1) % 20; const ybTi = (ybKin - 1) % 13;
+  const ybYearEnd = new Date(julAnchor.getFullYear()+1, 6, 25);
+  const yearBearerFull = KIN_COLORS[ybSi%4]+' '+KIN_TONES[ybTi]+' '+KIN_SEALS[ybSi];
+
+  // ── Long-term transits (hardcoded for 2025-2027) ─────────
+  const longTermTransits = [
+    { planet: '\u2644', name: 'Saturn in Aries', duration: 'May 2025 \u2013 Apr 2028',
+      desc: 'Saturn in Aries is a once-in-29-year passage. The archetype of structure, discipline and karma moves through the sign of the self, initiative and new beginnings. The personal challenge: to build with courage rather than retreat into what is already known. Structures that no longer serve collapse. New ones built with integrity last a generation. This transit rewards those who act from conviction rather than convention.',
+      today: 'Saturn is the foundation beneath today\u2019s reading \u2014 especially relevant whenever the Oracle speaks of discipline, ambition, or long-term consequence.' },
+    { planet: '\u2646', name: 'Neptune in Aries', duration: 'Mar 2025 \u2013 Jan 2039',
+      desc: 'Neptune enters Aries for the first time since 1861\u20131875 \u2014 the era of national unification movements across Europe. The planet of dissolution, spirituality and collective dreams moves into the sign of individual will and fresh beginnings. The invitation: to act from vision rather than ego, to be a pioneer of something more than personal ambition. The risk: idealism mistaken for action, or martyrdom mistaken for sacrifice.',
+      today: 'Neptune\u2019s long presence in Aries softens the boundary between personal will and collective calling. If today\u2019s reading touches on purpose or meaning, this is the background note.' },
+    { planet: '\u2644\u2229\u2646', name: 'Saturn conjunct Neptune, 0\u00b0 Aries', duration: 'Exact Feb\u2013Jul 2026',
+      desc: 'This is the civilisational hinge of our era. Saturn (structure, karma, material reality) meets Neptune (dissolution, vision, the collective dream) at 0\u00b0 Aries \u2014 the very first degree of the zodiac, the point of absolute beginning. The last Saturn-Neptune conjunction was 1989 (the fall of the Berlin Wall). Before that: 1952 (post-war rebuilding) and 1917 (Russian Revolution). These conjunctions mark moments when the old order dissolves and a new architecture of collective life must be consciously chosen. The window: 2025\u20132027.',
+      today: 'When today\u2019s reading speaks of dissolution and rebuilding, or of the tension between what was and what is possible, this transit is the cosmic context.' },
+    { planet: '\u2645', name: 'Jupiter in Cancer', duration: 'Jun 2025 \u2013 Jun 2026',
+      desc: 'Jupiter in Cancer is considered one of its most fortunate placements \u2014 the planet of expansion in the sign of home, nourishment, memory and belonging. This year favours emotional intelligence, deepening roots, and growth that comes through care rather than conquest. Family matters, ancestral healing, and investments in place and community are strongly supported.',
+      today: 'When today\u2019s reading touches on home, relationships, or emotional wellbeing, Jupiter in Cancer is the amplifying background note.' },
+    { planet: '\u26e2', name: 'Uranus in Gemini', duration: 'Jul 2025 \u2013 Aug 2033',
+      desc: 'Uranus moves into Gemini for the first time since 1941\u20131949 \u2014 the era of radio, radar and the first computers. The planet of disruption and revolution in the sign of communication, information and the mind. Expect rapid, unpredictable transformation in how humanity thinks, communicates and connects. AI, language, transport networks, and the structure of knowledge are all in flux.',
+      today: 'Any reading that touches on communication, ideas, technology or mental agility is being shaped by Uranus in Gemini at the civilisational level.' },
+  ];
+
+  // ── Personal Year arc descriptions ───────────────────────
+  const PY_ARC = {
+    1:'You are in Year 1 of a 9-year cycle \u2014 the year of planting seeds. The themes you initiate now set the entire arc of the next decade. Independence, courage, and new beginnings are the watchwords. What you start matters more than what you finish.',
+    2:'Year 2 is the year of patience and relationship. The seeds you planted last year need tending, not harvesting. Partnerships, diplomacy, and gentle persistence move things forward faster than force.',
+    3:'Year 3 opens the channels of creative expression. Communication, social connection, and visible self-expression are highlighted. This is often the year when earlier efforts become visible to others.',
+    4:'Year 4 demands that you build. Structure, discipline, and patient effort are the themes. This is the year to lay foundations rather than seek shortcuts. What you build now lasts.',
+    5:'Year 5 is the year of change, freedom, and expansion. The structures of Year 4 need to be tested and made more flexible. Expect the unexpected, and cultivate adaptability.',
+    6:'Year 6 is the year of responsibility, home, and relationship. Service, family, and care for others take centre stage. Beauty and harmony are yours to create this year.',
+    7:'Year 7 is the year of inner work, wisdom, and refinement. External achievement slows; inner development deepens. Research, study, solitude, and spiritual inquiry are highly productive.',
+    8:'Year 8 is the axis of material achievement and accountability. Power, money, and career are in sharp focus. This is the harvest year for the effort of the previous seven \u2014 results are visible and consequential.',
+    9:'Year 9 is the year of completion, release, and compassion. The 9-year cycle draws to a close. What no longer serves must be released. Generosity, forgiveness, and endings that clear space for the new are the themes.',
+    11:'Master Year 11 \u2014 Illumination. An extraordinarily intense year calling you toward your highest spiritual and creative potential. The tension between the mundane (2) and the transcendent (11) must be consciously held.',
+    22:'Master Year 22 \u2014 The Master Builder. A year of potential civilisational impact. Your practical idealism can take form at scale. The tension between the local (4) and the universal (22) must be navigated with patience.',
+    33:'Master Year 33 \u2014 The Master Teacher. A year of compassionate service at the highest level. What you give freely now has unusual reach and depth.',
+    44:'Master Year 44 \u2014 Master Organiser. A year of systemic achievement. Material and spiritual mastery can be integrated.'
+  };
+
+  const firstName = profile.nickname || (profile.name ? profile.name.split(' ')[0] : null);
+  const hasBirth = !!(profile.birthDay && profile.birthMonth && profile.birthYear);
+
+  // ── BUILD HTML ────────────────────────────────────────────
+  let html = '';
+
+  // TODAY'S CONTEXT CONNECTOR
+  if (currentReading?.num || currentReading?.kin) {
+    html += `<div style="background:var(--teal2);border:1px solid var(--teal);border-radius:3px;
+      padding:14px 18px;margin-bottom:22px;font-size:14px;color:var(--text2);line-height:1.65">
+      <span style="color:var(--teal);letter-spacing:.15em;text-transform:uppercase;font-size:11px">Today\u2019s connection \u2014</span>
+      Your daily reading is shaped by these long-term currents. The Cosmic Context is your backdrop; the daily reading is the foreground. When something in today\u2019s Oracle resonates deeply, look here for the larger pattern behind it.
+      <span style="display:inline-block;margin-top:8px;cursor:pointer;color:var(--teal)"
+        onclick="showScreen('sr',document.querySelectorAll('.npill')[0])">
+        \u2190 Return to today\u2019s reading
+      </span>
+    </div>`;
+  }
+
+  // SECTION 1: THE YEAR
+  html += `<div class="ctx-section">
+    <div class="ctx-section-label">The Year \u2014 ${curYear}</div>
+    <div class="ctx-section-title">Universal Year ${universalYear} \u2014 ${uyD.n}</div>
+    <div style="font-size:15px;color:var(--text2);line-height:1.75;margin-bottom:16px">
+      ${uyD.m || ''} This is the collective numerological frequency for all of ${curYear} \u2014 the energy everyone on Earth is navigating together.
+    </div>
+    <div class="ctx-grid">
+      <div class="ctx-card">
+        <div class="ctx-card-num">${universalYear}</div>
+        <div class="ctx-card-name">Universal Year</div>
+        <div class="ctx-card-body">${uyD.k || ''}</div>
+      </div>
+      ${hasBirth && personalYear ? `<div class="ctx-card">
+        <div class="ctx-card-num ${[11,22,33,44].includes(personalYear)?'master':''}">${personalYear}</div>
+        <div class="ctx-card-name">Your Personal Year</div>
+        <div class="ctx-card-body">${(NUM_DATA[personalYear]||{}).k||''}</div>
+      </div>` : `<div class="ctx-card" style="display:flex;align-items:center;justify-content:center">
+        <div style="text-align:center;color:var(--text3);font-size:14px;font-style:italic">
+          Add birth details in Profile<br>to unlock your Personal Year
+        </div>
+      </div>`}
+    </div>
+    ${hasBirth && personalYear ? `<div style="font-size:15px;color:var(--text2);line-height:1.75;margin:14px 0;
+      padding:14px;background:var(--bg3);border-left:2px solid var(--gold);border-radius:0 2px 2px 0">
+      ${PY_ARC[personalYear] || ''}
+    </div>` : ''}
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px">
+      <div style="background:var(--bg3);border:1px solid var(--div);border-radius:2px;padding:12px 16px;flex:1;min-width:160px">
+        <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Chinese Zodiac ${curYear}</div>
+        <div style="font-size:18px;color:var(--gold);margin-bottom:4px">${curChinese.element} ${curChinese.animal}</div>
+        <div style="font-size:13px;color:var(--text3)">Year of the ${curChinese.element} ${curChinese.animal}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--div);border-radius:2px;padding:12px 16px;flex:1;min-width:160px">
+        <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Dreamspell Year Bearer</div>
+        <div style="font-size:15px;color:var(--gold);margin-bottom:4px">Kin ${ybKin}</div>
+        <div style="font-size:13px;color:var(--text3)">${yearBearerFull}<br><span style="font-style:italic">Jul 26 \u2013 Jul 25</span></div>
+      </div>
+    </div>
+    <button class="tap-cta" style="margin-top:14px;font-size:12px"
+      onclick="openDrawer('Year ${curYear} Interpretation',
+        'Universal Year is ${universalYear} (${uyD.n||''}). ${hasBirth && personalYear ? 'Personal Year is '+personalYear+' ('+((NUM_DATA[personalYear]||{}).n||'')+').' : ''} Chinese year: ${curChinese.element} ${curChinese.animal}. Dreamspell Year Bearer: Kin ${ybKin} ${yearBearerFull}. ${firstName ? 'User\u2019s name: '+firstName+'.' : ''} What is the deepest synthesis of these four year energies? What does ${curYear} want from the person navigating it? Give a rich, specific, 3-5 sentence interpretation.',
+        [{q:'How does my Personal Year interact with the universal energy of ${curYear}?',l:'Personal vs universal year'},
+         {q:'What does the ${curChinese.element} ${curChinese.animal} add to this year\u2019s energy?',l:'Chinese zodiac depth'}])">
+      What does ${curYear} ask of me? <span class="cta-arrow">\u2192</span>
+    </button>
+  </div>`;
+
+  // SECTION 2: YOUR COSMIC BLUEPRINT
+  html += `<div class="ctx-section">
+    <div class="ctx-section-label">Your Cosmic Blueprint \u2014 permanent</div>
+    <div class="ctx-section-title">Your Fixed Signature</div>
+    <div style="font-size:14px;color:var(--text3);font-style:italic;margin-bottom:14px">
+      These do not change. They are the constants from which the daily variables take their meaning.
+    </div>`;
+
+  if (!hasBirth) {
+    html += `<div style="text-align:center;padding:28px;color:var(--text3);font-style:italic;
+      border:1px dashed var(--div);border-radius:2px">
+      Add your birth date in <button onclick="showScreen('sp',document.querySelectorAll('.npill')[document.querySelectorAll('.npill').length-1])"
+        style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:inherit;font-size:inherit;text-decoration:underline">Profile</button>
+      to unlock your personal blueprint.
+    </div>`;
+  } else {
+    if (lifePath) {
+      html += `<div class="ctx-blueprint-row">
+        <div class="ctx-bp-num ${[11,22,33,44].includes(lifePath)?'master':''}" style="${[11,22,33,44].includes(lifePath)?'color:var(--master)':''}">${lifePath}</div>
+        <div class="ctx-bp-body">
+          <div class="ctx-bp-name">Life Path</div>
+          <div class="ctx-bp-title">${lpD.n||''}</div>
+          <div class="ctx-bp-desc">${lpD.m||''}</div>
+          <button class="tap-cta" style="margin-top:10px;font-size:11px"
+            onclick="openDrawer('Life Path ${lifePath} \u2014 ${lpD.n||''}',
+              'Life Path ${lifePath} (${lpD.n||''}). ${firstName?'Name: '+firstName+'.':''} What are the deepest gifts, shadow patterns, and life purpose encoded in this Life Path? How does it show up in work, relationships, and the arc of a life?',
+              [{q:'What is the greatest shadow challenge of Life Path ${lifePath}?',l:'Shadow of ${lifePath}'},
+               {q:'How does Life Path ${lifePath} interact with Personal Year ${personalYear}?',l:'LP \u00d7 Personal Year'}])">
+            Explore my Life Path \u2192
+          </button>
+        </div>
+      </div>`;
+    }
+    if (birthKinNum) {
+      html += `<div class="ctx-blueprint-row">
+        <div class="ctx-bp-num" style="font-size:22px;padding-top:6px">◈</div>
+        <div class="ctx-bp-body">
+          <div class="ctx-bp-name">Birth Kin \u2014 Galactic Signature</div>
+          <div class="ctx-bp-title">Kin ${birthKinNum} \u2014 ${birthKinFull}</div>
+          <div class="ctx-bp-desc">This is your permanent galactic signature in the Dreamspell system \u2014 the energy you were born to embody and transmit. The <em>${birthKinTone}</em> tone is your fundamental frequency; the <em>${birthKinSeal}</em> seal is the archetype you carry.</div>
+          <button class="tap-cta" style="margin-top:10px;font-size:11px"
+            onclick="openDrawer('Birth Kin ${birthKinNum} \u2014 ${birthKinFull}',
+              'Birth Kin is ${birthKinNum} (${birthKinFull}). Tone: ${birthKinTone}. Seal: ${birthKinSeal}. ${firstName?'Name: '+firstName+'.':''} What is the deepest meaning of this galactic signature? What gifts and challenges does it bring? How does it shape the person\u2019s way of processing and transmitting energy in the world?',
+              [{q:'What is the shadow aspect of Kin ${birthKinNum}?',l:'Birth Kin shadow'},
+               {q:'How does Birth Kin ${birthKinNum} interact with today\u2019s Kin ${todayKin}?',l:'Birth vs today\u2019s Kin'}])">
+            What does my Birth Kin mean? \u2192
+          </button>
+        </div>
+      </div>`;
+    }
+    if (birthChinese) {
+      html += `<div class="ctx-blueprint-row">
+        <div class="ctx-bp-num" style="font-size:20px;padding-top:6px">\u7f8e</div>
+        <div class="ctx-bp-body">
+          <div class="ctx-bp-name">Chinese Zodiac \u2014 Birth Year</div>
+          <div class="ctx-bp-title">${birthChinese.element} ${birthChinese.animal}</div>
+          <div class="ctx-bp-desc">Born in the year of the ${birthChinese.element} ${birthChinese.animal}. This signature colours your instincts, social energy, and the rhythm of your ambition.</div>
+          <button class="tap-cta" style="margin-top:10px;font-size:11px"
+            onclick="openDrawer('${birthChinese.element} ${birthChinese.animal}',
+              'Born in the year of the ${birthChinese.element} ${birthChinese.animal}. Current year is ${curChinese.element} ${curChinese.animal}. ${firstName?'Name: '+firstName+'.':''} What are the core traits, gifts, and shadow patterns of the ${birthChinese.element} ${birthChinese.animal}? How does their birth year interact with the current year energy?',
+              [{q:'What does ${curYear} hold for the ${birthChinese.animal}?',l:'${curChinese.animal} year for ${birthChinese.animal}'}])">
+            Explore my birth sign \u2192
+          </button>
+        </div>
+      </div>`;
+    }
+  }
+  html += `</div>`;
+
+  // SECTION 3: CURRENT CYCLE (Wavespell)
+  html += `<div class="ctx-section">
+    <div class="ctx-section-label">Current 13-Day Cycle \u2014 Dreamspell Wavespell</div>
+    <div class="ctx-section-title">${wavespellName}</div>
+    <div style="font-size:15px;color:var(--text2);line-height:1.75;margin-bottom:14px">
+      You are on <em>day ${wavespellDay} of 13</em> in the ${wavespellName}.
+      ${daysLeftInWs === 0 ? 'Today is the last day of this cycle \u2014 completion and release.' :
+        daysLeftInWs === 1 ? 'The cycle completes tomorrow.' :
+        `${daysLeftInWs} days remain in this cycle.`}
+      A wavespell is a 13-day arc of energy initiated by the Magnetic tone and completed by the Cosmic.
+      The seal that opens the cycle (${wsSeal}) sets the theme of the entire 13 days.
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin:14px 0">
+      ${Array.from({length:13},(_,i)=>{
+        const d = i+1;
+        const toneNames = ['Magnetic','Lunar','Electric','Self-Existing','Overtone','Rhythmic','Resonant','Galactic','Solar','Planetary','Spectral','Crystal','Cosmic'];
+        const isNow = d === wavespellDay;
+        return `<div style="flex:1;min-width:28px;text-align:center;padding:6px 2px;
+          background:${isNow?'var(--gold3)':'var(--bg3)'};border:1px solid ${isNow?'var(--gold)':'var(--div)'};
+          border-radius:2px;font-size:11px;color:${isNow?'var(--gold)':'var(--text3)'}">
+          <div style="font-weight:${isNow?'600':'400'}">${d}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <span style="font-size:12px;color:var(--text3)">Day 1 = Magnetic \u2022 Day 13 = Cosmic</span>
+    </div>
+    <button class="tap-cta" style="margin-top:14px;font-size:12px"
+      onclick="openDrawer('${wavespellName} \u2014 Day ${wavespellDay}',
+        'We are on day ${wavespellDay} of 13 in the ${wavespellName}. Today\u2019s Kin is ${todayKin}. ${hasBirth && birthKinNum ? 'Birth Kin: '+birthKinNum+' ('+birthKinFull+').' : ''} What is the deeper theme of this wavespell, and what does being on day ${wavespellDay} specifically ask of the person in this cycle?',
+        [{q:'What should I complete or let go before this wavespell ends?',l:'Cycle completion'},
+         {q:'What seed is the next wavespell asking me to plant?',l:'Next wavespell prep'}])">
+      What does this wavespell cycle mean for me? <span class="cta-arrow">\u2192</span>
+    </button>
+  </div>`;
+
+  // SECTION 4: LONG-TERM SKY
+  html += `<div class="ctx-section">
+    <div class="ctx-section-label">The Long-Term Sky \u2014 months to years</div>
+    <div class="ctx-section-title">Planetary Background</div>
+    <div style="font-size:14px;color:var(--text3);font-style:italic;margin-bottom:18px">
+      These transits move slowly \u2014 some last years. Read once, integrate. They appear in your daily reading only when directly relevant to the day.
+    </div>`;
+  longTermTransits.forEach(t => {
+    html += `<div class="ctx-transit-row">
+      <div class="ctx-planet-badge">${t.planet}</div>
+      <div class="ctx-transit-body">
+        <div class="ctx-transit-head">${t.name}</div>
+        <div class="ctx-transit-duration">${t.duration}</div>
+        <div class="ctx-transit-desc">${t.desc}</div>
+        <div class="ctx-today-link"
+          onclick="openDrawer('${t.name.replace(/'/g,"\\'")}',
+            '${t.name} (${t.duration}). ${t.desc.replace(/'/g,"\\'").slice(0,200)} ${firstName?'User: '+firstName+'.':''} How is this transit specifically relevant to someone right now, at this point in the cycle? What practical and inner shifts does it support?',
+            [{q:'How does ${t.name.replace(/'/g,"\\'")} affect my Personal Year ${personalYear||''}?',l:'Personal impact'},
+             {q:'What is the shadow of ${t.name.replace(/'/g,"\\'")} to watch for?',l:'Shadow of this transit'}])">
+          \u21d2 What does this mean for me personally?
+        </div>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  el.innerHTML = html;
+}
+
 
 function updateProfileSummary() {
   const bar = document.getElementById('profileSummaryBar');
@@ -3195,10 +3579,17 @@ function renderReading(data, dateStr) {
   }
 
   if (r.astrology?.saturn_neptune) {
-    html += `<div class="r-section" style="border-left:2px solid var(--gold3)">
-      <div class="sec-label">∞ Saturn–Neptune 0° Aries — A Civilisational Reset</div>
-      <div class="sec-body">${prose(r.astrology.saturn_neptune)}
-      ${r.astrology?.uranus_note?`<p style="margin-top:10px;color:var(--teal);font-style:italic">${r.astrology.uranus_note}</p>`:''}
+    html += `<div class="r-section" style="border-left:2px solid var(--gold3);padding:14px 18px">
+      <div class="sec-label">∞ Saturn–Neptune backdrop — see Cosmic Context for full detail</div>
+      <div style="font-size:15px;color:var(--text2);line-height:1.7;margin:6px 0 10px">${prose(r.astrology.saturn_neptune).replace(/<\/p><p>/g,'</p><p>').split('<\/p>').slice(0,1).join('</p>')}</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <button class="tap-cta" style="font-size:11px" onclick="openDrawer('Saturn–Neptune — Your Context', 'Saturn conjunct Neptune at 0° Aries exact 2026. '+getUserContext()+' How is this civilisational transit specifically relevant to '+getFirstName()+'s current situation and life arc right now?', [{q:'What is Saturn-Neptune asking me to dissolve or rebuild?',l:'Dissolve or rebuild'}])">
+          What does this mean for me? <span class="cta-arrow">→</span>
+        </button>
+        <span style="font-size:13px;color:var(--teal);cursor:pointer;font-style:italic"
+          onclick="showScreen('sctx',Array.from(document.querySelectorAll('.npill')).find(b=>b.textContent.trim()==='Context'));renderContext()">
+          Full long-term context →
+        </span>
       </div>
     </div>`;
   }
@@ -3209,40 +3600,40 @@ function renderReading(data, dateStr) {
     const tone = kin.tone || '';
     const seal = kin.seal || '';
     const toneHooks = {
-      'Magnetic':'You are in a day of pure attraction — what you focus on, gathers. <em>Set your intention clearly this morning.</em>',
-      'Lunar':'The friction you feel between what you want and what's in the way is today's intelligence — it's showing you exactly where to direct energy.',
-      'Electric':'Something needs activating today — a conversation, a decision, a collaboration. Don't hold back what's ready to move.',
+      'Magnetic':'You are in a day of pure attraction \u2014 what you focus on, gathers. <em>Set your intention clearly this morning.</em>',
+      'Lunar':'The friction between what you want and what\u2019s in the way is today\u2019s intelligence \u2014 showing you exactly where to direct energy.',
+      'Electric':'Something needs activating today \u2014 a conversation, a decision, a collaboration. Don\u2019t hold back what\u2019s ready to move.',
       'Self-Existing':'What needs to be defined, planned, or given structure? The universe is asking you to be precise today.',
-      'Overtone':'You are being called to take command — not of others, but of your own direction. <em>What are you the authority on today?</em>',
-      'Rhythmic':'A day to create balance — equalise where there's been too much of one thing.',
-      'Resonant':'Your inner tuning fork is activated. Whatever feels most <em>true</em> right now — follow that signal.',
+      'Overtone':'You are being called to take command \u2014 not of others, but of your own direction. <em>What are you the authority on today?</em>',
+      'Rhythmic':'A day to create balance \u2014 equalise where there\u2019s been too much of one thing.',
+      'Resonant':'Your inner tuning fork is activated. Whatever feels most <em>true</em> right now \u2014 follow that signal.',
       'Galactic':'Alignment check: are your actions matching your values? Today asks you to walk your talk.',
       'Solar':'Intention becomes pulse. Be deliberate about what energy you send forward today.',
       'Planetary':'Manifestation is high. One of the most powerful days for bringing ideas into physical form.',
-      'Spectral':'Something may dissolve today — and that is perfect. <em>What are you ready to release?</em>',
+      'Spectral':'Something may dissolve today \u2014 and that is perfect. <em>What are you ready to release?</em>',
       'Crystal':'Your energy belongs to the collective today. Who needs what you have to offer?',
       'Cosmic':'Endurance and transcendence. What have you learned in this cycle? <em>Sit with the wholeness.</em>'
     };
     const sealHooks = {
-      'Dragon':'Primal, nurturing force — origins, ancestry, and deep care are in focus.',
+      'Dragon':'Primal, nurturing force \u2014 origins, ancestry, and deep care are in focus.',
       'Wind':'What you say today carries unusual weight. Communication is charged.',
       'Night':'The dreaming mind is available. Abundance and deep intuition.',
       'Seed':'Something is germinating. Plant, plan, or prepare today.',
-      'Serpent':'Instinct over analysis — your body knows before your mind does.',
-      'World-Bridger':'A day of crossing over — transformation, the space between what was and what comes next.',
+      'Serpent':'Instinct over analysis \u2014 your body knows before your mind does.',
+      'World-Bridger':'A day of crossing over \u2014 transformation, the space between what was and what comes next.',
       'Hand':'Healing and completion. Finish what matters most.',
       'Star':'Beauty and elegance open doors today that logic cannot.',
-      'Moon':'Flow is available. <em>Don't push — move like water.</em>',
+      'Moon':'Flow is available. <em>Don\u2019t push \u2014 move like water.</em>',
       'Dog':'Loyalty, heart, and love. Who and what is truly important to you?',
-      'Monkey':'Play and illusion. Don't take anything too seriously — including yourself.',
+      'Monkey':'Play and illusion. Don\u2019t take anything too seriously \u2014 including yourself.',
       'Human':'Free will is in focus. Your choices are especially consequential today.',
-      'Skywalker':'Expansion and exploration. Widen your horizon — mentally or physically.',
+      'Skywalker':'Expansion and exploration. Widen your horizon \u2014 mentally or physically.',
       'Wizard':'Enchantment and receptivity. You carry unusual influence today.',
       'Eagle':'Rise above the immediate. The bigger pattern is visible from altitude.',
       'Warrior':'Ask the hard questions. Intelligence and fearlessness are your guides.',
       'Earth':'Trust the signs. Synchronicity is the language of today.',
       'Mirror':'What is your situation showing you about yourself? Reflection and order.',
-      'Storm':'Don't resist the disruption — it is the intelligence. <em>Transformation is the point.</em>',
+      'Storm':'Don\u2019t resist the disruption \u2014 it is the intelligence. <em>Transformation is the point.</em>',
       'Sun':'Your life-force is high. <em>Let yourself shine without apology.</em>'
     };
     const toneMsg = toneHooks[tone] || '';
