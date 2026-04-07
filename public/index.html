@@ -1374,18 +1374,22 @@ body.print-card-mode{background:#0D1E33}
     <div class="mode-title">How deep do you want to go today?</div>
     <div class="mode-sub">Choose your depth — from instant to immersive</div>
     <div class="mode-options">
-      <button class="mode-btn mode-free selected" id="modeFree" onclick="selectMode('free')">
+      <button class="mode-btn mode-free" id="modeFree" onclick="selectMode('free')">
         <div class="mode-btn-icon">✦</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Daily Snapshot <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif">· Free</span></div>
-          <div class="mode-btn-desc">Instant — Universal Day, Moon, Dreamspell Kin. No server wait.</div>
+          <div class="mode-btn-title">Daily Snapshot
+            <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif;margin-left:6px">Free</span>
+          </div>
+          <div class="mode-btn-desc">Instant — Universal Day, Moon phase, Dreamspell Kin. No server wait.</div>
         </div>
-        <div class="mode-btn-time">Instant</div>
+        <div class="mode-btn-time" style="color:var(--teal)">Instant</div>
       </button>
-      <button class="mode-btn mode-quick" id="modeQuick" onclick="selectMode('quick')">
+      <button class="mode-btn mode-quick selected" id="modeQuick" onclick="selectMode('quick')">
         <div class="mode-btn-icon">⚡</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Full Reading <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif">· Seeker</span></div>
+          <div class="mode-btn-title">Full Reading
+            <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif;margin-left:6px">Seeker · £9/mo</span>
+          </div>
           <div class="mode-btn-desc">All four frameworks — numerology, astrology, Dreamspell, priorities, focus and ease</div>
         </div>
         <div class="mode-btn-time">~2 min</div>
@@ -1393,21 +1397,39 @@ body.print-card-mode{background:#0D1E33}
       <button class="mode-btn mode-standard" id="modeStandard" onclick="selectMode('standard')">
         <div class="mode-btn-icon">☽</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Deep Reading <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif">· Oracle</span></div>
-          <div class="mode-btn-desc">Full depth — shadow work, week ahead, time windows, planetary aspects</div>
+          <div class="mode-btn-title">Monthly Arc
+            <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);font-family:'EB Garamond',serif;margin-left:6px">Initiate · £29/mo</span>
+          </div>
+          <div class="mode-btn-desc">Full reading plus lunation map, wavespell arc, monthly shadow themes and growth edges</div>
         </div>
-        <div class="mode-btn-time">~5 min</div>
+        <div class="mode-btn-time">~3 min</div>
+      </button>
+      <button class="mode-btn mode-standard" id="modeMystic" onclick="selectMode('mystic')">
+        <div class="mode-btn-icon">◉</div>
+        <div class="mode-btn-text">
+          <div class="mode-btn-title">Yearly Reading
+            <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--master);font-family:'EB Garamond',serif;margin-left:6px">Mystic · £79/mo</span>
+          </div>
+          <div class="mode-btn-desc">Full natal chart integration, yearly arc, personal numerology cycles, major transit themes</div>
+        </div>
+        <div class="mode-btn-time">~4 min</div>
       </button>
       <button class="mode-btn mode-deep" id="modeDeep" onclick="selectMode('deep')">
         <div class="mode-btn-icon">◈</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Oracle Deep Dive <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--master);font-family:'EB Garamond',serif">· Maximum depth</span></div>
-          <div class="mode-btn-desc">Everything — daily gift, full aspects, closing reflection, complete week ahead</div>
+          <div class="mode-btn-title">Oracle Deep Dive
+            <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-family:'EB Garamond',serif;margin-left:6px">Oracle · Maximum depth</span>
+          </div>
+          <div class="mode-btn-desc">Everything — Hellenistic lots, full aspects, closing reflection, complete week ahead</div>
         </div>
         <div class="mode-btn-time">~8 min</div>
       </button>
     </div>
-    <button class="mode-start-btn" onclick="startWithMode()">✦ Begin My Reading</button>
+    <div style="font-size:12px;color:var(--text3);text-align:center;margin:0 0 12px;
+      font-style:italic;letter-spacing:.08em">
+      All tiers available during beta · Subscription pricing launches with Stripe
+    </div>
+    <button class="mode-start-btn" onclick="startWithMode()">✶ Begin My Reading</button>
     <div class="intention-group">
       <label class="intention-label">What's on your mind today? <span style="opacity:.5">(optional)</span></label>
       <textarea class="intention-input" id="intentionInput" rows="2"
@@ -2127,25 +2149,27 @@ const TIERS = {
 };
 
 let currentTier = 'free';
-let selectedMode = 'free';
+let selectedMode = 'quick';  // Default to Full Reading (Seeker)
 
 const MODE_TIERS = {
   free:     'free',
   quick:    'seeker',
-  standard: 'oracle',
+  standard: 'initiate',
+  mystic:   'mystic',
   deep:     'oracle'
 };
 const MODE_LABELS = {
-  free:     { icon:'✦', label:'Daily Snapshot',   time:'instant' },
+  free:     { icon:'✦', label:'Daily Snapshot',   time:'Instant' },
   quick:    { icon:'⚡', label:'Full Reading',      time:'~2 min' },
-  standard: { icon:'☽', label:'Deep Reading',      time:'~5 min' },
+  standard: { icon:'☽', label:'Monthly Arc',       time:'~3 min' },
+  mystic:   { icon:'◉', label:'Yearly Reading',    time:'~4 min' },
   deep:     { icon:'◈', label:'Oracle Deep Dive',  time:'~8 min' }
 };
 
 function selectMode(mode) {
   selectedMode = mode;
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
-  const map = {free:'modeFree', quick:'modeQuick', standard:'modeStandard', deep:'modeDeep'};
+  const map = {free:'modeFree', quick:'modeQuick', standard:'modeStandard', mystic:'modeMystic', deep:'modeDeep'};
   document.getElementById(map[mode])?.classList.add('selected');
 }
 
@@ -2157,7 +2181,7 @@ function showModeSelector() {
   // Update skip link to show what mode will be used
   const skipLbl = document.getElementById('modeSkipLink');
   if (skipLbl) {
-    const modeNames = {free:'Daily Snapshot', quick:'Full Reading', standard:'Deep Reading', deep:'Oracle Deep Dive'};
+    const modeNames = {free:'Daily Snapshot', quick:'Full Reading', standard:'Monthly Arc', mystic:'Yearly Reading', deep:'Oracle Deep Dive'};
     skipLbl.textContent = saved ? 'Use last setting (' + (modeNames[saved]||saved) + ')' : 'Skip — use default';
   }
   document.getElementById('modeSelector').classList.add('visible');
@@ -2653,10 +2677,10 @@ async function loadReading(dateStr, tier) {
   const stages = tierStages[activeTier] || tierStages.oracle;
 
   const depthNote = {
-    free:     `Quick Snapshot · typically ready in about 30 seconds`,
-    seeker:   `Full Reading · typically ready in 1 to 2 minutes`,
-    initiate: `Initiate Reading · typically ready in 2 to 3 minutes`,
-    mystic:   `Mystic Reading · typically ready in 3 to 4 minutes`,
+    free:     `Daily Snapshot · instant`,
+    seeker:   `Full Reading (Seeker) · typically ready in 1 to 2 minutes`,
+    initiate: `Monthly Arc (Initiate) · typically ready in 2 to 3 minutes`,
+    mystic:   `Yearly Reading (Mystic) · typically ready in 3 to 4 minutes`,
     oracle:   `Oracle Deep Dive · typically ready in 3 to 6 minutes. The depth is worth it.`,
   }[activeTier] || '';
 
@@ -3541,7 +3565,7 @@ function renderSkeletonReading(dateStr, tier) {
     <div style="font-size:22px;animation:moonSpin 3s linear infinite">☽</div>
     <div style="flex:1">
       <div style="font-size:13px;color:var(--gold);letter-spacing:.12em">
-        Oracle is composing your ${tier==='oracle'?'deep ':tier==='mystic'?'full ':tier==='seeker'?'personal ':''}reading…
+        Oracle is composing your ${tier==='oracle'?'deep ':tier==='mystic'?'yearly ':tier==='initiate'?'monthly ':tier==='seeker'?'personal ':''}reading…
       </div>
       <div style="font-size:12px;color:var(--text3);margin-top:2px" id="skStatusText">
         Typically ready in ${tier==='oracle'?'3–6':tier==='seeker'?'1–2':'2–3'} minutes. Numbers, Kin and moon are accurate right now.
