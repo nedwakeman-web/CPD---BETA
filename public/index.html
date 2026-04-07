@@ -108,10 +108,13 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 @keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 .load-msg{font-size:18px;color:var(--text2);margin-top:20px;letter-spacing:.1em;font-style:italic}
 .tier-sub-msg{font-size:14px;color:var(--text3);margin-top:12px;letter-spacing:.12em}
-.load-stage{font-size:15px;color:var(--text3);letter-spacing:.08em;font-style:italic;
-  transition:all .5s ease;opacity:.35}
-.load-stage.active{color:var(--text);opacity:1;font-size:17px;letter-spacing:.1em}
-.load-stage.done{color:var(--teal);opacity:.7}
+.load-stage{font-size:clamp(16px,2.5vw,20px);color:var(--text2);letter-spacing:.06em;
+  font-style:italic;font-family:'Cormorant Garamond',serif;
+  transition:opacity .5s,transform .4s;opacity:0;transform:translateY(8px);
+  position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+.load-stage.active{opacity:1;transform:translateY(0)}
+.load-stage.done{opacity:0;transform:translateY(-8px)}
+#stageList{position:relative;height:2.4em;overflow:hidden;margin-top:28px}
 .r-section{background:var(--bg2);border:1px solid var(--div);border-radius:2px;
   padding:28px 32px;margin-bottom:20px}
 @media(max-width:600px){.r-section{padding:20px 18px}}
@@ -1365,7 +1368,7 @@ body.print-card-mode{background:#0D1E33}
       <div style="margin-top:14px;font-size:11px;color:var(--text3);text-align:center;opacity:.5;line-height:1.6">
         Your readings are already saved locally on this device.<br>
         Sign in to sync them across devices and never lose your history.<br>
-        <a href="/privacy" target="_blank" style="color:var(--text3);text-decoration:underline;text-underline-offset:2px;opacity:.8">Privacy Policy</a>
+        <a href="/privacy.html" target="_blank" style="color:var(--text3);text-decoration:underline;text-underline-offset:2px;opacity:.8">Privacy Policy</a>
       </div>
     </div>
   </div>
@@ -2720,10 +2723,9 @@ async function loadReading(dateStr, tier) {
     oracle:   `Oracle Deep Dive · typically ready in 3 to 6 minutes. The depth is worth it.`,
   }[activeTier] || '';
 
-  cont.innerHTML = `<div style="max-width:680px;margin:0 auto;padding:52px 24px 80px;text-align:center">
-
-    <div class="load-moon">☽</div>
-    <div class="load-msg" id="loadMsg">${stages[0]}</div>
+  // Old loading screen removed — skeleton renders immediately above
+  // Keep a minimal hidden container for the stageTimer IDs to reference
+  cont.innerHTML = `<div style="display:none" id="legacyStageHolder">
 
     <div style="margin-top:10px;font-size:13px;color:var(--teal);letter-spacing:.12em;opacity:.8">${depthNote}</div>
 
@@ -2738,7 +2740,7 @@ async function loadReading(dateStr, tier) {
       </span>
     </div>
 
-    <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px;align-items:center" id="stageList">
+    <div id="stageList">
       ${stages.map((s,i)=>`<div id="stage-${i}" class="load-stage">${s}</div>`).join('')}
     </div>
 
@@ -2776,25 +2778,7 @@ async function loadReading(dateStr, tier) {
 
   </div>`;
 
-  let stageIdx = 0;
-  const stageTimer = setInterval(()=>{
-    if (stageIdx > 0) {
-      const prev = document.getElementById(`stage-${stageIdx-1}`);
-      if (prev) { prev.classList.remove('active'); prev.classList.add('done'); }
-    }
-    const stage = document.getElementById(`stage-${stageIdx}`);
-    if (stage) stage.classList.add('active');
-    const msg = document.getElementById('loadMsg');
-    if (msg) msg.textContent = stages[Math.min(stageIdx, stages.length-1)];
-    stageIdx++;
-    if (stageIdx >= stages.length) {
-      clearInterval(stageTimer);
-      setTimeout(()=>{
-        const note = document.getElementById('bgNote');
-        if (note) note.style.display = 'block';
-      }, 800);
-    }
-  }, 3200);
+  const stageTimer = { _fake: true };  // placeholder — skeleton handles stage cycling
 
   // ── FREE TIER: instant client-side snapshot — no server call needed ──
   if (activeTier === 'free') {
@@ -2874,6 +2858,15 @@ async function loadReading(dateStr, tier) {
     return;
   }
 
+  // ── RENDER SKELETON IMMEDIATELY — before any network call ───────
+  clearInterval(stageTimer);
+  window._phase1Rendered = false;
+  try {
+    renderSkeletonReading(dateStr, activeTier);
+  } catch(skErr) {
+    console.error('Skeleton render error:', skErr.message);
+  }
+
   try {
     const intention = localStorage.getItem('cdp_intention') || '';
 
@@ -2897,11 +2890,6 @@ async function loadReading(dateStr, tier) {
     sessionStorage.setItem('cdp_active_job', JSON.stringify({
       jobId, dateStr, tier: activeTier, startedAt: Date.now()
     }));
-
-    // ── IMMEDIATE RENDER: show all computed data right now ────────────
-    clearInterval(stageTimer);
-    window._phase1Rendered = false;
-    renderSkeletonReading(dateStr, activeTier);
 
     const startedAt = Date.now();
     // Kill switch — if no response after 8 minutes, show clear error
@@ -3823,7 +3811,7 @@ function renderSkeletonReading(dateStr, tier) {
 
   // Skeleton footer with privacy link
   html += `<div style="text-align:center;padding:16px 0 8px;border-top:1px solid var(--div2);margin-top:8px">
-    <a href="/privacy" target="_blank" style="font-size:13px;color:var(--text3);
+    <a href="/privacy.html" target="_blank" style="font-size:13px;color:var(--text3);
       text-decoration:underline;text-underline-offset:3px;font-family:'EB Garamond',serif;
       letter-spacing:.15em">Privacy Policy</a>
     <span style="color:var(--text3);opacity:.4;margin:0 10px">·</span>
@@ -4615,7 +4603,7 @@ function renderReading(data, dateStr) {
     <button class="pdf-btn" onclick="showScreen('scard',document.querySelectorAll('.npill')[1]);renderCard()">☽ Daily Card</button>
   </div>
   <div style="text-align:center;padding:16px 0 8px;border-top:1px solid var(--div2);margin-top:8px">
-    <a href="/privacy" target="_blank" style="font-size:13px;color:var(--text3);
+    <a href="/privacy.html" target="_blank" style="font-size:13px;color:var(--text3);
       text-decoration:underline;text-underline-offset:3px;font-family:'EB Garamond',serif;
       letter-spacing:.15em">Privacy Policy</a>
     <span style="color:var(--text3);opacity:.4;margin:0 10px">·</span>
@@ -6187,7 +6175,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           style="font-size:11px;color:rgba(240,237,230,0.3);cursor:pointer;text-decoration:underline;text-underline-offset:3px">← Back</span>
         <div style="margin-top:20px;padding-top:14px;border-top:1px solid rgba(201,160,80,0.1);font-size:8px;letter-spacing:.08em;color:rgba(240,237,230,0.25);line-height:1.7">
           Your email is used only to send your invitation. No spam, ever.<br>
-          <a href="/privacy" target="_blank" style="color:rgba(240,237,230,0.25);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
+          <a href="/privacy.html" target="_blank" style="color:rgba(240,237,230,0.25);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
         </div>
       </div>
       <div id="g-waitlist-success" style="display:none;text-align:center">
@@ -6222,7 +6210,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         </div>
         <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(201,160,80,0.1);font-size:8px;letter-spacing:.08em;color:rgba(240,237,230,0.32);line-height:1.7">
           Cosmic Daily Planner · Private Beta 2026<br>cosmicdailyplanner.com
-          <br><a href="/privacy" target="_blank" style="color:rgba(240,237,230,0.32);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
+          <br><a href="/privacy.html" target="_blank" style="color:rgba(240,237,230,0.32);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
         </div>
       </div>
       <div id="g-success" style="display:none;text-align:center">
