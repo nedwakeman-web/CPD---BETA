@@ -416,13 +416,14 @@ function buildProfileContext(p, recentHistory = []) {
 // ══════════════════════════════════════════════════════════════════
 // ORACLE READING — FULL SCHEMA, FULL QUALITY, BENCHMARK STANDARD
 // ══════════════════════════════════════════════════════════════════
-async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHistory = []) {
-  const planets = buildPlanets(dateStr);
-  const moon = getMoon(dateStr);
-  const kin = getKin(dateStr);
+async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHistory = [], _planets, _moon, _kin, _num, _aspects) {
+  // Accept pre-calculated data from two-phase flow to avoid recalculating
+  const planets = _planets || buildPlanets(dateStr);
+  const moon = _moon || getMoon(dateStr);
+  const kin = _kin || getKin(dateStr);
   const p = profile || {};
-  const num = getNumerology(dateStr, p.birthDay, p.birthMonth, p.birthYear);
-  const aspects = getAspects(planets);
+  const num = _num || getNumerology(dateStr, p.birthDay, p.birthMonth, p.birthYear);
+  const aspects = _aspects || getAspects(planets);
   const weekAhead = getWeekAhead(dateStr);
 
   // ── DYNAMIC PROFILE — Beta 2: uses buildProfileContext ──
@@ -625,6 +626,76 @@ function repairJSON(str) {
   return s;
 }
 
+
+// ══════════════════════════════════════════════════════════════════
+// TWO-PHASE READING GENERATION
+// Phase 1: Actionable core (~25s) — synthesis, priorities, shadow,
+//          focus/ease, time windows
+// Phase 2: Deep analysis (~3-5min) — numerology, astrology,
+//          dreamspell, transits, week ahead, daily gift
+// ══════════════════════════════════════════════════════════════════
+
+async function generatePhase1(dateStr, profile, tier, planets, moon, kin, num, aspects) {
+  const firstName = profile.nickname || (profile.name ? profile.name.split(' ')[0] : 'you');
+  const profileBlock = buildProfileContext(profile, []);
+
+  const pTable = planets.map(pl => `${pl.name}: ${pl.degStr}`).join('\n');
+  const moonAlert = moon.isBlack
+    ? `★ BLACK MOON — threshold day. No major launches. Observe.`
+    : moon.isShiva ? `★ SHIVA MOON — auspicious. Fresh starts welcomed.` : '';
+
+  const scope1 = {
+    free: 'PHASE 1 FREE: synthesis (1 sentence), one priority, one action. Under 200 tokens.',
+    seeker: 'PHASE 1 SEEKER: synthesis (2 sentences), 3 priorities with rationale and actions, shadow_work, focus_on (4 items), ease_off (4 items), time_windows. Concise — 2 sentences per field. Under 1500 tokens.',
+    initiate: 'PHASE 1 INITIATE: Same as Seeker but richer. synthesis (2-3 sentences), 3 priorities with full rationale, shadow_work, focus_on, ease_off, time_windows. Under 2000 tokens.',
+    mystic: 'PHASE 1 MYSTIC: synthesis (3 sentences), 3 full priorities, shadow_work (3 sentences), focus_on, ease_off, time_windows. Under 2500 tokens.',
+    oracle: 'PHASE 1 ORACLE: synthesis (3 powerful sentences synthesising all 4 frameworks), 3 priorities with full 3-4 sentence rationale and specific actions, shadow_work (4 sentences — the hard question), focus_on (4 items), ease_off (4 items), time_windows (3 sentences each). Under 3000 tokens.'
+  }[tier] || 'PHASE 1: synthesis, priorities, shadow_work, focus_on, ease_off, time_windows.';
+
+  const sys1 = `You are the Oracle at Cosmic Daily Planner. PHASE 1 — generate only the actionable core sections. Fast, precise, personal.
+${scope1}
+Rules: Address ${firstName} by name. Use only provided data. RESPOND WITH VALID JSON ONLY — no markdown, no preamble.`;
+
+  const user1 = `DATE: ${dateStr}
+PROFILE: ${profileBlock}
+PLANETS: ${pTable}
+MOON: ${moon.phase} — ${moon.cycle} days into cycle ${moonAlert}
+NUMEROLOGY: UD${num.ud} (${num.udM?.n}), PD${num.pd||num.ud} (${num.pdM?.n||''}), LP${num.lp||'?'}, PY${num.py||'?'}
+KIN: ${kin.full}${kin.isGAP?' ★ GAP':''}
+
+Generate ONLY these sections as valid JSON:
+{
+  "synthesis": "<${tier==='oracle'?'3 powerful sentences synthesising Dreamspell Kin, Universal Day, dominant transit and moon into one resonant truth for '+firstName+' today':'2-3 sentences — the essential truth for '+firstName+' today'}>",
+  "priorities": [
+    {"rank":1,"title":"<Most important priority — specific to ${firstName}>","rationale":"<${tier==='oracle'?'3-4':'2'} sentences with cosmic rationale — which transits/numbers/phase support this>","action":"<One specific, completable action for today>"},
+    {"rank":2,"title":"<Connection/relationship priority>","rationale":"<${tier==='oracle'?'3-4':'2'} sentences>","action":"<Specific action>"},
+    {"rank":3,"title":"<Body/health/rest priority>","rationale":"<${tier==='oracle'?'3-4':'2'} sentences>","action":"<Specific action with time of day>"}
+  ],
+  "shadow_work": "<${tier==='oracle'?'3-4':'2'} sentences — the question ${firstName} most needs right now. Grounded in their context. Not abstract. The specific avoidance or unexamined assumption.>",
+  "focus_on": ["<specific named item>","<specific item>","<specific item>","<specific item>"],
+  "ease_off": ["<specific named item>","<specific item>","<specific item>","<specific item>"],
+  "time_windows": {
+    "morning": "<${tier==='oracle'?'3':'2'} sentences — specific cosmic quality and advice for ${firstName}'s morning>",
+    "afternoon": "<${tier==='oracle'?'3':'2'} sentences — how energy shifts and what becomes available>",
+    "evening": "<${tier==='oracle'?'3':'2'} sentences — how ${firstName} closes the day well>"
+  }
+}`;
+
+  const maxTok1 = {free:400, seeker:1800, initiate:2200, mystic:2800, oracle:3500}[tier] || 2000;
+  const raw1 = await callAPI('claude-sonnet-4-6', maxTok1, sys1, user1);
+
+  try {
+    const cleaned = raw1.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch(e) {
+    try {
+      return JSON.parse(repairJSON(raw1.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()));
+    } catch(e2) {
+      return { synthesis: raw1, raw: true };
+    }
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════
 // ROUTES
 // ══════════════════════════════════════════════════════════════════
@@ -643,38 +714,67 @@ setInterval(cleanOldJobs, 600000);
 
 // ── START BACKGROUND READING ──
 app.post('/api/reading/start', async (req, res) => {
-  const {date, profile, tier, user_id, recentHistory} = req.body;  // Beta 2: recentHistory added
+  const {date, profile, tier, user_id, recentHistory} = req.body;
   const ds = date || new Date().toISOString().slice(0, 10);
   const jobId = newJobId();
+  const activeTier = tier || 'oracle';
 
   jobs.set(jobId, {
     status: 'pending',
     startedAt: Date.now(),
     date: ds,
-    tier: tier || 'oracle',
+    tier: activeTier,
     user_id: user_id || null,
     result: null,
+    phase1: null,
     error: null
   });
 
   res.json({ jobId, status: 'pending' });
 
-  // Beta 2: pass recentHistory to generateReading
-  generateReading(ds, profile || {}, tier || 'oracle', recentHistory || [])
-    .then(r => {
+  // ── TWO-PHASE GENERATION ────────────────────────────────────────
+  // Phase 1: actionable core in ~25s (free tier skips to full)
+  // Phase 2: full depth analysis continues in background
+  (async () => {
+    try {
+      // Pre-calculate shared data once
+      const planets = buildPlanets(ds);
+      const moon = getMoon(ds);
+      const kin = getKin(ds);
+      const num = getNumerology(ds, profile?.birthDay, profile?.birthMonth, profile?.birthYear);
+      const aspects = getAspects(planets);
+
+      if (activeTier !== 'free') {
+        // Phase 1 — fast actionable core
+        const p1 = await generatePhase1(ds, profile || {}, activeTier, planets, moon, kin, num, aspects);
+        const job = jobs.get(jobId);
+        if (job) {
+          job.phase1 = p1;
+          job.status = 'phase1_complete';
+          console.log(`Job ${jobId} Phase 1 complete (${((Date.now() - job.startedAt)/1000).toFixed(1)}s)`);
+        }
+      }
+
+      // Phase 2 — full depth (runs immediately after phase 1 or alone for free)
+      const r = await generateReading(ds, profile || {}, activeTier, recentHistory || [], planets, moon, kin, num, aspects);
       const job = jobs.get(jobId);
       if (job) {
+        // Merge phase1 into full reading (phase1 had fresher/shorter prompts — keep phase2 for depth)
+        if (job.phase1 && r.reading) {
+          // Phase 2 takes precedence for content depth, but phase1 fills gaps if phase2 truncated
+          r.reading._phase1 = job.phase1;
+        }
         job.status = 'complete';
         job.result = r;
         job.completedAt = Date.now();
       }
       console.log(`Job ${jobId} complete (${((Date.now() - job?.startedAt)/1000).toFixed(1)}s)`);
-    })
-    .catch(e => {
+    } catch(e) {
       const job = jobs.get(jobId);
       if (job) { job.status = 'error'; job.error = e.message; }
       console.error(`Job ${jobId} failed:`, e.message);
-    });
+    }
+  })();
 });
 
 // ── POLL JOB STATUS ──
@@ -687,6 +787,11 @@ app.get('/api/reading/status/:jobId', (req, res) => {
   }
   if (job.status === 'error') {
     return res.json({ status: 'error', error: job.error });
+  }
+  // Phase 1 complete — return actionable core while phase 2 continues
+  if (job.status === 'phase1_complete' && job.phase1) {
+    const elapsed = Math.round((Date.now() - job.startedAt) / 1000);
+    return res.json({ status: 'phase1_complete', phase1: job.phase1, elapsed, tier: job.tier });
   }
   const elapsed = Math.round((Date.now() - job.startedAt) / 1000);
   res.json({ status: 'pending', elapsed, tier: job.tier });

@@ -2900,6 +2900,7 @@ async function loadReading(dateStr, tier) {
 
     // ── IMMEDIATE RENDER: show all computed data right now ────────────
     clearInterval(stageTimer);
+    window._phase1Rendered = false;
     renderSkeletonReading(dateStr, activeTier);
 
     const startedAt = Date.now();
@@ -2938,17 +2939,33 @@ async function loadReading(dateStr, tier) {
         if (elText) elText.textContent = timeStr + ' — still composing…';
         if (elBar)  elBar.style.width = pct + '%';
 
+        // ── PHASE 1 ARRIVED: render actionable core immediately ──────
+        if (poll.status === 'phase1_complete' && poll.phase1 && !window._phase1Rendered) {
+          window._phase1Rendered = true;
+          console.log('Phase 1 received — rendering actionable core');
+          const p1 = poll.phase1;
+          // Update stage display to show phase 2 starting
+          const sd = document.getElementById('stageDisplay');
+          if (sd) { sd.style.opacity='0'; setTimeout(()=>{ if(sd){sd.textContent='Deep analysis and cross-referencing in progress…'; sd.style.opacity='1';} },400); }
+          // Update status bar
+          const skTxt = document.getElementById('skStatusText');
+          if (skTxt) skTxt.textContent = 'Priorities ready — deep analysis composing…';
+          // Fill in phase 1 sections with fade
+          fillPhase1Sections(p1);
+        }
+
         if (poll.status === 'complete') {
           clearInterval(pollingTimer); pollingTimer = null;
           clearInterval(stageTimer);
           sessionStorage.removeItem('cdp_active_job');
+          window._phase1Rendered = false;
           currentReading = poll.result;
           saveToHistory(dateStr, poll.result);
           const _sb = document.getElementById('skeletonStatusBar');
           if (_sb) { _sb.style.transition='opacity .4s'; _sb.style.opacity='0'; setTimeout(()=>_sb.remove(),400); }
           fillAISections(poll.result, dateStr);
           if (document.hidden) {
-            document.title = '✦ Your Oracle Reading is Ready';
+            document.title = '✶ Your Oracle Reading is Ready';
             setTimeout(() => { document.title = 'Cosmic Daily Planner'; }, 5000);
           }
         } else if (poll.status === 'error') {
@@ -2960,7 +2977,7 @@ async function loadReading(dateStr, tier) {
       } catch(pollErr) {
         console.warn('Poll error (will retry):', pollErr.message);
       }
-    }, 3000);
+    }, 2000);
 
   } catch(e) {
     clearInterval(stageTimer);
@@ -3863,6 +3880,90 @@ function renderSkeletonReading(dateStr, tier) {
       }
     }
   }, 1000);
+}
+
+// ── Fill Phase 1 sections (actionable core, ~25s) ─────────────────
+function fillPhase1Sections(p1) {
+  function fadeIn(el, html) {
+    if (!el) return;
+    el.classList.remove('sk-section');
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .6s';
+    el.innerHTML = html;
+    requestAnimationFrame(() => requestAnimationFrame(() => { el.style.opacity = '1'; }));
+  }
+
+  // Synthesis — phase 1 version (shorter, will be replaced by phase 2)
+  if (p1.synthesis) {
+    const synthEl = document.getElementById('ai-synthesis');
+    if (synthEl) {
+      const synthText = String(p1.synthesis).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'$1').trim();
+      // Show phase 1 synthesis in the stage display area  
+      const sd = document.getElementById('stageDisplay');
+      if (sd) {
+        sd.style.opacity = '0';
+        setTimeout(() => {
+          if (sd) {
+            sd.style.fontStyle = 'italic';
+            sd.style.fontSize = 'clamp(15px,2vw,18px)';
+            sd.style.lineHeight = '1.8';
+            sd.style.padding = '0 8px';
+            sd.innerHTML = synthText;
+            sd.style.opacity = '1';
+          }
+        }, 500);
+      }
+    }
+  }
+
+  // Priorities — show immediately
+  if (p1.priorities?.length) {
+    const priEl = document.getElementById('ai-priorities');
+    if (priEl) {
+      let ph = '<div class="r-section"><div class="sec-label">Today\'s Priorities <span style="font-size:11px;color:var(--teal);letter-spacing:.1em">· Deep analysis composing…</span></div>';
+      p1.priorities.forEach((pri, i) => {
+        const st = (pri.title||'').replace(/'/g,"\'").slice(0,80);
+        const sr = (pri.rationale||'').replace(/'/g,"\'").slice(0,150);
+        const sa = (pri.action||'').replace(/'/g,"\'").slice(0,100);
+        ph += `<div class="priority-item tappable" onclick="tapPriority('${st}','${sr}','${sa}')">
+          <div class="pri-num">${i+1}</div>
+          <div style="flex:1">
+            <div class="pri-title">${pri.title||''} <span style="font-size:12px;color:var(--gold3)">↗</span></div>
+            <div class="pri-body">${pri.rationale||''}</div>
+            ${pri.action?`<div class="pri-action">→ ${pri.action}</div>`:''}
+          </div>
+        </div>`;
+      });
+      ph += '</div>';
+      fadeIn(priEl, ph);
+    }
+  }
+
+  // Shadow work
+  if (p1.shadow_work) {
+    const swEl = document.getElementById('ai-shadow');
+    if (swEl) {
+      const sw = p1.shadow_work;
+      fadeIn(swEl, `<div class="shadow-box tappable" onclick="tapShadow('${sw.replace(/'/g,"\'").slice(0,200)}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+          <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55)">Shadow Work</div>
+          <div style="font-size:12px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:500">↗ Work with this</div>
+        </div>
+        <div class="shadow-text">${sw}</div>
+      </div>`);
+    }
+  }
+
+  // Focus / Ease
+  if (p1.focus_on?.length || p1.ease_off?.length) {
+    const focEl = document.getElementById('ai-focus');
+    if (focEl) {
+      fadeIn(focEl, `<div class="two-col">
+        <div class="col-card"><div class="col-head">Focus On</div>${(p1.focus_on||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}</div>
+        <div class="col-card"><div class="col-head">Ease Off</div>${(p1.ease_off||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}</div>
+      </div>`);
+    }
+  }
 }
 
 // ── Fill in AI sections when the Oracle completes ──────────────────
