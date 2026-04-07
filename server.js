@@ -238,9 +238,6 @@ function getAspects(planets){
 
 // ══════════════════════════════════════════════════════════════════
 // THE FIX: STREAMING API CALL
-// Uses Anthropic's SSE streaming so Railway never sees an idle
-// connection — data flows token-by-token, killing the timeout problem
-// entirely. Full 4096-token output restored. Quality benchmark met.
 // ══════════════════════════════════════════════════════════════════
 function callAPI(model, maxTok, sys, user) {
   return new Promise((resolve, reject) => {
@@ -271,7 +268,7 @@ function callAPI(model, maxTok, sys, user) {
       res.on('data', chunk => {
         buffer += chunk.toString();
         const lines = buffer.split('\n');
-        buffer = lines.pop(); // hold incomplete line
+        buffer = lines.pop();
 
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
@@ -300,7 +297,6 @@ function callAPI(model, maxTok, sys, user) {
     });
 
     req.on('error', err => reject(err));
-    // 120s socket timeout — 8192 token responses take time to stream
     req.setTimeout(120000, () => {
       req.destroy(new Error('Socket timeout after 120s'));
     });
@@ -310,10 +306,117 @@ function callAPI(model, maxTok, sys, user) {
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ORACLE READING — FULL SCHEMA, FULL QUALITY, BENCHMARK STANDARD
-// Matches and extends the March 31 2026 reading
+// BETA 2 — PROFILE CONTEXT BUILDER
+// Converts user profile + reading history into a rich Oracle brief.
+// Called by generateReading() — replaces the old ad-hoc profileBlock.
 // ══════════════════════════════════════════════════════════════════
-async function generateReading(dateStr, profile, tier) {
+function buildProfileContext(p, recentHistory = []) {
+  if (!p || Object.keys(p).length === 0) return 'No personal profile provided — give a universal reading grounded in the cosmic data.';
+
+  const lines = [];
+
+  // Name
+  const userName = p.name || p.nickname || 'the reader';
+  const firstName = p.nickname || (p.name ? p.name.split(' ')[0] : 'you');
+  lines.push(`Name: ${userName}`);
+
+  // Location
+  if (p.location) lines.push(`Current Location: ${p.location}`);
+
+  // Birth
+  if (p.birthDay && p.birthMonth && p.birthYear) {
+    lines.push(`Date of Birth: ${p.birthDay}/${p.birthMonth}/${p.birthYear}${p.birthTime ? ' at ' + p.birthTime : ''}${p.birthLocation ? ', born in ' + p.birthLocation : ''}`);
+  }
+  if (p.birthLocation) lines.push(`Place of Birth: ${p.birthLocation}`);
+
+  // ── BETA 2: ENRICHED LIFE CONTEXT ──
+  // Professional roles
+  const roles = p.roles || [];
+  if (roles.length > 0) {
+    const rolesStr = Array.isArray(roles) ? roles.join(', ') : roles;
+    lines.push(`Current roles: ${rolesStr}`);
+  }
+
+  // Key relationships
+  const rels = p.relationships || {};
+  if (typeof rels === 'object' && Object.keys(rels).length > 0) {
+    const relStr = Object.entries(rels)
+      .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+      .join('; ');
+    lines.push(`Key relationships: ${relStr}`);
+  } else if (typeof rels === 'string' && rels.trim()) {
+    lines.push(`Key relationships: ${rels}`);
+  }
+
+  // Active threads
+  const threads = p.active_threads || p.activeThreads || [];
+  if (threads.length > 0) {
+    const threadStr = Array.isArray(threads) ? threads.join(', ') : threads;
+    lines.push(`Active chapters / projects: ${threadStr}`);
+  }
+
+  // Intentions
+  const intentions = p.intentions || [];
+  if (intentions.length > 0) {
+    const intentStr = Array.isArray(intentions) ? intentions.join(', ') : intentions;
+    lines.push(`Current intentions: ${intentStr}`);
+  }
+
+  // Free-form context (existing field — preserved)
+  if (p.context) lines.push(`Personal context: ${p.context}`);
+
+  // Today's intention
+  if (p.intention) lines.push(`Today's intention: ${p.intention} — weave this into the synthesis, priorities, and shadow work.`);
+
+  // Hormonal phase (client-computed, privacy-safe — no raw dates sent, just phase name and Oracle guidance)
+  if (p.cycleContext) {
+    lines.push('');
+    lines.push('HORMONAL PHASE (today): ' + p.cycleContext);
+    lines.push('Integrate this meaningfully — hormonal phases are a legitimate biological rhythm that shapes energy, decision-making capacity, emotional sensitivity, and relational needs today. Reference it specifically in time windows, priorities, and shadow work.');
+  }
+
+  // Biorhythm today (if birth date available, calculate server-side)
+  if (p.birthDay && p.birthMonth && p.birthYear) {
+    const bDate = p.birthYear + '-' + String(p.birthMonth).padStart(2,'0') + '-' + String(p.birthDay).padStart(2,'0');
+    const today = new Date().toISOString().slice(0,10);
+    try {
+      const bio = getBiorhythms(bDate, today);
+      const bioLine = 'BIORHYTHMS TODAY: Physical ' + (bio.physical.pct > 0 ? '+' : '') + bio.physical.pct + '% (' + bio.physical.phase + ')'
+        + ', Emotional ' + (bio.emotional.pct > 0 ? '+' : '') + bio.emotional.pct + '% (' + bio.emotional.phase + ')'
+        + ', Intellectual ' + (bio.intellectual.pct > 0 ? '+' : '') + bio.intellectual.pct + '% (' + bio.intellectual.phase + ')'
+        + ', Composite: ' + (bio.composite > 0 ? '+' : '') + bio.composite + '%.'
+        + (bio.physical.isCritical ? ' Physical critical day.' : '')
+        + (bio.emotional.isCritical ? ' Emotional critical day.' : '')
+        + (bio.intellectual.isCritical ? ' Intellectual critical day.' : '');
+      lines.push('');
+      lines.push(bioLine);
+      lines.push('Reference biorhythm state in time windows and energy guidance. Critical days (zero crossings) are transition points requiring particular care.');
+    } catch(e) { /* biorhythm calculation failed — skip */ }
+  }
+
+  // ── BETA 2: READING HISTORY CONTINUITY ──
+  // Inject last 3 reading summaries for genuine cross-session continuity
+  if (recentHistory && recentHistory.length > 0) {
+    lines.push('');
+    lines.push('RECENT SESSIONS — use for continuity and pattern recognition:');
+    recentHistory.slice(0, 3).forEach((h, i) => {
+      const label = i === 0 ? 'Most recent reading' : `${i + 1} sessions ago`;
+      const date = h.reading_date || h.date || '';
+      const summary = h.summary || h.synthesis || '';
+      if (summary) lines.push(`${label}${date ? ' (' + date + ')' : ''}: ${summary.slice(0, 400)}`);
+      if (h.shadow_work) lines.push(`  Shadow question that session: ${h.shadow_work.slice(0, 200)}`);
+      if (h.priority_1) lines.push(`  Primary focus: ${h.priority_1}`);
+    });
+    lines.push('');
+  }
+
+  return lines.filter(Boolean).join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ORACLE READING — FULL SCHEMA, FULL QUALITY, BENCHMARK STANDARD
+// ══════════════════════════════════════════════════════════════════
+async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHistory = []) {
   const planets = buildPlanets(dateStr);
   const moon = getMoon(dateStr);
   const kin = getKin(dateStr);
@@ -322,30 +425,12 @@ async function generateReading(dateStr, profile, tier) {
   const aspects = getAspects(planets);
   const weekAhead = getWeekAhead(dateStr);
 
-  // ── DYNAMIC PROFILE — fully from user input, no hardcoded fallbacks ──
-  const userName = p.name || p.nickname || 'the reader';
+  // ── DYNAMIC PROFILE — Beta 2: uses buildProfileContext ──
   const firstName = p.nickname || (p.name ? p.name.split(' ')[0] : 'you');
-  const userLocation = p.location || 'their location';
-  const userContext = p.context || '';
-  const userIntention = p.intention || '';
-  const userBirth = (p.birthDay && p.birthMonth && p.birthYear)
-    ? `${p.birthDay}/${p.birthMonth}/${p.birthYear}${p.birthTime ? ' at ' + p.birthTime : ''}${p.birthLocation ? ', born in ' + p.birthLocation : ''}`
-    : 'not provided';
-  const userBirthLocation = p.birthLocation || 'not provided';
+  const profileBlock = buildProfileContext(p, recentHistory);
 
   // Build birth kin string from calculated num
   const birthKinStr = num.birthKin ? `Kin ${num.birthKin.kin} — ${num.birthKin.full}` : 'not calculated';
-
-  // Profile context for the Oracle — ONLY from user input
-  const profileBlock = `Name: ${userName}
-Current Location: ${userLocation}
-Place of Birth: ${p.birthLocation || 'not provided'}
-Date of Birth: ${userBirth}
-Birth Kin (Dreamspell): ${birthKinStr}
-Life Path: ${num.lp || 'not calculated'} (${num.lpM?.n || ''})
-Personal Year: ${num.py || 'not calculated'} (${num.pyM?.n || ''})
-Personal Context: ${userContext || 'None provided — give a universal reading grounded in the cosmic data.'}
-Today's Intention: ${userIntention || 'Not specified'}${userIntention ? ' — weave this into the synthesis, priorities, and shadow work.' : '.'}`;
 
   const pTable = planets.map(pl => `${pl.name}: ${pl.degStr}`).join('\n');
   const aList = aspects.slice(0,6).map(a => `${'●'.repeat(a.str)}${'○'.repeat(5-a.str)} ${a.desc}`).join('\n');
@@ -388,16 +473,24 @@ ${scope}
 CRITICAL RULES:
 — Use ONLY the Swiss Ephemeris positions provided. Never invent planetary data.
 — Address the reader by their first name (${firstName}) throughout. Use ONLY the personal context they have provided — do not invent details about their life.
-— If personal context is provided (companies, family, projects, relationships), reference it specifically. If not provided, speak universally but still specifically to the cosmic weather.
+— If personal context is provided (companies, family, projects, relationships, roles, active threads), reference it specifically and by name. If not provided, speak universally but still specifically to the cosmic weather.
+— If RECENT SESSIONS are provided in the profile, use them for genuine continuity: reference what was present before, notice patterns, acknowledge what has shifted. The Oracle has memory.
 — Dreamspell is ALWAYS labelled: Argüelles (1987) The Mayan Factor — modern 20th-century system, distinct from ancient K'iche' Maya tradition maintained by Guatemalan daykeepers.
 — No deterministic predictions. Speak in possibilities and tendencies.
 — Every section must be grounded in the actual planetary data and personal context provided.
+— BIORHYTHMS: If BIORHYTHMS TODAY is present in the profile, integrate it meaningfully. A physical score below -60% means depleted vitality — flag it in time windows and priorities. A critical day (zero crossing) is a transition requiring care. Do not merely mention it — let it shape the energy guidance concretely.
+— HORMONAL PHASE: If HORMONAL PHASE is present, treat it as a legitimate biological rhythm equal in weight to moon phase. Reference it in time windows, priorities, and shadow work — speak to how this phase shapes energy, decision-making, and relational sensitivity today.
+— NATAL vs TRANSIT: Always distinguish clearly. Say "today's Moon is in X" or "the Moon transits X today" for current sky positions. Say "your natal Moon in X" for birth chart placements. Never conflate the two — this confusion destroys credibility with experienced users.
 — RESPOND ONLY WITH VALID JSON. No markdown fences. No preamble. No text outside the JSON object.
 — CRITICAL: The JSON MUST be syntactically complete and valid. Every opened brace and bracket must be closed. If approaching length limit, shorten EARLIER sections first — but always close the JSON properly.
 — SCHOLARLY SOURCES: Šprajc et al. 2023 (Science Advances); Aldana 2022; Tarnas 2006 Cosmos & Psyche; Greene 1976 Saturn; Hand 2002 Planets in Transit; Brady 1999; Brennan 2017; Drayer 2002 Numerology; Kahn 2001 Pythagoras.`;
 
   const user = `PROFILE:
 ${profileBlock}
+
+Life Path: ${num.lp || 'not calculated'} (${num.lpM?.n || ''})
+Personal Year: ${num.py || 'not calculated'} (${num.pyM?.n || ''})
+Birth Kin (Dreamspell): ${birthKinStr}
 
 DATE: ${dateStr} (${new Date(dateStr + 'T12:00:00Z').toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', year:'numeric'})})
 
@@ -489,7 +582,6 @@ Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no pream
   "sources": "Astronomy: Swiss Ephemeris (Koch & Treindl, Astrodienst AG, ae_2026.pdf); USNO Moon Phases. Maya calendrics: Šprajc et al. (2023) Science Advances doi:10.1126/sciadv.abq7675; Aldana (2022) doi:10.34758/qyyd-vx23. Dreamspell: Argüelles (1987) The Mayan Factor. Astrology: Greene (1976) Saturn; Tarnas (2006) Cosmos & Psyche; Hand (2002) Planets in Transit; Brady (1999) Predictive Astrology; Brennan (2017) Hellenistic Astrology. Numerology: Drayer (2002); Kahn (2001) Pythagoras."
 }`;
 
-  // Token budget by tier — smaller tiers complete faster
   const maxTok = {free:800, seeker:3000, initiate:5000, mystic:8000, oracle:16000}[tier] || 8192;
   const raw = await callAPI('claude-sonnet-4-6', maxTok, sys, user);
 
@@ -498,7 +590,6 @@ Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no pream
     const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     reading = JSON.parse(cleaned);
   } catch(e) {
-    // JSON repair: try to salvage truncated JSON by closing open structures
     try {
       const repaired = repairJSON(raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim());
       reading = JSON.parse(repaired);
@@ -511,14 +602,11 @@ Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no pream
 }
 
 // ══════════════════════════════════════════════════════════════════
-// JSON REPAIR — closes truncated JSON objects/arrays/strings
+// JSON REPAIR
 // ══════════════════════════════════════════════════════════════════
 function repairJSON(str) {
-  // Remove trailing incomplete key-value pair
   let s = str.trim();
-  // Remove trailing comma before attempted close
   s = s.replace(/,\s*$/, '');
-  // Count open braces and brackets
   let openBraces = 0, openBrackets = 0, inString = false, escape = false;
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
@@ -531,9 +619,7 @@ function repairJSON(str) {
     else if (c === '[') openBrackets++;
     else if (c === ']') openBrackets--;
   }
-  // If we're mid-string, close it
   if (inString) s += '"';
-  // Close any open arrays/objects
   while (openBrackets > 0) { s += ']'; openBrackets--; }
   while (openBraces > 0) { s += '}'; openBraces--; }
   return s;
@@ -543,24 +629,21 @@ function repairJSON(str) {
 // ROUTES
 // ══════════════════════════════════════════════════════════════════
 
-// ── IN-MEMORY JOB STORE ──
-// Holds jobs for up to 2 hours, then auto-cleans
 const jobs = new Map();
 function newJobId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 function cleanOldJobs() {
-  const cutoff = Date.now() - 7200000; // 2 hours
+  const cutoff = Date.now() - 7200000;
   for (const [id, job] of jobs) {
     if (job.startedAt < cutoff) jobs.delete(id);
   }
 }
-setInterval(cleanOldJobs, 600000); // clean every 10 min
+setInterval(cleanOldJobs, 600000);
 
 // ── START BACKGROUND READING ──
-// Returns jobId immediately — reading generates in background
 app.post('/api/reading/start', async (req, res) => {
-  const {date, profile, tier, user_id} = req.body;
+  const {date, profile, tier, user_id, recentHistory} = req.body;  // Beta 2: recentHistory added
   const ds = date || new Date().toISOString().slice(0, 10);
   const jobId = newJobId();
 
@@ -574,11 +657,10 @@ app.post('/api/reading/start', async (req, res) => {
     error: null
   });
 
-  // Return jobId immediately — don't await
   res.json({ jobId, status: 'pending' });
 
-  // Generate reading in background
-  generateReading(ds, profile || {}, tier || 'oracle')
+  // Beta 2: pass recentHistory to generateReading
+  generateReading(ds, profile || {}, tier || 'oracle', recentHistory || [])
     .then(r => {
       const job = jobs.get(jobId);
       if (job) {
@@ -610,12 +692,12 @@ app.get('/api/reading/status/:jobId', (req, res) => {
   res.json({ status: 'pending', elapsed, tier: job.tier });
 });
 
-// ── LEGACY SYNC READING (kept for compatibility) ──
+// ── LEGACY SYNC READING ──
 app.post('/api/reading', async (req, res) => {
-  const {date, profile, tier} = req.body;
+  const {date, profile, tier, recentHistory} = req.body;
   const ds = date || new Date().toISOString().slice(0, 10);
   try {
-    const r = await generateReading(ds, profile || {}, tier || 'oracle');
+    const r = await generateReading(ds, profile || {}, tier || 'oracle', recentHistory || []);
     res.json(r);
   } catch(e) {
     console.error('Reading error:', e.message);
@@ -642,6 +724,15 @@ app.post('/api/ask', async (req, res) => {
   try {
     const p = profile || {};
     const firstName = p.nickname || (p.name ? p.name.split(' ')[0] : 'the reader');
+
+    // Beta 2: enriched profile context for ask endpoint
+    const rolesCtx = (p.roles && p.roles.length)
+      ? `Roles: ${Array.isArray(p.roles) ? p.roles.join(', ') : p.roles}.` : '';
+    const threadsCtx = (p.active_threads && p.active_threads.length)
+      ? `Active projects: ${Array.isArray(p.active_threads) ? p.active_threads.join(', ') : p.active_threads}.` : '';
+    const intentionsCtx = (p.intentions && p.intentions.length)
+      ? `Intentions: ${Array.isArray(p.intentions) ? p.intentions.join(', ') : p.intentions}.` : '';
+
     const sys = `You are the Oracle at Cosmic Daily Planner — the same voice that wrote today's full reading. A reader is asking a follow-up or deeper question.
 
 YOUR VOICE: The best Jungian analyst meets the Swiss Ephemeris. Precise. Personal. Grounded. Emotionally intelligent.
@@ -662,6 +753,9 @@ RULES:
       readingData?.astrology?.main_transit_headline ? `Main transit: ${readingData.astrology.main_transit_headline}` : '',
       readingData?.numerology?.headline ? `Numerology: ${readingData.numerology.headline}` : '',
       p.context ? `Personal context: ${p.context}` : '',
+      rolesCtx,          // Beta 2
+      threadsCtx,        // Beta 2
+      intentionsCtx,     // Beta 2
       p.birthDay ? `Born: ${p.birthDay}/${p.birthMonth}/${p.birthYear}${p.birthTime ? ' at ' + p.birthTime : ''}${p.birthLocation ? ' in ' + p.birthLocation : ''}` : '',
     ].filter(Boolean).join('\n');
 
@@ -694,5 +788,569 @@ app.post('/api/calendar', (req, res) => {
   res.json(result);
 });
 
+// ══════════════════════════════════════════════════════════════════
+// BIORHYTHM CALCULATOR
+// Classical three-cycle theory: physical 23d, emotional 28d, intellectual 33d
+// All sine waves from birth date (Teltscher, Fliess, Swoboda — early 20thC)
+// Critical days = zero crossings (most significant days)
+// ══════════════════════════════════════════════════════════════════
+function getBiorhythms(birthDateStr, targetDateStr) {
+  const birth = new Date(birthDateStr + 'T12:00:00Z');
+  const target = new Date(targetDateStr + 'T12:00:00Z');
+  const days = Math.round((target - birth) / 86400000);
+
+  const cycles = {
+    physical:     { period: 23,  label: 'Physical',     desc: 'vitality, strength, coordination, stamina' },
+    emotional:    { period: 28,  label: 'Emotional',    desc: 'mood, sensitivity, creativity, intuition' },
+    intellectual: { period: 33,  label: 'Intellectual', desc: 'reasoning, memory, decision-making, alertness' },
+  };
+
+  const result = {};
+  for (const [key, c] of Object.entries(cycles)) {
+    const value = Math.sin((2 * Math.PI * days) / c.period);
+    const pct   = Math.round(value * 100);
+    // Critical day = within 1 day of zero crossing
+    const nextDay = Math.sin((2 * Math.PI * (days + 1)) / c.period);
+    const isCritical = (value >= 0 && nextDay < 0) || (value < 0 && nextDay >= 0)
+      || Math.abs(value) < 0.13;
+    const phase = isCritical ? 'critical'
+      : value > 0.6  ? 'high'
+      : value > 0.1  ? 'rising'
+      : value > -0.1 ? 'transition'
+      : value > -0.6 ? 'falling'
+      : 'low';
+    result[key] = { value: parseFloat(value.toFixed(3)), pct, phase, isCritical,
+      period: c.period, label: c.label, desc: c.desc, dayOfCycle: days % c.period };
+  }
+
+  // Composite score: weighted average
+  const composite = Math.round((result.physical.pct * 0.4) +
+    (result.emotional.pct * 0.35) + (result.intellectual.pct * 0.25));
+
+  return { ...result, composite, daysAlive: days };
+}
+
+function getBiorhythmSynastry(bioA, bioB) {
+  // Compare where both people sit on their cycles today
+  const out = [];
+  for (const key of ['physical', 'emotional', 'intellectual']) {
+    const a = bioA[key];
+    const b = bioB[key];
+    const diff = Math.abs(a.pct - b.pct);
+    const bothCritical = a.isCritical && b.isCritical;
+    const aligned = diff < 20; // within 20% of each other
+    const opposed = diff > 70 && ((a.pct > 0 && b.pct < 0) || (a.pct < 0 && b.pct > 0));
+
+    out.push({
+      cycle: a.label,
+      aPhase: a.phase, aPct: a.pct,
+      bPhase: b.phase, bPct: b.pct,
+      diff, aligned, opposed, bothCritical,
+      dynamic: bothCritical ? 'Both in critical transition — take care'
+        : aligned && a.pct > 30 ? 'Both running high — strong shared energy'
+        : aligned && a.pct < -30 ? 'Both low — a good time to rest together, not push'
+        : opposed ? 'Out of phase — one high, one low. Patience and adaptation needed'
+        : 'Mixed — complement each other\'s energy today'
+    });
+  }
+  return out;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// NUMEROLOGY CROSS-ANALYSIS
+// LP compatibility (Drayer 2002, Millman 1993 Life You Were Born to Live)
+// ══════════════════════════════════════════════════════════════════
+const LP_COMPAT = {
+  '1-1': { quality: 'Resonant independence', dynamic: 'Two strong wills — inspiring when aligned, competitive when not. Leadership must be shared consciously.' },
+  '1-2': { quality: 'Complementary polarity', dynamic: 'The initiator and the nurturer. Natural fit when both roles are honoured. 2 softens 1\'s edges; 1 gives 2 direction.' },
+  '1-3': { quality: 'Creative momentum', dynamic: 'High-energy, expressive pairing. 1 leads, 3 brings joy and communication. Risk: both can be self-focused.' },
+  '1-4': { quality: 'Vision and structure', dynamic: '1 dreams, 4 builds. Powerful if the 4 doesn\'t stifle 1\'s initiative, and the 1 respects the 4\'s need for order.' },
+  '1-5': { quality: 'Freedom and fire', dynamic: 'Both love independence. Exciting but can be unstable — neither naturally prioritises the relationship.' },
+  '1-6': { quality: 'Leadership and care', dynamic: '1 leads outward, 6 holds the home. Strong if 6\'s nurturing isn\'t seen as control, and 1\'s independence isn\'t abandonment.' },
+  '1-7': { quality: 'Inner and outer mastery', dynamic: '1 acts, 7 reflects. They operate on different planes — potential for profound complementarity or mutual frustration.' },
+  '1-8': { quality: 'Power pairing', dynamic: 'Both driven. High potential for material success together. Risk: competition and control battles.' },
+  '1-9': { quality: 'The pioneer and the sage', dynamic: '1\'s new beginnings meet 9\'s wisdom and completion. 9 can guide 1; 1 can reignite 9\'s forward momentum.' },
+  '2-2': { quality: 'Deep emotional resonance', dynamic: 'Highly sensitive pairing. Beautiful emotional depth, but both may wait for the other to lead.' },
+  '2-3': { quality: 'Heart and voice', dynamic: '2\'s depth of feeling expressed through 3\'s communication. Warm and creative. Risk: 3 can seem superficial to 2.' },
+  '2-4': { quality: 'Stability and sensitivity', dynamic: 'Very compatible. 2 brings emotional depth, 4 brings security. Strong domestic foundation.' },
+  '2-5': { quality: 'The tension of need vs freedom', dynamic: '2 needs closeness; 5 needs space. This tension can be creative or exhausting depending on awareness.' },
+  '2-6': { quality: 'Devotion and harmony', dynamic: 'Naturally aligned. Both care deeply, both prioritise relationship. Risk: enmeshment or avoiding necessary conflict.' },
+  '2-7': { quality: 'The seen and the unseen', dynamic: '2 operates emotionally; 7 operates intellectually and spiritually. Deep potential if each accepts the other\'s mode.' },
+  '2-8': { quality: 'Sensitivity meets power', dynamic: '2 feels everything 8 projects. 8 must learn care; 2 must learn not to absorb 8\'s intensity as personal.' },
+  '2-9': { quality: 'Heart resonance', dynamic: 'Both compassionate, both giving. Deeply harmonious. Risk: both may sacrifice too much.' },
+  '3-3': { quality: 'Joyful creative chaos', dynamic: 'Brilliant fun, creative explosion. Risk: neither grounds the other, and both can be emotionally avoidant.' },
+  '3-4': { quality: 'Creativity meets structure', dynamic: '3 expands, 4 contains. Productive if 4 doesn\'t dampen 3\'s spark, and 3 respects 4\'s need for order.' },
+  '3-5': { quality: 'Expression and adventure', dynamic: 'High energy, sociable, fun. Both resist routine. May lack the depth to weather difficulty.' },
+  '3-6': { quality: 'Heart and hearth', dynamic: '3\'s lightness meets 6\'s warmth. Beautiful combination. 6\'s care grounds 3; 3\'s joy uplifts 6.' },
+  '3-7': { quality: 'Surface and depth', dynamic: '3 skims the surface delightfully; 7 dives deep. Can complement beautifully — or talk past each other entirely.' },
+  '3-8': { quality: 'Charm and authority', dynamic: '3 is social, 8 is powerful. 3 can open doors 8 cannot; 8 can provide the solidity 3 needs.' },
+  '3-9': { quality: 'Creative wisdom', dynamic: 'Both generous, both expressive. 9\'s wisdom tempers 3\'s restlessness. High creative and spiritual potential.' },
+  '4-4': { quality: 'The builders', dynamic: 'Stable, reliable, productive. May be too similar — can be rigid. Needs conscious injection of joy and spontaneity.' },
+  '4-5': { quality: 'Structure vs freedom', dynamic: 'Significant tension. 4 needs order; 5 fights it. Both must stretch well beyond their comfort zone.' },
+  '4-6': { quality: 'The foundation', dynamic: 'One of the most compatible pairings. Both responsible, both devoted. Risk: life becomes all duty and no play.' },
+  '4-7': { quality: 'Pragmatism and philosophy', dynamic: '4 builds in the world; 7 seeks inner truth. Can be deeply complementary — 7 gives meaning to 4\'s efforts.' },
+  '4-8': { quality: 'The power builders', dynamic: 'Both capable of great achievement together. 4 provides the plan, 8 provides the drive. Risk: all work, no intimacy.' },
+  '4-9': { quality: 'The long view', dynamic: '4\'s methodical nature meets 9\'s universal perspective. 9 can inspire 4 beyond the material; 4 can help 9 manifest.' },
+  '5-5': { quality: 'The free spirits', dynamic: 'Exhilarating and chaotic. Both need change. May have difficulty committing or creating lasting structure.' },
+  '5-6': { quality: 'Freedom and responsibility', dynamic: '5 wants to fly; 6 wants to nest. This tension is constant. Can work beautifully if each honours the other\'s need.' },
+  '5-7': { quality: 'The seekers', dynamic: 'Both restless in their different ways. 5 seeks experience; 7 seeks understanding. Interesting intellectual companionship.' },
+  '5-8': { quality: 'Energy and ambition', dynamic: 'High-voltage pairing. Both driven, both capable. 5\'s versatility and 8\'s focus can be powerful together.' },
+  '5-9': { quality: 'The adventurers', dynamic: 'Both expansive, both drawn to the wider world. 9\'s wisdom can give 5\'s adventures direction and meaning.' },
+  '6-6': { quality: 'The devoted', dynamic: 'Deep caring and mutual commitment. Risk: over-responsibility for each other, difficulty receiving as well as giving.' },
+  '6-7': { quality: 'Warmth and wisdom', dynamic: '6\'s heart and 7\'s mind. Beautiful if each accepts the other\'s mode of relating. 7 may seem cold to 6; 6 may seem needy to 7.' },
+  '6-8': { quality: 'Care and command', dynamic: '6 serves, 8 leads. Works if 8 reciprocates care; risks imbalance if 6 gives and 8 takes.' },
+  '6-9': { quality: 'The humanitarians', dynamic: 'Both give themselves to others. Deeply aligned in values. Risk: neither focuses enough on their own relationship.' },
+  '7-7': { quality: 'The philosophers', dynamic: 'Rare depth of intellectual and spiritual understanding. Risk: both retreat inward and the relationship starves of warmth.' },
+  '7-8': { quality: 'The thinker and the achiever', dynamic: '7\'s insight informs 8\'s action. Powerful if each respects the other\'s domain.' },
+  '7-9': { quality: 'Depth upon depth', dynamic: 'Both oriented toward meaning and truth. Profound potential for spiritual and intellectual growth together.' },
+  '8-8': { quality: 'The magnates', dynamic: 'Extraordinary potential — and extraordinary risk. Power dynamics must be managed consciously or this becomes a battle.' },
+  '8-9': { quality: 'Material and spiritual', dynamic: '8 builds in the world; 9 transcends it. 9 can soften 8\'s drive; 8 can help 9 manifest their vision.' },
+  '9-9': { quality: 'Universal love', dynamic: 'Deeply aligned in compassion and wisdom. Risk: both may be so oriented toward others that the relationship itself is neglected.' },
+};
+
+function getNumerologyCrossAnalysis(numA, numB, nameA, nameB) {
+  if (!numA || !numB) return null;
+  const lpA = numA.lp;
+  const lpB = numB.lp;
+  if (!lpA || !lpB) return null;
+
+  // Normalize LP pair for lookup (always lower first)
+  const key = lpA <= lpB ? (lpA + '-' + lpB) : (lpB + '-' + lpA);
+  const compat = LP_COMPAT[key] || { quality: 'Unique pairing', dynamic: 'A less common Life Path combination with its own unrepeated qualities.' };
+
+  // Personal Year interaction
+  const pyA = numA.py;
+  const pyB = numB.py;
+  let pyDynamic = '';
+  if (pyA && pyB) {
+    const pySum = reduce(pyA + pyB);
+    if (pyA === pyB) pyDynamic = 'Both in Personal Year ' + pyA + ' simultaneously — a year of shared themes and mirrored lessons.';
+    else if (Math.abs(pyA - pyB) === 1 || Math.abs(pyA - pyB) === 8) pyDynamic = 'Personal Years ' + pyA + ' and ' + pyB + ' are adjacent phases — one slightly ahead of the other in the nine-year cycle. This creates a natural mentoring dynamic this year.';
+    else if (pyA + pyB === 10 || pyA + pyB === 19) pyDynamic = 'Personal Years ' + pyA + ' and ' + pyB + ' are complementary within the cycle — what one is releasing, the other is beginning.';
+    else pyDynamic = 'Personal Year ' + pyA + ' (' + nameA + ') and Personal Year ' + pyB + ' (' + nameB + ') — different life themes active this year. Understanding each other\'s current chapter is essential.';
+  }
+
+  // Combined Life Path
+  const combined = reduce(lpA + lpB);
+  const combinedData = NUM[combined] || {};
+
+  return {
+    lpA, lpB,
+    quality: compat.quality,
+    dynamic: compat.dynamic,
+    pyDynamic,
+    combined, combinedName: combinedData.n || '',
+    combinedMeaning: 'The combined energy of this relationship carries the frequency of ' + combined + ' (' + (combinedData.n || '') + ') — the numerological signature of what this partnership is here to create or learn.'
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// DREAMSPELL SYNASTRY — The Five Oracle Relationships
+// Arguelles (1987) The Mayan Factor
+// Each Kin has four oracle relationships derived from it:
+// Analog, Antipode, Occult, Guide
+// ══════════════════════════════════════════════════════════════════
+function getDreamspellSynastry(kinA, kinB) {
+  if (!kinA || !kinB) return null;
+
+  const kinNumA = kinA.kin;
+  const kinNumB = kinB.kin;
+
+  // Color chromatic family relationship
+  const colorA = kinA.color; // Red, White, Blue, Yellow
+  const colorB = kinB.color;
+  const COLOR_PARTNERS = { Red: 'White', White: 'Red', Blue: 'Yellow', Yellow: 'Blue' };
+  const chromatic = colorA === colorB ? 'same-tribe'
+    : COLOR_PARTNERS[colorA] === colorB ? 'chromatic-partner'
+    : 'cross-family';
+
+  const chromaticDesc = {
+    'same-tribe': colorA + ' tribe — you share the same chromatic family. Natural resonance in how you process and express energy. You understand each other\'s fundamental mode without explanation.',
+    'chromatic-partner': colorA + ' and ' + colorB + ' — complementary partner colours. This is one of the most harmonious pairings in Dreamspell. Your energies naturally complete each other.',
+    'cross-family': colorA + ' and ' + colorB + ' — different colour families. Your modes of engaging with reality are genuinely different, which creates richness and the need for translation.',
+  }[chromatic];
+
+  // Tonal relationship
+  const toneA = kinA.toneNum;
+  const toneB = kinB.toneNum;
+  const toneSum = ((toneA + toneB - 1) % 13) + 1;
+  const toneRelation = toneA === toneB ? 'resonant tones — you pulse at the same frequency'
+    : toneSum === 14 ? 'complementary tones (sum to 14) — you complete each other\'s vibrational arc'
+    : 'distinct tones — each brings a different quality of intention and power';
+
+  // Kin difference relationship
+  const kinDiff = Math.abs(kinNumA - kinNumB);
+  const kinSum = ((kinNumA + kinNumB - 1) % 260) + 1;
+
+  // Are they in the same wavespell (13-day arc)?
+  const wavespellA = Math.floor((kinNumA - 1) / 13);
+  const wavespellB = Math.floor((kinNumB - 1) / 13);
+  const sameWavespell = wavespellA === wavespellB;
+
+  // GAP relationship
+  const bothGAP = kinA.isGAP && kinB.isGAP;
+  const oneGAP = (kinA.isGAP || kinB.isGAP) && !bothGAP;
+
+  // Combined Kin
+  const combinedKin = kinSum;
+  const combinedSeal = SEALS[(combinedKin - 1) % 20];
+  const combinedTone = TONES[(combinedKin - 1) % 13];
+  const combinedColor = ['Red','White','Blue','Yellow'][(combinedKin - 1) % 4];
+
+  return {
+    kinA: kinNumA, kinB: kinNumB,
+    chromatic, chromaticDesc,
+    toneA, toneB, toneRelation,
+    sameWavespell,
+    bothGAP, oneGAP,
+    combinedKin,
+    combinedFull: 'Kin ' + combinedKin + ' — ' + combinedColor + ' ' + combinedTone + ' ' + combinedSeal,
+    combinedMeaning: 'The combined Kin of this relationship is ' + combinedColor + ' ' + combinedTone + ' ' + combinedSeal + ' — the galactic signature of what this connection is here to embody and transmit together.',
+    wavespellNote: sameWavespell ? 'You were born in the same wavespell — a rare and significant bond.' : 'Born in different wavespells, your 13-day arcs create a dynamic interplay of different intentions.'
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// NATAL MOON PHASE
+// What lunar phase was active when each person was born?
+// ══════════════════════════════════════════════════════════════════
+const MOON_PHASE_NAMES = [
+  { max: 1.5,  name: 'New Moon',         archetype: 'The Initiator — spontaneous, instinctive, driven by feeling over reflection' },
+  { max: 7.5,  name: 'Waxing Crescent',  archetype: 'The Seeker — gathering energy, building toward something, full of possibility' },
+  { max: 8.5,  name: 'First Quarter',    archetype: 'The Builder — decisive, action-oriented, willing to push through resistance' },
+  { max: 14.5, name: 'Waxing Gibbous',   archetype: 'The Refiner — analytical, perfection-seeking, always improving' },
+  { max: 16.5, name: 'Full Moon',        archetype: 'The Illuminator — relational, aware, seen and seeing — fulfillment through others' },
+  { max: 22.5, name: 'Waning Gibbous',   archetype: 'The Messenger — drawn to share wisdom, teach, contribute to the larger story' },
+  { max: 23.5, name: 'Last Quarter',     archetype: 'The Reorienteer — reassessing, releasing, turning away from what no longer fits' },
+  { max: 30,   name: 'Waning Crescent',  archetype: 'The Mystic — finishing cycles, surrendering, deeply intuitive and contemplative' },
+];
+
+function getNatalMoonPhase(birthDateStr) {
+  const moon = getMoon(birthDateStr);
+  const cyc = parseFloat(moon.cycle);
+  const found = MOON_PHASE_NAMES.find(p => cyc <= p.max) || MOON_PHASE_NAMES[MOON_PHASE_NAMES.length - 1];
+  return {
+    phase: found.name,
+    archetype: found.archetype,
+    cycle: cyc,
+    pct: moon.pct
+  };
+}
+
+function getMoonPhaseSynastry(phaseA, phaseB, nameA, nameB) {
+  if (!phaseA || !phaseB) return null;
+
+  // Phase type: waxing vs waning
+  const waxingPhases = ['New Moon', 'Waxing Crescent', 'First Quarter', 'Waxing Gibbous'];
+  const aWaxing = waxingPhases.includes(phaseA.phase);
+  const bWaxing = waxingPhases.includes(phaseB.phase);
+
+  let dynamicNote = '';
+  if (phaseA.phase === phaseB.phase) {
+    dynamicNote = 'Born under the same lunar phase — you share a fundamental emotional rhythm and approach to relationship. This creates deep instinctive understanding.';
+  } else if (aWaxing && !bWaxing) {
+    dynamicNote = nameA + ' was born under a waxing moon (building energy) and ' + nameB + ' under a waning moon (integrating energy). One of you naturally initiates; the other naturally synthesises and completes. This is a powerful creative polarity.';
+  } else if (!aWaxing && bWaxing) {
+    dynamicNote = nameB + ' was born under a waxing moon (building energy) and ' + nameA + ' under a waning moon (integrating energy). One of you naturally initiates; the other naturally synthesises and completes. This is a powerful creative polarity.';
+  } else if (aWaxing && bWaxing) {
+    dynamicNote = 'Both born under waxing moons — you both naturally build, initiate, and reach toward new things. This creates momentum and possibility, with care needed around slowing down and integrating.';
+  } else {
+    dynamicNote = 'Both born under waning moons — you both naturally turn inward, integrate, and release. Deep shared wisdom and contemplative depth. You may need to consciously inject new energy and forward motion.';
+  }
+
+  return {
+    phaseA: phaseA.phase, archetypeA: phaseA.archetype,
+    phaseB: phaseB.phase, archetypeB: phaseB.archetype,
+    dynamicNote
+  };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// NATAL PLANETARY POSITIONS
+// ══════════════════════════════════════════════════════════════════
+// Uses J2000.0 epoch mean longitudes + mean daily motion
+// Accuracy: Sun ±1°, Moon ±5°, inner planets ±5-10°, outer ±2-5°
+// Sufficient for synastry interpretation; always labelled as approximate
+// Source: Meeus (1998) Astronomical Algorithms, Table 31.a + 32.a
+// ══════════════════════════════════════════════════════════════════
+const J2000 = new Date('2000-01-01T12:00:00Z');
+
+// [mean longitude at J2000, mean daily motion °/day]
+const MEAN_MOTION = {
+  Sun:     [280.46646,  0.98564736],
+  Moon:    [218.31665, 13.17639648],
+  Mercury: [252.25032,  4.09233445],
+  Venus:   [181.97980,  1.60213034],
+  Mars:    [355.45332,  0.52402068],
+  Jupiter: [ 34.35148,  0.08308529],
+  Saturn:  [ 50.07747,  0.03344876],
+  Uranus:  [314.05501,  0.01172834],
+  Neptune: [304.34867,  0.00598103],
+  Pluto:   [238.92881,  0.00397057],
+};
+
+function getNatalPlanets(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00Z');
+  const days = (d - J2000) / 86400000;
+  return Object.entries(MEAN_MOTION).map(([name, [l0, motion]]) => {
+    const deg = ((l0 + motion * days) % 360 + 360) % 360;
+    return { name, deg, sign: getSign(deg), degStr: `${getDegInSign(deg)}° ${getSign(deg)}` };
+  });
+}
+
+function getSunSign(day, month, year) {
+  const d = new Date(`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}T12:00:00Z`);
+  const jDays = (d - J2000) / 86400000;
+  const sunLon = ((280.46646 + 0.98564736 * jDays) % 360 + 360) % 360;
+  return { sign: getSign(sunLon), deg: sunLon, degStr: `${getDegInSign(sunLon)}° ${getSign(sunLon)}` };
+}
+
+function getSynastryAspects(planetsA, planetsB) {
+  // Cross-aspects: each of A's planets vs each of B's key planets
+  const keyB = ['Sun','Moon','Venus','Mars','Saturn'];
+  const keyA = ['Sun','Moon','Venus','Mars','Saturn','Mercury','Jupiter'];
+  const out = [];
+  for (const a of planetsA.filter(p => keyA.includes(p.name))) {
+    for (const b of planetsB.filter(p => keyB.includes(p.name))) {
+      let diff = Math.abs(a.deg - b.deg);
+      if (diff > 180) diff = 360 - diff;
+      for (const asp of ASPS) {
+        const orb = Math.abs(diff - asp.d);
+        if (orb <= asp.orb) {
+          const str = Math.max(1, 5 - Math.floor(orb / (asp.orb / 5)));
+          out.push({
+            pA: a.name, pB: b.name, aspect: asp.n, sym: asp.sym,
+            orb: orb.toFixed(1), str,
+            label: `${a.name} (A) ${asp.sym} ${b.name} (B)`,
+            desc: `${a.name} ${a.degStr} ${asp.n} ${b.name} ${b.degStr} (${orb.toFixed(1)}° orb)`
+          });
+          break;
+        }
+      }
+    }
+  }
+  return out.sort((a, b) => b.str - a.str).slice(0, 8);
+}
+
+// ── COMPATIBILITY ENDPOINT ──
+app.post('/api/compatibility', async (req, res) => {
+  const { personA, personB, topic, customContext } = req.body;
+  if (!personA || !personB) return res.status(400).json({ error: 'Both people required' });
+
+  try {
+    const pA = personA;
+    const pB = personB;
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Build birth date strings
+    const dateA = pA.birthYear && pA.birthMonth && pA.birthDay
+      ? `${pA.birthYear}-${String(pA.birthMonth).padStart(2,'0')}-${String(pA.birthDay).padStart(2,'0')}`
+      : null;
+    const dateB = pB.birthYear && pB.birthMonth && pB.birthDay
+      ? `${pB.birthYear}-${String(pB.birthMonth).padStart(2,'0')}-${String(pB.birthDay).padStart(2,'0')}`
+      : null;
+
+    // ── ALL FOUR FRAMEWORKS ──
+    const natalA    = dateA ? getNatalPlanets(dateA) : null;
+    const natalB    = dateB ? getNatalPlanets(dateB) : null;
+    const kinA      = dateA ? getKin(dateA) : null;
+    const kinB      = dateB ? getKin(dateB) : null;
+    const numA      = dateA ? getNumerology(dateA, pA.birthDay, pA.birthMonth, pA.birthYear) : null;
+    const numB      = dateB ? getNumerology(dateB, pB.birthDay, pB.birthMonth, pB.birthYear) : null;
+    const moonPhaseA = dateA ? getNatalMoonPhase(dateA) : null;
+    const moonPhaseB = dateB ? getNatalMoonPhase(dateB) : null;
+
+    // ── CROSS-ANALYSIS (pre-computed, structured) ──
+    const synAspects      = (natalA && natalB) ? getSynastryAspects(natalA, natalB) : [];
+    const numCross        = getNumerologyCrossAnalysis(numA, numB, pA.name || pA.nickname || 'Person A', pB.name || pB.nickname || 'Person B');
+    const dreamspellCross = (kinA && kinB) ? getDreamspellSynastry(kinA, kinB) : null;
+    const moonPhaseCross  = getMoonPhaseSynastry(moonPhaseA, moonPhaseB, pA.name || pA.nickname || 'Person A', pB.name || pB.nickname || 'Person B');
+
+    // ── BIORHYTHMS TODAY ──
+    const bioA      = dateA ? getBiorhythms(dateA, today) : null;
+    const bioB      = dateB ? getBiorhythms(dateB, today) : null;
+    const bioSynastry = (bioA && bioB) ? getBiorhythmSynastry(bioA, bioB) : null;
+
+    const nameA = pA.nickname || pA.name || 'Person A';
+    const nameB = pB.nickname || pB.name || 'Person B';
+
+    const formatNatal = (natal, kin, num, moonPhase, person) => {
+      if (!natal) return (person.name || 'Person') + ': birth details not provided';
+      return 'Name: ' + (person.name || person.nickname || 'unknown') + '\n'
+        + 'Born: ' + person.birthDay + '/' + person.birthMonth + '/' + person.birthYear
+        + (person.birthTime ? ' at ' + person.birthTime : '')
+        + (person.birthLocation ? ' in ' + person.birthLocation : '') + '\n'
+        + 'Sun: ' + natal[0].degStr + ' | Moon: ' + natal[1].degStr + ' | Venus: ' + natal[3].degStr + ' | Mars: ' + natal[4].degStr + '\n'
+        + 'Mercury: ' + natal[2].degStr + ' | Jupiter: ' + natal[5].degStr + ' | Saturn: ' + natal[6].degStr + '\n'
+        + 'Life Path: ' + (num ? num.lp : '?') + ' (' + (num && num.lpM ? num.lpM.n : '') + ') | Personal Year: ' + (num ? num.py : '?') + '\n'
+        + 'Dreamspell Birth Kin: ' + (kin ? kin.full : '?') + (kin && kin.isGAP ? ' (GAP — portal day birth)' : '') + '\n'
+        + 'Natal Moon Phase: ' + (moonPhase ? moonPhase.phase + ' — ' + moonPhase.archetype : 'unknown');
+    };
+
+    const aspectList = synAspects.map(a =>
+      '●'.repeat(a.str) + '○'.repeat(5-a.str) + ' ' + a.desc
+    ).join('\n');
+
+    // Format cross-analysis as structured text for Oracle
+    const numCrossText = numCross
+      ? 'NUMEROLOGY CROSS-ANALYSIS:\n'
+        + 'Life Path ' + numCross.lpA + ' and ' + numCross.lpB + ' — ' + numCross.quality + '\n'
+        + numCross.dynamic + '\n'
+        + (numCross.pyDynamic ? numCross.pyDynamic + '\n' : '')
+        + 'Combined relationship frequency: ' + numCross.combined + ' (' + numCross.combinedName + ') — ' + numCross.combinedMeaning
+      : 'Numerology: insufficient birth data';
+
+    const dreamspellCrossText = dreamspellCross
+      ? 'DREAMSPELL SYNASTRY:\n'
+        + dreamspellCross.chromaticDesc + '\n'
+        + 'Tonal relationship: ' + dreamspellCross.toneRelation + '\n'
+        + (dreamspellCross.sameWavespell ? 'Born in the same wavespell — rare and significant.\n' : '')
+        + (dreamspellCross.bothGAP ? 'Both born on Galactic Activation Portal days — extraordinary portal-day connection.\n' : '')
+        + 'Combined Kin: ' + dreamspellCross.combinedFull + ' — ' + dreamspellCross.combinedMeaning
+      : 'Dreamspell: insufficient data';
+
+    const moonPhaseCrossText = moonPhaseCross
+      ? 'NATAL MOON PHASE SYNASTRY:\n'
+        + nameA + ' born at ' + moonPhaseCross.phaseA + ' — ' + moonPhaseCross.archetypeA + '\n'
+        + nameB + ' born at ' + moonPhaseCross.phaseB + ' — ' + moonPhaseCross.archetypeB + '\n'
+        + moonPhaseCross.dynamicNote
+      : 'Natal moon phase: insufficient data';
+
+    const bioText = bioSynastry
+      ? 'BIORHYTHM CROSS-ANALYSIS TODAY (' + today + '):\n'
+        + bioSynastry.map(b =>
+            b.cycle + ': ' + nameA + ' at ' + b.aPct + '% (' + b.aPhase + '), '
+            + nameB + ' at ' + b.bPct + '% (' + b.bPhase + ') — ' + b.dynamic
+          ).join('\n')
+      : '';
+
+    const topicMap = {
+      romance:       'Romantic compatibility — attraction, intimacy, long-term potential, physical chemistry, emotional resonance',
+      communication: 'Communication — how they think, speak, argue, listen, and understand each other',
+      conflict:      'Conflict and growth edges — where they clash, why, and what those tensions are trying to build',
+      parenting:     'Parenting together — how they parent as a team, where they align and diverge, how to be consistent',
+      business:      'Business and creative partnership — complementary strengths, blind spots, decision-making dynamics',
+      friendship:    'Friendship — the nature of the bond, what sustains it, what deepens it over time',
+      children:      'Understanding a child — how to connect with, motivate, nurture, and support this child',
+      fun:           'Where they click best — shared pleasures, compatible rhythms, what brings out the best in each other',
+    };
+    const topicDesc = topicMap[topic] || topicMap.romance;
+
+    // Pre-compute string values for safe concatenation
+    const kinAStr = kinA ? kinA.full : 'not calculated';
+    const kinBStr = kinB ? kinB.full : 'not calculated';
+    const lpAStr  = numA ? String(numA.lp) : 'unknown';
+    const lpBStr  = numB ? String(numB.lp) : 'unknown';
+    const lpAnm   = (numA && numA.lpM) ? numA.lpM.n : '';
+    const lpBnm   = (numB && numB.lpM) ? numB.lpM.n : '';
+    const ctxA    = pA.context ? 'Context: ' + pA.context : '';
+    const ctxB    = pB.context ? 'Context: ' + pB.context : '';
+    const userCtx = customContext ? 'USER CONTEXT: ' + customContext : '';
+    const aspList = aspectList || 'Insufficient birth data for precise aspects';
+    const aspJSON = synAspects.slice(0, 5).map(function(a) {
+      return '{"aspect":"' + a.desc.replace(/"/g, "'") + '","interpretation":"<3 sentences: what this cross-aspect means for ' + nameA + ' and ' + nameB + ' specifically>"}';
+    }).join(',\n    ');
+
+    const sys = 'You are the Oracle at Cosmic Daily Planner — the most sophisticated multi-framework relationship reading system in existence.\n\n'
+      + 'YOUR VOICE: A Jungian analyst, a spiritual director, and the wisest friend they have ever had — in one voice. Precise. Warm. Deeply honest. You speak to what is actually happening beneath the surface, not just what is comfortable to hear. You hold both the gifts and the shadows with equal care.\n\n'
+      + 'TOPIC: ' + topicDesc + '\n\n'
+      + 'FRAMEWORK SOURCES you are drawing on simultaneously:\n'
+      + '1. Western astrology synastry (natal planetary cross-aspects, approximate positions, Meeus 1998)\n'
+      + '2. Pythagorean numerology cross-analysis (Life Path compatibility, Drayer 2002; Millman 1993)\n'
+      + '3. Dreamspell synastry (chromatic family, tonal relationship, combined Kin, Arguelles 1987)\n'
+      + '4. Natal lunar phase archetypes (emotional rhythm and relationship archetype from birth phase)\n'
+      + '5. Biorhythm cross-analysis for today (physical, emotional, intellectual cycle synchrony)\n\n'
+      + 'RULES:\n'
+      + '— Address ' + nameA + ' directly throughout. Use both names. Never "Person A" or "Person B".\n'
+      + '— Synthesise ALL FIVE frameworks — do not treat them separately. The power is in the convergence.\n'
+      + '— When multiple frameworks point to the same dynamic, name that convergence explicitly — it is the most significant signal.\n'
+      + '— When frameworks diverge (e.g. numerology says compatible, astrology shows tension), name the paradox and explain what it means.\n'
+      + '— Be honest about challenges. Do not flatten or spiritually bypass difficulty.\n'
+      + '— Planetary positions are approximate mean longitudes — always label as such.\n'
+      + '— End with genuine engagement: a question, a practice, an invitation to go deeper.\n'
+      + '— RESPOND ONLY WITH VALID JSON. No markdown, no preamble.\n'
+      + '— Scholarly sources: Greene (1976) Saturn; Arroyo (1978); Sasportas (1989); Tarnas (2006); Drayer (2002); Millman (1993); Arguelles (1987).';
+
+    const user = 'PERSON A — ' + nameA + ':\n'
+      + formatNatal(natalA, kinA, numA, moonPhaseA, pA) + '\n'
+      + ctxA + '\n\n'
+      + 'PERSON B — ' + nameB + ':\n'
+      + formatNatal(natalB, kinB, numB, moonPhaseB, pB) + '\n'
+      + ctxB + '\n\n'
+      + 'ASTROLOGICAL CROSS-ASPECTS (approximate, Meeus 1998):\n' + aspList + '\n\n'
+      + numCrossText + '\n\n'
+      + dreamspellCrossText + '\n\n'
+      + moonPhaseCrossText + '\n\n'
+      + (bioText ? bioText + '\n\n' : '')
+      + 'TOPIC: ' + topicDesc + '\n'
+      + userCtx + '\n\n'
+      + 'Generate the compatibility reading as valid JSON. This is a landmark document — the most multi-layered compatibility reading available anywhere. Every section must synthesise multiple frameworks, not just one:\n'
+      + '{\n'
+      + '  "headline": "<One sentence capturing the essential truth of this connection — specific, evocative, grounded in the data>",\n'
+      + '  "synthesis": "<4-5 sentence opening synthesising ALL frameworks. Name the convergences — where multiple frameworks point to the same dynamic. What is this connection fundamentally about?>",\n'
+      + '  "framework_convergence": "<2-3 paragraphs. Where do the five frameworks AGREE? This is the most reliable signal. Name it explicitly. Then: where do they diverge, and what does that paradox mean?>",\n'
+      + '  "gifts": {\n'
+      + '    "headline": "<The genuine strengths of this connection>",\n'
+      + '    "body": "<3 rich paragraphs: (1) The primary gift — named across multiple frameworks. (2) How they bring out the best in each other specifically re: ' + topicDesc + '. (3) What this connection uniquely offers.>"\n'
+      + '  },\n'
+      + '  "tensions": {\n'
+      + '    "headline": "<The growth edges — honest>",\n'
+      + '    "body": "<3 paragraphs: (1) Primary tension named across frameworks — where do multiple systems signal friction? (2) What that tension is asking both people to develop. (3) Specific, practical ways to work with it.>"\n'
+      + '  },\n'
+      + '  "topic_specific": {\n'
+      + '    "headline": "<' + topicDesc + '>",\n'
+      + '    "body": "<4 substantial paragraphs grounded in specific cross-framework data. Concrete. Day-to-day. Not archetypes — actual guidance.>"\n'
+      + '  },\n'
+      + '  "key_aspects": [\n'
+      + '    ' + aspJSON + '\n'
+      + '  ],\n'
+      + '  "biorhythm_today": "<2 paragraphs: what their biorhythm positions say about their dynamics TODAY specifically. Physical synchrony or friction, emotional alignment or divergence, intellectual resonance. What is today good for in this relationship, and what to navigate carefully?>",\n'
+      + '  "dreamspell_connection": "<2 paragraphs: ' + kinAStr + ' and ' + kinBStr + '. The chromatic relationship, tonal dynamic, combined Kin ' + (dreamspellCross ? dreamspellCross.combinedFull : '') + ', and what their Dreamspell synastry says about the galactic purpose of this connection.>",\n'
+      + '  "numerology_connection": "<2 paragraphs: Life Path ' + lpAStr + ' (' + lpAnm + ') and ' + lpBStr + ' (' + lpBnm + '). The compatibility dynamic, Personal Year interaction, combined frequency. What the numbers say about timing, purpose, and what this partnership is here to build.>",\n'
+      + '  "natal_moon_connection": "<2 paragraphs: how their natal moon phases — their birth emotional archetypes — interact. What this means for how they feel, receive love, and process experience together.>",\n'
+      + '  "for_them": {\n'
+      + '    "for_a": "<4 sentences for ' + nameA + ' — not advice, but genuine insight. What do they most need to understand about ' + nameB + ' that they likely do not yet see? What is their specific growth edge in this relationship?>",\n'
+      + '    "for_b": "<4 sentences for ' + nameB + ' — same depth, same honesty.>"\n'
+      + '  },\n'
+      + '  "a_question_to_sit_with": "<One question for them both — not rhetorical, but genuinely open. The question that, if they sat with it honestly together, would unlock something important. It should feel slightly uncomfortable to ask.>",\n'
+      + '  "closing": "<One final sentence — the deepest truth of this connection. Warm, precise, honest.>",\n'
+      + '  "sources": "Astrology: approximate natal positions Meeus (1998) Astronomical Algorithms. Synastry: Greene (1976); Arroyo (1978); Sasportas (1989); Tarnas (2006). Numerology: Drayer (2002); Millman (1993). Dreamspell: Arguelles (1987) modern system. Biorhythms: Teltscher, Fliess, Swoboda (classical three-cycle theory). Natal moon phase archetypes."\n'
+      + '}';
+
+    const raw = await callAPI('claude-sonnet-4-6', 12000, sys, user);
+    let reading;
+    try {
+      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      reading = JSON.parse(cleaned);
+    } catch(e) {
+      try {
+        reading = JSON.parse(repairJSON(raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()));
+        reading._repaired = true;
+      } catch(e2) {
+        reading = { synthesis: raw, raw: true };
+      }
+    }
+
+    res.json({
+      reading,
+      natalA: natalA ? natalA.slice(0, 7) : null,
+      natalB: natalB ? natalB.slice(0, 7) : null,
+      kinA, kinB, numA, numB,
+      moonPhaseA, moonPhaseB,
+      bioA: bioA ? { physical: bioA.physical, emotional: bioA.emotional, intellectual: bioA.intellectual, composite: bioA.composite } : null,
+      bioB: bioB ? { physical: bioB.physical, emotional: bioB.emotional, intellectual: bioB.intellectual, composite: bioB.composite } : null,
+      bioSynastry,
+      numCross, dreamspellCross, moonPhaseCross,
+      synAspects,
+      nameA, nameB, topic
+    });
+
+  } catch(e) {
+    console.error('Compatibility error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`CDP v7 — streaming — port ${PORT}`));
+app.listen(PORT, () => console.log(`CDP v7 Beta2 — streaming — port ${PORT}`));

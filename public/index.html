@@ -32,7 +32,7 @@
   --bg:#0D1E33;--bg2:#122440;--bg3:#192E4A;--bg4:#08131F;
   --gold:#C9A050;--gold2:#E8C878;--gold3:rgba(201,160,80,0.18);--gold4:rgba(201,160,80,0.07);
   --teal:#81CDB6;--teal2:rgba(129,205,182,0.18);--teal3:rgba(129,205,182,0.07);
-  --text:#F0E6CC;--text2:#C8BAA0;--text3:#7E7262;
+  --text:#F0E6CC;--text2:#D4C8AE;--text3:#9E9282;
   --div:rgba(240,230,204,0.10);--div2:rgba(240,230,204,0.06);
   --red:#cc4444;--master:#C8A0FF;
 }
@@ -66,7 +66,23 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
   width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;
   display:flex;align-items:center;justify-content:center;transition:all .25s}
 .thm:hover,.feedback-btn:hover{border-color:var(--gold);color:var(--gold)}
-@media(max-width:580px){.npill{font-size:11px;padding:5px 10px;letter-spacing:.1em}}
+
+/* ── MOBILE NAV HAMBURGER (Sonia #50) ── */
+.nav-hamburger{display:none;background:none;border:1px solid var(--div);color:var(--text3);
+  padding:6px 10px;border-radius:2px;cursor:pointer;font-size:18px;line-height:1}
+.nav-hamburger:hover{border-color:var(--gold);color:var(--gold)}
+.nav-dropdown{display:none;position:absolute;top:52px;left:50%;transform:translateX(-50%);
+  background:var(--bg2);border:1px solid var(--div);border-radius:3px;padding:8px;
+  z-index:200;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.nav-dropdown.open{display:flex;flex-direction:column;gap:4px}
+.nav-dropdown .npill{width:100%;text-align:left;padding:10px 14px}
+
+@media(max-width:600px){
+  .nav{display:none}
+  .nav-hamburger{display:block}
+  .topbar{padding:10px 16px}
+  .brand{font-size:12px;letter-spacing:.3em}
+}
 
 /* ── SCREENS ── */
 .screen{display:none}.screen.on{display:block}
@@ -96,17 +112,17 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .load-stage.active{color:var(--text);opacity:1;font-size:17px;letter-spacing:.1em}
 .load-stage.done{color:var(--teal);opacity:.7}
 .r-section{background:var(--bg2);border:1px solid var(--div);border-radius:2px;
-  padding:26px 30px;margin-bottom:18px}
-@media(max-width:600px){.r-section{padding:18px 16px}}
-.sec-label{font-size:13px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);
-  margin-bottom:14px;display:flex;align-items:center;gap:10px}
+  padding:28px 32px;margin-bottom:20px}
+@media(max-width:600px){.r-section{padding:20px 18px}}
+.sec-label{font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55);
+  margin-bottom:16px;display:flex;align-items:center;gap:10px}
 .sec-label::after{content:'';flex:1;height:1px;background:var(--div)}
 .sec-hl{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);
-  font-weight:400;margin-bottom:14px;line-height:1.35}
-.sec-body{color:var(--text2);font-size:18px;line-height:1.9}
-.sec-body p{margin-bottom:1rem}.sec-body p:last-child{margin-bottom:0}
-.synthesis{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.35rem;
-  line-height:1.78;color:var(--text);text-align:center;padding:36px 28px;
+  font-weight:400;margin-bottom:16px;line-height:1.35}
+.sec-body{color:var(--text2);font-size:18px;line-height:2.05}
+.sec-body p{margin-bottom:1.15rem}.sec-body p:last-child{margin-bottom:0}
+.synthesis{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.4rem;
+  line-height:1.85;color:var(--text);text-align:center;padding:36px 28px;
   border-bottom:1px solid var(--div);margin-bottom:28px}
 .moon-badge{display:inline-block;padding:6px 16px;font-size:12px;
   letter-spacing:.15em;text-transform:uppercase;border-radius:2px;margin-bottom:16px}
@@ -889,6 +905,16 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill" onclick="showScreen('shist',this);renderHistory()">History</button>
     <button class="npill" onclick="showScreen('scompat',this);initCompatScreen()">Compat</button>
     <button class="npill" onclick="showScreen('sp',this)">Profile</button>
+  </div>
+  <!-- Mobile hamburger (Sonia #50) -->
+  <button class="nav-hamburger" onclick="toggleMobileNav()" id="navHamburger">☰</button>
+  <div class="nav-dropdown" id="navDropdown">
+    <button class="npill on" onclick="showScreen('sr',this);if(!currentReading)showModeSelector();closeMobileNav()">Reading</button>
+    <button class="npill" onclick="showScreen('scard',this);renderCard();closeMobileNav()">Card</button>
+    <button class="npill" onclick="showScreen('sc',this);closeMobileNav()">Calendar</button>
+    <button class="npill" onclick="showScreen('shist',this);renderHistory();closeMobileNav()">History</button>
+    <button class="npill" onclick="showScreen('scompat',this);initCompatScreen();closeMobileNav()">Compat</button>
+    <button class="npill" onclick="showScreen('sp',this);closeMobileNav()">Profile</button>
   </div>
   <div class="topbar-right">
     <div id="authBtnArea">
@@ -2837,6 +2863,18 @@ function isRawReading(r) {
   return false;
 }
 
+function toggleMobileNav() {
+  const d = document.getElementById('navDropdown');
+  if (d) d.classList.toggle('open');
+}
+function closeMobileNav() {
+  const d = document.getElementById('navDropdown');
+  if (d) d.classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-hamburger') && !e.target.closest('.nav-dropdown')) closeMobileNav();
+});
+
 function renderReading(data, dateStr) {
   const { reading: r, planets, moon, kin, num, aspects } = data;
   const date = new Date(dateStr + 'T12:00:00Z');
@@ -2857,9 +2895,9 @@ function renderReading(data, dateStr) {
   html += `<div class="widgets">
     <div class="wgt">
       <div class="wgt-icon">${moon?.emoji||'☽'}</div>
-      <div class="wgt-label">Moon</div>
-      <div class="wgt-val">${moon?.phase||'—'}</div>
-      <div class="wgt-sub">${moonSign} · ${moon?.pct||0}%</div>
+      <div class="wgt-label">Moon Phase</div>
+      <div class="wgt-val" style="font-size:13px">${moon?.phase||'—'}</div>
+      <div class="wgt-sub">${moonSign ? moonSign+' · ' : ''}Day ${moon?.cycle||'—'}</div>
     </div>
     <div class="wgt">
       <div class="wgt-icon">${num?.ud||'—'}</div>
@@ -2876,8 +2914,8 @@ function renderReading(data, dateStr) {
     <div class="wgt">
       <div class="wgt-icon">☽</div>
       <div class="wgt-label">Lunar Cycle</div>
-      <div class="wgt-val">${moon?.cycle||'—'}d</div>
-      <div class="wgt-sub">${moon?.toNew}d to New</div>
+      <div class="wgt-val">${moon?.toNew||'—'}d to New</div>
+      <div class="wgt-sub">${moon?.toFull||'—'}d to Full</div>
     </div>
   </div>`;
 
@@ -2935,56 +2973,44 @@ function renderReading(data, dateStr) {
 
   const hasAI = !isRawReading(r);
 
-  // Biorhythm widget — client-side calculation from profile birth date
+  // ── BIORHYTHM DATA (computed once, used below) ──
+  let bioHtml = '';
   if (profile.birthDay && profile.birthMonth && profile.birthYear) {
     const bDate = profile.birthYear + '-' + String(profile.birthMonth).padStart(2,'0') + '-' + String(profile.birthDay).padStart(2,'0');
-    const todayStr = dateStr;
     const birth = new Date(bDate + 'T12:00:00Z');
-    const target = new Date(todayStr + 'T12:00:00Z');
+    const target = new Date(dateStr + 'T12:00:00Z');
     const daysAlive = Math.round((target - birth) / 86400000);
-    const cycles = [
-      { label: 'Physical', period: 23, desc: 'Vitality & strength' },
-      { label: 'Emotional', period: 28, desc: 'Mood & intuition' },
-      { label: 'Intellectual', period: 33, desc: 'Focus & clarity' },
-    ];
+    const cycles = [{label:'Physical',period:23},{label:'Emotional',period:28},{label:'Intellectual',period:33}];
     const bioVals = cycles.map(c => {
       const val = Math.sin((2 * Math.PI * daysAlive) / c.period);
       const pct = Math.round(val * 100);
       const nextVal = Math.sin((2 * Math.PI * (daysAlive + 1)) / c.period);
       const isCritical = Math.abs(val) < 0.13 || (val >= 0 && nextVal < 0) || (val < 0 && nextVal >= 0);
-      const col = isCritical ? 'var(--gold)' : pct > 30 ? 'var(--teal)' : pct < -30 ? '#ff9999' : 'var(--text3)';
-      const phase = isCritical ? 'critical' : pct > 60 ? 'high' : pct > 10 ? 'rising' : pct > -10 ? 'transition' : pct > -60 ? 'falling' : 'low';
-      return { ...c, pct, isCritical, col, phase };
+      const col = isCritical ? 'var(--gold)' : pct > 30 ? 'var(--teal)' : pct < -30 ? '#e08080' : 'var(--text2)';
+      const phase = isCritical ? '⚡ Critical' : pct > 60 ? 'High' : pct > 10 ? 'Rising' : pct > -10 ? 'Transition' : pct > -60 ? 'Falling' : 'Low';
+      return {...c, pct, isCritical, col, phase};
     });
-
-    html += '<div style="background:var(--bg2);border:1px solid var(--div);border-radius:2px;'
-      + 'padding:12px 16px;margin-bottom:16px">'
-      + '<div style="font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);'
-      + 'margin-bottom:10px;display:flex;align-items:center;gap:10px">'
-      + 'Biorhythms Today'
+    bioHtml = '<div style="background:var(--bg2);border:1px solid var(--div);border-radius:2px;padding:16px 18px;margin-bottom:20px">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+      + '<div style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:rgba(240,237,230,0.75);font-weight:500">Biorhythms Today</div>'
       + '<span style="flex:1;height:1px;background:var(--div);display:inline-block"></span>'
-      + '<span style="font-size:9px;letter-spacing:.05em;text-transform:none;font-style:italic;color:var(--text3)">Physical 23d · Emotional 28d · Intellectual 33d</span>'
-      + '</div>'
+      + '<span style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Cycles · Physical 23d · Emotional 28d · Intellectual 33d</span></div>'
       + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
-
     bioVals.forEach(b => {
-      const barWidth = Math.abs(b.pct);
-      const barColor = b.isCritical ? 'var(--gold)' : b.pct > 0 ? 'var(--teal)' : '#ff9999';
+      const bw = Math.abs(b.pct);
+      const bc = b.isCritical ? 'var(--gold)' : b.pct > 0 ? 'var(--teal)' : '#e08080';
       const sign = b.pct > 0 ? '+' : '';
-      html += '<div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:8px 10px">'
-        + '<div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">' + b.label + '</div>'
-        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;color:' + b.col + ';line-height:1">' + sign + b.pct + '%</div>'
-        + '<div style="height:2px;background:var(--div);border-radius:1px;margin:5px 0;overflow:hidden">'
-        + '<div style="height:100%;width:' + barWidth + '%;background:' + barColor + ';border-radius:1px;'
-        + (b.pct < 0 ? 'margin-left:' + (100 - barWidth) + '%;' : '') + '"></div>'
-        + '</div>'
-        + '<div style="font-size:10px;color:var(--text3)">' + (b.isCritical ? '⚡ Critical day' : b.phase) + '</div>'
-        + '</div>';
+      bioHtml += '<div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 12px">'
+        + '<div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">' + b.label + '</div>'
+        + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:24px;color:' + b.col + ';line-height:1">' + sign + b.pct + '%</div>'
+        + '<div style="height:2px;background:var(--div);border-radius:1px;margin:6px 0;overflow:hidden">'
+        + '<div style="height:100%;width:' + bw + '%;background:' + bc + ';border-radius:1px;' + (b.pct < 0 ? 'margin-left:' + (100 - bw) + '%;' : '') + '"></div></div>'
+        + '<div style="font-size:11px;color:var(--text3)">' + b.phase + '</div></div>';
     });
-
-    html += '</div></div>';
+    bioHtml += '</div></div>';
   }
 
+  // 1. SYNTHESIS
   const synthText = hasAI
     ? String(r.synthesis||'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'$1').replace(/^[_*]+|[_*]+$/g,'').trim()
     : '';
@@ -2995,6 +3021,64 @@ function renderReading(data, dateStr) {
     </div>`;
   }
 
+  // 2. BIORHYTHMS (Sonia #57 — more prominent, higher up)
+  if (bioHtml) html += bioHtml;
+
+  // 3. TODAY'S PRIORITIES (Sonia #55 — action first)
+  if (r.priorities?.length) {
+    html += `<div class="r-section"><div class="sec-label">Today's Priorities</div>`;
+    r.priorities.forEach((pri, i) => {
+      const safeTitle = (pri.title||'').replace(/'/g,"\\'").slice(0,80);
+      const safeRat = (pri.rationale||'').replace(/'/g,"\\'").slice(0,150);
+      const safeAct = (pri.action||'').replace(/'/g,"\\'").slice(0,100);
+      html += `<div class="priority-item tappable" onclick="tapPriority('${safeTitle}','${safeRat}','${safeAct}')" title="Tap for specific guidance">
+        <div class="pri-num">${i+1}</div>
+        <div style="flex:1">
+          <div class="pri-title">${pri.title||''} <span style="font-size:12px;color:var(--gold3)">↗</span></div>
+          <div class="pri-body">${pri.rationale||pri.body||''}</div>
+          ${pri.action?`<div class="pri-action">→ ${pri.action}</div>`:''}
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // 4. SHADOW WORK (Sonia #55 — near top)
+  if (r.shadow_work) {
+    const sw = cleanText(r.shadow_work);
+    html += `<div class="shadow-box tappable" onclick="tapShadow('${sw.replace(/'/g,"\\'").slice(0,200)}')" title="Tap to go deeper into shadow work">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
+        <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55)">Shadow Work</div>
+        <div style="font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase">↗ Work with this</div>
+      </div>
+      <div class="shadow-text">${sw}</div>
+    </div>`;
+  }
+
+  // 5. FOCUS ON / EASE OFF (Sonia #55)
+  if (r.focus_on?.length || r.ease_off?.length) {
+    html += `<div class="two-col" style="margin-bottom:20px">
+      <div class="col-card">
+        <div class="col-head">Focus On</div>
+        ${(r.focus_on||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}
+      </div>
+      <div class="col-card">
+        <div class="col-head">Ease Off</div>
+        ${(r.ease_off||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  // ── DIVIDER: deeper content below ──
+  if (hasAI) {
+    html += `<div style="text-align:center;margin:28px 0 20px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;height:1px;background:var(--div)"></div>
+      <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3)">Full Reading</div>
+      <div style="flex:1;height:1px;background:var(--div)"></div>
+    </div>`;
+  }
+
+  // 6. NUMEROLOGY
   html += `<div class="r-section">
     <div class="sec-label tappable" onclick="tapNumerology(${num?.ud||'—'},'${num?.udM?.n||''}')">
       Numerology of the Day
@@ -3035,14 +3119,16 @@ function renderReading(data, dateStr) {
   html += `<div class="r-section">
     <div class="sec-label tappable" onclick="tapMoon()">Lunar Landscape <span class="tap-hint">↗ Interpret</span></div>
     <div class="sec-hl tappable" onclick="tapMoon()" style="cursor:pointer">${moon?.emoji||''} ${r.moon_section?.headline||(moon?.phase+' in '+moonSign)||''}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-style:italic">Today's Moon — current sky position</div>
     ${moon?.isBlack?`<div><span class="moon-badge badge-black">⚠️ Black Moon — 2 days before New Moon — threshold day</span></div>`:''}
     ${moon?.isShiva?`<div><span class="moon-badge badge-shiva">✨ Shiva Moon — 2 days after New Moon — auspicious</span></div>`:''}
-    <div class="sec-body" style="margin-top:10px">${r.moon_section?.body ? prose(r.moon_section.body) : `<p>The ${moon?.phase||'Moon'} in ${moonSign} on day ${moon?.cycle||'—'} of the lunar cycle. ${moon?.toNew||'—'} days to the New Moon.</p>`}</div>
+    <div class="sec-body" style="margin-top:10px">${r.moon_section?.body ? prose(r.moon_section.body) : `<p>Today's Moon is in ${moonSign}, day ${moon?.cycle||'—'} of the lunar cycle (${moon?.phase||''}). ${moon?.toNew||'—'} days to the New Moon.</p>`}</div>
   </div>`;
 
   if (r.astrology?.main_transit_headline || r.astrology?.main_transit_body) {
     html += `<div class="r-section">
-      <div class="sec-label">Western Astrology</div>
+      <div class="sec-label">Western Astrology — Today's Transits</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-style:italic">Current planetary positions in the sky today. "Your Moon" = natal chart. "The Moon" = today's sky position.</div>
       <div class="sec-hl">${r.astrology?.main_transit_headline||''}</div>
       <div class="sec-body">${prose(r.astrology?.main_transit_body||r.astrology?.main_transit||'')}</div>
     </div>`;
@@ -3117,49 +3203,7 @@ function renderReading(data, dateStr) {
     html += `</div>`;
   }
 
-  if (r.shadow_work) {
-    const sw = cleanText(r.shadow_work);
-    html += `<div class="shadow-box tappable" onclick="tapShadow('${sw.replace(/'/g,"\\'").slice(0,200)}')" title="Tap to go deeper into shadow work">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
-        <div style="font-size:13px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3)">Shadow Work</div>
-        <div style="font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase">↗ Work with this</div>
-      </div>
-      <div class="shadow-text">${sw}</div>
-    </div>`;
-  }
-
-  if (r.priorities?.length) {
-    html += `<div class="r-section"><div class="sec-label">Today's Priorities</div>`;
-    r.priorities.forEach((pri, i) => {
-      const safeTitle = (pri.title||'').replace(/'/g,"\\'").slice(0,80);
-      const safeRat = (pri.rationale||'').replace(/'/g,"\\'").slice(0,150);
-      const safeAct = (pri.action||'').replace(/'/g,"\\'").slice(0,100);
-      html += `<div class="priority-item tappable" onclick="tapPriority('${safeTitle}','${safeRat}','${safeAct}')" title="Tap for specific guidance">
-        <div class="pri-num">${i+1}</div>
-        <div style="flex:1">
-          <div class="pri-title">${pri.title||''} <span style="font-size:12px;color:var(--gold3)">↗</span></div>
-          <div class="pri-body">${pri.rationale||pri.body||''}</div>
-          ${pri.action?`<div class="pri-action">→ ${pri.action}</div>`:''}
-        </div>
-        <div style="clear:both"></div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  if (r.focus_on?.length || r.ease_off?.length) {
-    html += `<div class="two-col" style="margin-bottom:18px">
-      <div class="col-card">
-        <div class="col-head">Focus On</div>
-        ${(r.focus_on||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}
-      </div>
-      <div class="col-card">
-        <div class="col-head">Ease Off</div>
-        ${(r.ease_off||[]).map(i=>`<div class="col-item">${i}</div>`).join('')}
-      </div>
-    </div>`;
-  }
-
+  // time windows and week ahead follow below
   const tw = r.time_windows;
   const te2 = r.numerology?.three_energies;
   if (tw || te2) {
@@ -3557,9 +3601,13 @@ const KIN_TONES_CAL=['Magnetic','Lunar','Electric','Self-Existing','Overtone','R
   'Resonant','Galactic','Solar','Planetary','Spectral','Crystal','Cosmic'];
 const LUNAR_C=29.53058867;
 const MOON_A=new Date('2026-01-17T02:02:00Z');
-const GAP_S=new Set([1,2,3,4,5,8,9,10,11,12,19,20,21,22,23,26,27,28,29,30,
-  53,54,55,56,57,60,61,62,63,64,71,72,73,74,75,78,79,80,81,82,
-  105,106,107,108,109,112,113,114,115,116,133,134]);
+// GAP portals — 52 Galactic Activation Portal kins per Starroot/Tortuga source
+const GAP_S=new Set([
+  1,2,3,4,5,6,7,8,9,10,11,12,13,
+  14,28,41,54,67,80,93,106,119,132,145,158,171,184,197,210,223,236,249,260,
+  20,33,46,59,72,85,98,111,124,137,150,163,176,189,202,215,228,241,254,
+  17,30,43,56,69,82,95,108,121,134,147,160,173,186,199,212,225,238,251
+]);
 const KIN_ANC=new Date('2026-03-31T12:00:00Z');
 
 function clientMoon(ds){
@@ -3768,7 +3816,14 @@ async function sendMagicLink() {
     if (error) throw error;
     showAuthMsg(msg, '✦ Magic link sent — check your email', 'success');
   } catch(e) {
-    showAuthMsg(msg, e.message, 'error');
+    const friendly = e.message?.includes('pattern') || e.message?.includes('invalid')
+      ? 'Please check your email address and try again.'
+      : e.message?.includes('rate') || e.message?.includes('limit')
+      ? 'Too many attempts. Please wait a minute and try again.'
+      : e.message?.includes('network') || e.message?.includes('fetch')
+      ? 'Connection issue — please check your internet and try again.'
+      : 'Something went wrong. Please try again.';
+    showAuthMsg(msg, friendly, 'error');
   }
 }
 
