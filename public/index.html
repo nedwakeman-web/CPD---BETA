@@ -89,7 +89,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .screen{display:none}.screen.on{display:block}
 
 /* ══ READING SCREEN ══ */
-#sr{max-width:840px;margin:0 auto;padding:0 24px 100px}
+#sr{max-width:840px;margin:0 auto;padding:0 16px 100px}
 .r-head{text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--div);margin-bottom:28px}
 .r-meta{font-size:15px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
 .r-date{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,48px);color:var(--gold);
@@ -139,7 +139,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:600px){.two-col{grid-template-columns:1fr}}
 .col-card{border:1px solid var(--div);background:var(--bg3);padding:16px;border-radius:2px}
-.col-head{font-size:13px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.col-head{font-size:13px;letter-spacing:.25em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;font-weight:600}
 .col-item{font-size:17px;color:var(--text2);margin-bottom:9px;padding-left:16px;
   position:relative;line-height:1.65}
 .col-item::before{content:'·';position:absolute;left:0;color:var(--gold)}
@@ -974,10 +974,10 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill on" onclick="showScreen('sr',this);if(!currentReading)showModeSelector()">Reading</button>
     <button class="npill" onclick="showScreen('scard',this);renderCard()">Card</button>
     <button class="npill" onclick="showScreen('sc',this)">Calendar</button>
-    <button class="npill" onclick="showScreen('shist',this);renderHistory()">History</button>
+    <button class="npill" onclick="showScreen('sctx',this);renderContext()">Year Energy</button>
     <button class="npill" onclick="showScreen('scompat',this);initCompatScreen()">Compat</button>
-    <button class="npill" onclick="showScreen('sctx',this);renderContext()">Context</button>
     <button class="npill" onclick="showScreen('sp',this)">Profile</button>
+    <button class="npill" onclick="showScreen('shist',this);renderHistory()">History</button>
   </div>
   <!-- Mobile hamburger (Sonia #50) -->
   <button class="nav-hamburger" onclick="toggleMobileNav()" id="navHamburger">
@@ -988,10 +988,10 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill on" onclick="showScreen('sr',this);if(!currentReading)showModeSelector();closeMobileNav()">Reading</button>
     <button class="npill" onclick="showScreen('scard',this);renderCard();closeMobileNav()">Card</button>
     <button class="npill" onclick="showScreen('sc',this);closeMobileNav()">Calendar</button>
-    <button class="npill" onclick="showScreen('shist',this);renderHistory();closeMobileNav()">History</button>
+    <button class="npill" onclick="showScreen('sctx',this);renderContext();closeMobileNav()">Year Energy</button>
     <button class="npill" onclick="showScreen('scompat',this);initCompatScreen();closeMobileNav()">Compat</button>
-    <button class="npill" onclick="showScreen('sctx',this);renderContext();closeMobileNav()">Context</button>
     <button class="npill" onclick="showScreen('sp',this);closeMobileNav()">Profile</button>
+    <button class="npill" onclick="showScreen('shist',this);renderHistory();closeMobileNav()">History</button>
   </div>
   <div class="topbar-right">
     <div id="authBtnArea">
@@ -1142,7 +1142,7 @@ body.print-card-mode{background:#0D1E33}
 
 <!-- PROFILE SCREEN -->
 <div id="sctx" class="screen">
-  <div id="sctxContent" style="max-width:840px;margin:0 auto;padding:0 24px 100px">
+  <div id="sctxContent" style="max-width:840px;margin:0 auto;padding:0 16px 100px">
     <div style="text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--div);margin-bottom:28px">
       <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Your Cosmic Context</div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(26px,4vw,38px);color:var(--gold);font-weight:300;letter-spacing:.04em">The Long View</div>
@@ -1157,6 +1157,11 @@ body.print-card-mode{background:#0D1E33}
   <div class="profile-head">
     <div class="profile-title">Your Cosmic Profile</div>
     <div class="profile-sub">Your birth details unlock your Galactic Signature, Life Path,<br>and fully personalised Oracle readings.</div>
+    <div id="profileSaveIndicator" style="font-size:13px;color:var(--teal);letter-spacing:.15em;
+      text-transform:uppercase;margin-top:8px;opacity:0;transition:opacity .3s"></div>
+    <div style="font-size:13px;color:var(--text3);margin-top:6px;font-style:italic">
+      Your details are saved automatically as you type and stored on this device.
+    </div>
   </div>
   <div id="profileSummaryBar" style="display:none;background:var(--bg2);border:1px solid var(--div);
     border-radius:3px;padding:20px 24px;margin-bottom:16px">
@@ -1659,18 +1664,9 @@ function renderContext() {
   }
 
   // ── Wavespell position ───────────────────────────────────
-  const anchor2 = new Date('2024-07-08T12:00:00Z');
-  const today = new Date(); today.setHours(12,0,0,0);
-  let rawDiff2 = Math.round((today - anchor2) / 86400000);
-  let gy = today.getFullYear(), gm = today.getMonth()+1, gd = today.getDate();
-  let leaps = 0;
-  for (let y = 2024; y <= gy; y++) {
-    const isLeap = (y%4===0&&y%100!==0)||(y%400===0);
-    if (!isLeap) continue;
-    const feb29 = new Date(y,1,29,12,0,0);
-    if (feb29 > anchor2 && feb29 < today) leaps++;
-  }
-  const todayKin = ((rawDiff2 - leaps) % 260 + 260) % 260 + 1;
+  // Use clientKin for consistency with calendar and server
+  const _todayKinD = clientKin(TODAY);
+  const todayKin = _todayKinD.kin;
   const wavespellStart = Math.floor((todayKin - 1) / 13) * 13 + 1;
   const wavespellDay = ((todayKin - 1) % 13) + 1;
   const wsSi = (wavespellStart - 1) % 20;
@@ -1682,29 +1678,51 @@ function renderContext() {
   // ── Chinese Zodiac (year of birth + current year) ────────
   const CHINESE_ANIMALS = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
   const CHINESE_ELEMENTS = ['Wood','Wood','Fire','Fire','Earth','Earth','Metal','Metal','Water','Water'];
-  function chineseYear(y) {
+  // CNY dates (month, day) for birth-year correction
+  const CNY_DATES = {
+    1950:[1,27],1951:[2,6],1952:[1,27],1953:[2,14],1954:[2,3],
+    1955:[1,24],1956:[2,12],1957:[1,31],1958:[2,18],1959:[2,8],
+    1960:[1,28],1961:[2,15],1962:[2,5],1963:[1,25],1964:[2,13],
+    1965:[2,2],1966:[1,21],1967:[2,9],1968:[1,30],1969:[2,17],
+    1970:[2,6],1971:[1,27],1972:[2,15],1973:[2,3],1974:[1,23],
+    1975:[2,11],1976:[1,31],1977:[2,18],1978:[2,7],1979:[1,28],
+    1980:[2,16],1981:[2,5],1982:[1,25],1983:[2,13],1984:[2,2],
+    1985:[2,20],1986:[2,9],1987:[1,29],1988:[2,17],1989:[2,6],
+    1990:[1,27],1991:[2,15],1992:[2,4],1993:[1,23],1994:[2,10],
+    1995:[1,31],1996:[2,19],1997:[2,7],1998:[1,28],1999:[2,16],
+    2000:[2,5],2001:[1,24],2002:[2,12],2003:[2,1],2004:[1,22],
+    2005:[2,9],2006:[1,29],2007:[2,18],2008:[2,7],2009:[1,26],
+    2010:[2,14],2011:[2,3],2012:[1,23],2013:[2,10],2014:[1,31],
+    2015:[2,19],2016:[2,8],2017:[1,28],2018:[2,16],2019:[2,5],
+    2020:[1,25],2021:[2,12],2022:[2,1],2023:[1,22],2024:[2,10],
+    2025:[1,29],2026:[2,17]
+  };
+  function chineseYear(y, birthMonth, birthDay) {
+    // Adjust for Chinese New Year: if born before CNY, use previous year
+    let effectiveYear = y;
+    if (birthMonth && birthDay && CNY_DATES[y]) {
+      const [cnyM, cnyD] = CNY_DATES[y];
+      if (birthMonth < cnyM || (birthMonth === cnyM && birthDay < cnyD)) {
+        effectiveYear = y - 1;
+      }
+    }
     const base = 1900;
-    const idx = (y - base) % 12;
-    const eidx = (y - base) % 10;
+    const idx = (effectiveYear - base) % 12;
+    const eidx = (effectiveYear - base) % 10;
     return { animal: CHINESE_ANIMALS[((idx % 12) + 12) % 12], element: CHINESE_ELEMENTS[((eidx % 10) + 10) % 10] };
   }
   const curChinese = chineseYear(curYear);
   let birthChinese = null;
-  if (profile.birthYear) birthChinese = chineseYear(parseInt(profile.birthYear));
+  if (profile.birthYear) birthChinese = chineseYear(parseInt(profile.birthYear), parseInt(profile.birthMonth)||0, parseInt(profile.birthDay)||0);
 
   // ── Dreamspell year bearer (Jul 26 previous to today) ───
-  const julAnchor = new Date(today >= new Date(gy,6,26) ? gy : gy-1, 6, 26, 12, 0, 0);
-  const ybDiff = Math.round((julAnchor - anchor2) / 86400000);
-  let ybLeaps = 0;
-  for (let y2 = 2024; y2 <= julAnchor.getFullYear(); y2++) {
-    const isLeap = (y2%4===0&&y2%100!==0)||(y2%400===0);
-    if (!isLeap) continue;
-    const feb29 = new Date(y2,1,29,12,0,0);
-    if (feb29 > anchor2 && feb29 <= julAnchor) ybLeaps++;
-  }
-  const ybKin = ((ybDiff - ybLeaps) % 260 + 260) % 260 + 1;
-  const ybSi = (ybKin - 1) % 20; const ybTi = (ybKin - 1) % 13;
-  const ybYearEnd = new Date(julAnchor.getFullYear()+1, 6, 25);
+  // Year bearer: Kin of July 26 of current Dreamspell year
+  const _todayDate = new Date(); 
+  const _gy = _todayDate.getFullYear();
+  const _julStr = (_todayDate >= new Date(_gy,6,26) ? _gy : _gy-1) + '-07-26';
+  const _ybKinD = clientKin(_julStr);
+  const ybKin = _ybKinD.kin;
+  const ybSi = (ybKin-1)%20; const ybTi = (ybKin-1)%13;
   const yearBearerFull = KIN_COLORS[ybSi%4]+' '+KIN_TONES[ybTi]+' '+KIN_SEALS[ybSi];
 
   // ── Long-term transits (hardcoded for 2025-2027) ─────────
@@ -2395,6 +2413,14 @@ function loadProfileUI() {
 function saveProfileField(key, val) {
   profile[key] = val;
   localStorage.setItem('cdp_profile', JSON.stringify(profile));
+  // Visual confirmation
+  const indicator = document.getElementById('profileSaveIndicator');
+  if (indicator) {
+    indicator.textContent = '✓ Saved';
+    indicator.style.opacity = '1';
+    clearTimeout(indicator._t);
+    indicator._t = setTimeout(() => { indicator.style.opacity = '0'; }, 2000);
+  }
 }
 
 // Beta 2: parse comma-separated strings into arrays for life context fields
@@ -2829,22 +2855,22 @@ async function loadReading(dateStr, tier) {
         const poll = await pollRes.json();
 
         const elapsed = Math.round((Date.now() - startedAt) / 1000);
+        const maxSec = {free:60, seeker:120, initiate:180, mystic:240, oracle:360}[activeTier] || 300;
+        const pct = Math.min(96, Math.round((elapsed / maxSec) * 100));
+        const mins = Math.floor(elapsed/60), secs = elapsed % 60;
+        const timeStr = (mins > 0 ? mins+'m ' : '') + secs + 's';
+        // Update skeleton status bar (primary — shown after immediate render)
+        const skBar = document.getElementById('skProgressBar');
+        const skTxt = document.getElementById('skStatusText');
+        if (skBar) skBar.style.width = pct + '%';
+        if (skTxt) skTxt.textContent = timeStr + ' — Oracle still composing…';
+        // Fallback: update old elapsed elements if still present
         const elNote = document.getElementById('elapsedNote');
         const elText = document.getElementById('elapsedText');
-        const elBar = document.getElementById('elapsedBar');
-        if (elNote) {
-          elNote.style.display = 'block';
-          // Estimate 5 min max for oracle, 2 min for quick
-          const maxSec = {free:60, seeker:120, initiate:180, mystic:240, oracle:360}[activeTier] || 300;
-          const pct = Math.min(96, Math.round((elapsed / maxSec) * 100));
-          if (elText) {
-            const mins = Math.floor(elapsed/60);
-            const secs = elapsed % 60;
-            const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-            elText.textContent = `${timeStr} — still composing your reading…`;
-          }
-          if (elBar) elBar.style.width = pct + '%';
-        }
+        const elBar  = document.getElementById('elapsedBar');
+        if (elNote) { elNote.style.display = 'block'; }
+        if (elText) elText.textContent = timeStr + ' — still composing…';
+        if (elBar)  elBar.style.width = pct + '%';
 
         if (poll.status === 'complete') {
           clearInterval(pollingTimer); pollingTimer = null;
@@ -3201,8 +3227,16 @@ function renderCard() {
     html += `</div>`;
   }
   if (profile.birthDay && profile.birthYear) {
-    const lpNum = num?.lp;
-    const pyNum = num?.py;
+    // Compute LP/PY client-side if not in reading data
+    let lpNum = num?.lp;
+    let pyNum = num?.py;
+    if (!lpNum && profile.birthDay && profile.birthMonth && profile.birthYear) {
+      const lpRaw = parseInt(profile.birthDay) + parseInt(profile.birthMonth) +
+        String(profile.birthYear).split('').reduce((a,b)=>a+parseInt(b),0);
+      lpNum = numReduce(lpRaw);
+      const uyRaw = String(new Date().getFullYear()).split('').reduce((a,b)=>a+parseInt(b),0);
+      pyNum = numReduce(parseInt(profile.birthDay) + parseInt(profile.birthMonth) + numReduce(uyRaw));
+    }
     const lpD = NUM_DATA[lpNum] || {n:'—'};
     const pyD = NUM_DATA[pyNum] || {n:'—'};
     const isMLP = [11,22,33,44].includes(lpNum);
@@ -3349,7 +3383,7 @@ document.addEventListener('click', e => {
 
 // ── Update hamburger label to show current page ──────────────
 function updateHamburgerLabel(screenId) {
-  const labels = {sr:'Reading',scard:'Card',sc:'Calendar',shist:'History',scompat:'Compat',sctx:'Context',sp:'Profile'};
+  const labels = {sr:'Reading',scard:'Card',sc:'Calendar',shist:'History',scompat:'Compat',sctx:'Year Energy',sp:'Profile'};
   const lbl = document.getElementById('hamburgerLabel');
   if (lbl) lbl.textContent = labels[screenId] || 'Menu';
 }
@@ -3388,32 +3422,21 @@ function renderSkeletonReading(dateStr, tier) {
   }
 
   // ── Dreamspell Kin ───────────────────────────────────────────────
+  // Use clientKin() — same calculation as calendar and server
   const KS=['Dragon','Wind','Night','Seed','Serpent','World-Bridger','Hand','Star',
     'Moon','Dog','Monkey','Human','Skywalker','Wizard','Eagle','Warrior','Earth','Mirror','Storm','Sun'];
   const KT=['Magnetic','Lunar','Electric','Self-Existing','Overtone','Rhythmic',
     'Resonant','Galactic','Solar','Planetary','Spectral','Crystal','Cosmic'];
   const KC=['Red','White','Blue','Yellow'];
-  const GAP_KINS = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,52,53,54,55,56,57,58,59,60,61,62,63,64,
-    105,106,107,108,109,110,111,112,113,114,115,116,117,118,157,158,159,160,161,162,163,164,165,166,
-    167,168,169,170,211,212,213,214,215,216,217,218,219,220,221,222,223,224]);
-  const anchor = new Date('2024-07-08T12:00:00Z');
-  const today  = new Date(dateStr + 'T12:00:00Z');
-  let diff = Math.round((today - anchor) / 86400000);
-  let leaps = 0;
-  for (let y = 2024; y <= parts[0]; y++) {
-    const isLY = (y%4===0&&y%100!==0)||(y%400===0);
-    if (!isLY) continue;
-    const feb = new Date(y,1,29,12,0,0);
-    if (feb > anchor && feb < today) leaps++;
-  }
-  const kinNum = ((diff - leaps) % 260 + 260) % 260 + 1;
+  const _kinD = clientKin(dateStr);
+  const kinNum = _kinD.kin;
   const si = (kinNum-1)%20, ti = (kinNum-1)%13;
   const kinFull = KC[si%4]+' '+KT[ti]+' '+KS[si];
-  const isGAP = GAP_KINS.has(kinNum);
+  const isGAP = _kinD.isGAP;
 
   // ── Moon (rough client-side calc) ────────────────────────────────
-  const knownNew = new Date('2026-03-29T12:00:00Z');
-  const lunarCycle = 29.53059;
+  const knownNew = new Date('2026-01-17T02:02:00Z');  // USNO verified
+  const lunarCycle = 29.53058867;
   const moonAge = ((today - knownNew) / 86400000 % lunarCycle + lunarCycle) % lunarCycle;
   const toNew = lunarCycle - moonAge;
   const isBlack = toNew >= 0.6 && toNew <= 2.6;
@@ -3441,7 +3464,7 @@ function renderSkeletonReading(dateStr, tier) {
     });
     bioHtml = `<div style="background:var(--bg2);border:1px solid var(--div);border-radius:2px;padding:16px 18px;margin-bottom:20px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:rgba(240,237,230,0.75)">Biorhythms Today</div>
+        <div style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:rgba(240,237,230,0.75);font-weight:600">Biorhythms Today</div>
         <span style="flex:1;height:1px;background:var(--div)"></span>
         <span style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Cycles · Physical 23d · Emotional 28d · Intellectual 33d</span>
       </div>
@@ -3764,7 +3787,7 @@ function fillAISections(data, dateStr) {
     fadeIn(swEl, `<div class="shadow-box tappable" onclick="tapShadow('${sw.replace(/'/g,"\'").slice(0,200)}')" title="Tap to go deeper">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
         <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55)">Shadow Work</div>
-        <div style="font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase">↗ Work with this</div>
+        <div style="font-size:12px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:500">↗ Work with this</div>
       </div>
       <div class="shadow-text">${sw}</div>
     </div>`);
@@ -3953,7 +3976,7 @@ function renderReading(data, dateStr) {
     });
     bioHtml = '<div style="background:var(--bg2);border:1px solid var(--div);border-radius:2px;padding:16px 18px;margin-bottom:20px">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
-      + '<div style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:rgba(240,237,230,0.75);font-weight:500">Biorhythms Today</div>'
+      + '<div style="font-size:13px;letter-spacing:.28em;text-transform:uppercase;color:rgba(240,237,230,0.75);font-weight:600">Biorhythms Today</div>'
       + '<span style="flex:1;height:1px;background:var(--div);display:inline-block"></span>'
       + '<span style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3)">Cycles · Physical 23d · Emotional 28d · Intellectual 33d</span></div>'
       + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
@@ -4010,7 +4033,7 @@ function renderReading(data, dateStr) {
     html += `<div class="shadow-box tappable" onclick="tapShadow('${sw.replace(/'/g,"\\'").slice(0,200)}')" title="Tap to go deeper into shadow work">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">
         <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:rgba(240,237,230,0.55)">Shadow Work</div>
-        <div style="font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase">↗ Work with this</div>
+        <div style="font-size:12px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:500">↗ Work with this</div>
       </div>
       <div class="shadow-text">${sw}</div>
     </div>`;
@@ -4677,7 +4700,7 @@ function clientMoon(ds){
   else if(cyc<14.5)emoji='🌔';else if(cyc<16.5)emoji='🌕';else if(cyc<22.5)emoji='🌖';
   else if(cyc<23.5)emoji='🌗';else emoji='🌘';
   return{emoji,cyc,isBlack:cyc>27.53,isShiva:cyc>=1.5&&cyc<=3.5,
-    isNew:cyc<1.5||cyc>28.5,isFull:cyc>13.5&&cyc<16.5};
+    isNew:cyc<1.5||cyc>28.5,isFull:cyc>=14.0&&cyc<=16.0};
 }
 
 function clientKin(ds){
