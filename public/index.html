@@ -1372,37 +1372,37 @@ body.print-card-mode{background:#0D1E33}
   <div class="mode-box">
     <div class="mode-eyebrow">Cosmic Daily Planner</div>
     <div class="mode-title">How deep do you want to go today?</div>
-    <div class="mode-sub">Your Oracle adapts to the time you have</div>
+    <div class="mode-sub">Choose your depth — from instant to immersive</div>
     <div class="mode-options">
       <button class="mode-btn mode-free selected" id="modeFree" onclick="selectMode('free')">
         <div class="mode-btn-icon">✦</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Daily Snapshot</div>
-          <div class="mode-btn-desc">Instant — Universal Day, Moon, Dreamspell Kin. No wait.</div>
+          <div class="mode-btn-title">Daily Snapshot <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif">· Free</span></div>
+          <div class="mode-btn-desc">Instant — Universal Day, Moon, Dreamspell Kin. No server wait.</div>
         </div>
         <div class="mode-btn-time">Instant</div>
       </button>
       <button class="mode-btn mode-quick" id="modeQuick" onclick="selectMode('quick')">
         <div class="mode-btn-icon">⚡</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Full Reading</div>
-          <div class="mode-btn-desc">All frameworks — numerology, astrology, Dreamspell, priorities</div>
+          <div class="mode-btn-title">Full Reading <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif">· Seeker</span></div>
+          <div class="mode-btn-desc">All four frameworks — numerology, astrology, Dreamspell, priorities, focus and ease</div>
         </div>
         <div class="mode-btn-time">~2 min</div>
       </button>
       <button class="mode-btn mode-standard" id="modeStandard" onclick="selectMode('standard')">
         <div class="mode-btn-icon">☽</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Deep Reading</div>
-          <div class="mode-btn-desc">Full Oracle with shadow work, week ahead, time windows</div>
+          <div class="mode-btn-title">Deep Reading <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);font-family:'EB Garamond',serif">· Oracle</span></div>
+          <div class="mode-btn-desc">Full depth — shadow work, week ahead, time windows, planetary aspects</div>
         </div>
         <div class="mode-btn-time">~5 min</div>
       </button>
       <button class="mode-btn mode-deep" id="modeDeep" onclick="selectMode('deep')">
         <div class="mode-btn-icon">◈</div>
         <div class="mode-btn-text">
-          <div class="mode-btn-title">Oracle Deep Dive</div>
-          <div class="mode-btn-desc">Maximum depth — daily gift, all aspects, full week ahead</div>
+          <div class="mode-btn-title">Oracle Deep Dive <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--master);font-family:'EB Garamond',serif">· Maximum depth</span></div>
+          <div class="mode-btn-desc">Everything — daily gift, full aspects, closing reflection, complete week ahead</div>
         </div>
         <div class="mode-btn-time">~8 min</div>
       </button>
@@ -1416,7 +1416,7 @@ body.print-card-mode{background:#0D1E33}
     <label class="mode-remember">
       <input type="checkbox" id="modeRemember"> Remember my choice
     </label>
-    <div class="mode-skip" onclick="startWithMode()">Skip — use my last setting</div>
+    <div class="mode-skip" id="modeSkipLink" onclick="startWithMode()">Use last setting</div>
   </div>
 </div>
 
@@ -2151,12 +2151,15 @@ function selectMode(mode) {
 
 function showModeSelector() {
   const saved = localStorage.getItem('cdp_mode');
-  if (saved && localStorage.getItem('cdp_mode_remember') === 'true') {
-    selectedMode = saved;
-    startWithMode(true);
-    return;
-  }
+  // Always show the selector — no auto-skip until tier gating is live
+  // Pre-highlight their last choice if they have one
   if (saved) { selectedMode = saved; selectMode(saved); }
+  // Update skip link to show what mode will be used
+  const skipLbl = document.getElementById('modeSkipLink');
+  if (skipLbl) {
+    const modeNames = {free:'Daily Snapshot', quick:'Full Reading', standard:'Deep Reading', deep:'Oracle Deep Dive'};
+    skipLbl.textContent = saved ? 'Use last setting (' + (modeNames[saved]||saved) + ')' : 'Skip — use default';
+  }
   document.getElementById('modeSelector').classList.add('visible');
 }
 
@@ -2664,10 +2667,15 @@ async function loadReading(dateStr, tier) {
 
     <div style="margin-top:10px;font-size:13px;color:var(--teal);letter-spacing:.12em;opacity:.8">${depthNote}</div>
 
-    <div class="tier-row" style="margin-top:24px">
-      ${['free','seeker','initiate','mystic','oracle'].map(t=>
-        `<span class="tier-pill ${activeTier===t?'active':''}" onclick="showTierModal('${t}')" style="cursor:pointer">${t.charAt(0).toUpperCase()+t.slice(1)}</span>`
-      ).join('')}
+    <div style="margin-top:20px;display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap">
+      <span style="font-size:13px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase">
+        ${{'free':'Daily Snapshot','seeker':'Full Reading','oracle':'Deep Reading','initiate':'Initiate','mystic':'Mystic'}[activeTier]||activeTier}
+        &nbsp;·&nbsp; ${{'free':'Instant','seeker':'~2 min','oracle':'~5 min','initiate':'~3 min','mystic':'~4 min'}[activeTier]||''}
+      </span>
+      <span style="font-size:12px;color:var(--gold3);cursor:pointer;text-decoration:underline;text-underline-offset:3px"
+        onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">
+        change depth
+      </span>
     </div>
 
     <div style="margin-top:28px;display:flex;flex-direction:column;gap:10px;align-items:center" id="stageList">
