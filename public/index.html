@@ -496,6 +496,10 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .sk-line{height:14px;background:var(--div);border-radius:2px;margin-bottom:8px;
   animation:skPulse 1.6s ease-in-out infinite}
 .sk-section{transition:opacity .5s}
+.stage-dot{width:6px;height:6px;border-radius:50%;background:var(--div);
+  transition:background .4s,transform .4s;flex-shrink:0}
+.stage-dot.active{background:var(--gold);transform:scale(1.3)}
+.stage-dot.done{background:var(--teal);opacity:.6}
 
 .ctx-section-label{font-size:10px;letter-spacing:.35em;text-transform:uppercase;
   color:var(--text3);margin-bottom:6px}
@@ -3594,26 +3598,25 @@ function renderSkeletonReading(dateStr, tier) {
   const _readyTime = {free:'instant',seeker:'1–2 min',initiate:'2–3 min',mystic:'3–4 min',oracle:'3–6 min'}[tier]||'';
 
   let html = `<div id="skeletonStatusBar" style="position:sticky;top:52px;z-index:90;
-    background:var(--bg3);border-bottom:1px solid var(--gold3);padding:10px 24px;
-    display:flex;align-items:center;gap:12px;transition:opacity .4s">
-    <div style="font-size:20px;animation:moonSpin 3s linear infinite;flex-shrink:0">☽</div>
+    background:rgba(8,19,31,0.95);border-bottom:1px solid var(--gold3);
+    padding:9px 20px;display:flex;align-items:center;gap:12px;
+    transition:opacity .4s;backdrop-filter:blur(12px)">
+    <div style="font-size:16px;animation:moonSpin 3s linear infinite;flex-shrink:0;opacity:.8">☽</div>
     <div style="flex:1;min-width:0">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span style="font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold3)">${_tierLabel}</span>
-        <span style="font-size:12px;color:var(--text3)">·</span>
-        <span style="font-size:12px;color:var(--text3)">${_readyTime}</span>
-        <span style="font-size:12px;color:var(--text3)">·</span>
-        <span style="font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:2px"
-          onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">change</span>
-      </div>
-      <div style="font-size:13px;color:var(--gold);letter-spacing:.04em;margin-top:3px;
-        transition:opacity .4s;font-style:italic" id="skStatusText">
-        ${_skStages[0]}
-      </div>
+      <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.9">${_tierLabel}</span>
+      <span style="font-size:12px;color:var(--text3);margin:0 6px">·</span>
+      <span style="font-size:12px;color:var(--text3)" id="skStatusText">${_readyTime}</span>
+      <span style="font-size:12px;color:var(--text3);margin:0 6px">·</span>
+      <span style="font-size:12px;color:var(--text3);cursor:pointer;
+        text-decoration:underline;text-underline-offset:2px;opacity:.7"
+        onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">change depth</span>
     </div>
-    <div style="width:100px;height:2px;background:var(--div);border-radius:1px;overflow:hidden;flex-shrink:0">
-      <div id="skProgressBar" style="height:100%;width:0%;background:var(--gold3);
-        border-radius:1px;transition:width 1s linear"></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+      <span style="font-size:11px;color:var(--text3)" id="skElapsedTxt"></span>
+      <div style="width:80px;height:2px;background:var(--div);border-radius:1px;overflow:hidden">
+        <div id="skProgressBar" style="height:100%;width:0%;background:var(--gold);
+          border-radius:1px;transition:width 1s linear"></div>
+      </div>
     </div>
   </div>`;
 
@@ -3656,9 +3659,18 @@ function renderSkeletonReading(dateStr, tier) {
   if (isBlack) html += `<div style="margin-bottom:16px"><span class="moon-badge badge-black">⚠️ Black Moon — 2 days before New Moon — threshold day</span></div>`;
   if (isShiva) html += `<div style="margin-bottom:16px"><span class="moon-badge badge-shiva">✨ Shiva Moon — 2 days after New Moon — auspicious</span></div>`;
 
-  // AI placeholder: synthesis (will be replaced)
-  html += `<div id="ai-synthesis" class="synthesis sk-section">
-    ${Array.from({length:4},(_,i)=>`<div class="sk-line" style="width:${[88,95,72,60][i]}%;animation-delay:${i*0.1}s"></div>`).join('')}
+  // AI placeholder: synthesis — shows elegant cycling stage display while Oracle composes
+  html += `<div id="ai-synthesis" class="synthesis" style="text-align:center;padding:32px 24px 28px;
+    background:var(--bg2);border:1px solid var(--div);border-radius:3px;margin-bottom:20px">
+    <div style="font-size:28px;margin-bottom:16px;animation:moonSpin 4s linear infinite;display:inline-block">☽</div>
+    <div id="stageDisplay" style="font-family:'Cormorant Garamond',serif;font-size:clamp(17px,2.5vw,22px);
+      color:var(--text2);font-style:italic;line-height:1.6;letter-spacing:.02em;
+      transition:opacity .5s;min-height:2.4em;display:flex;align-items:center;justify-content:center">
+      ${_skStages[0]}
+    </div>
+    <div style="margin-top:18px;display:flex;align-items:center;gap:6px;justify-content:center">
+      ${_skStages.map((_,i)=>`<div class="stage-dot${i===0?' active':''}" id="stageDot${i}"></div>`).join('')}
+    </div>
   </div>`;
 
   // Biorhythms (real data)
@@ -3794,41 +3806,46 @@ function renderSkeletonReading(dateStr, tier) {
   html += `</div>`;
   cont.innerHTML = html;
 
-  // Animate progress bar + cycle stage messages during wait
-  const pb = document.getElementById('skProgressBar');
-  const st = document.getElementById('skStatusText');
-  let elapsed = 0;
-  let stageIdx = 0;
+  // Stage cycling + progress bar animation
+  const pb  = document.getElementById('skProgressBar');
+  const elt = document.getElementById('skElapsedTxt');
+  let elapsed = 0, stageIdx = 0;
   const maxSec = {oracle:360,mystic:240,initiate:180,seeker:120,free:60}[tier]||300;
-  const stageInterval = Math.max(12, Math.floor(maxSec / _skStages.length));
+  const stageInterval = Math.max(10, Math.floor(maxSec / _skStages.length));
 
   const pbTimer = setInterval(() => {
     elapsed++;
     if (!document.getElementById('skeletonStatusBar')) { clearInterval(pbTimer); return; }
 
     // Progress bar
-    const pct = Math.min(95, Math.round((elapsed/maxSec)*100));
+    const pct = Math.min(95, Math.round((elapsed / maxSec) * 100));
     if (pb) pb.style.width = pct + '%';
 
-    // Cycle stage messages
-    if (elapsed > 0 && elapsed % stageInterval === 0 && stageIdx < _skStages.length - 1) {
-      stageIdx++;
-      if (st) {
-        st.style.opacity = '0';
-        setTimeout(() => {
-          if (st) { st.textContent = _skStages[stageIdx]; st.style.opacity = '1'; }
-        }, 300);
-      }
+    // Elapsed time in status bar
+    if (elt) {
+      const m = Math.floor(elapsed/60), s = elapsed%60;
+      elt.textContent = (m>0?m+'m ':'')+s+'s';
     }
 
-    // After all stages, show elapsed time
-    if (stageIdx >= _skStages.length - 1 && elapsed % 15 === 0) {
-      const mins = Math.floor(elapsed/60), secs = elapsed%60;
-      if (st) {
-        st.style.opacity = '0';
+    // Advance to next stage
+    if (elapsed % stageInterval === 0 && stageIdx < _skStages.length - 1) {
+      // Mark current dot done
+      const curDot = document.getElementById('stageDot'+stageIdx);
+      if (curDot) { curDot.classList.remove('active'); curDot.classList.add('done'); }
+
+      stageIdx++;
+
+      // Advance dot
+      const nxtDot = document.getElementById('stageDot'+stageIdx);
+      if (nxtDot) nxtDot.classList.add('active');
+
+      // Fade stage text
+      const sd = document.getElementById('stageDisplay');
+      if (sd) {
+        sd.style.opacity = '0';
         setTimeout(() => {
-          if (st) { st.textContent = (mins>0?mins+'m ':'')+secs+'s — still composing, almost there…'; st.style.opacity = '1'; }
-        }, 300);
+          if (sd) { sd.textContent = _skStages[stageIdx]; sd.style.opacity = '1'; }
+        }, 400);
       }
     }
   }, 1000);
