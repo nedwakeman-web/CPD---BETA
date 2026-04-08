@@ -523,7 +523,7 @@ async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHis
   // ── TIER-SPECIFIC SCOPE ──
   const tierScope = {
     free: `TIER: Free — Generate ONLY: synthesis (1 sentence), Universal Day number + name + one sentence meaning, moon phase + sign, today's Kin, one "For Today" action. JSON must have: synthesis, numerology:{headline, body(1 paragraph)}, moon_section:{headline, body(1 paragraph)}, dreamspell:{headline}, closing_line. Nothing else. Keep total output under 500 tokens.`,
-    seeker: `TIER: Seeker — Generate full reading with: synthesis, numerology (all fields including three_energies), moon_section, astrology (main_transit only, no saturn_neptune deep dive), dreamspell, priorities (3), focus_on, ease_off, time_windows, closing_line, sources. No week_ahead, no daily_gift. Keep prose fields to 2 sentences each.`,
+    seeker: `TIER: Seeker — Generate a focused reading. Required JSON fields ONLY: synthesis (3 sentences), numerology:{headline,body(2 sentences),three_energies:{morning,afternoon,evening each with num+name+guidance}}, moon_section:{headline,body(2 sentences)}, astrology:{main_transit_headline,main_transit_body(2 sentences)}, dreamspell:{headline,body(2 sentences)}, priorities:[3 items with title+rationale(2 sentences)+action], shadow_work(2 sentences), focus_on:[4 items], ease_off:[4 items], time_windows:{morning,afternoon,evening each 1 sentence}, closing_line, sources. NO week_ahead. NO daily_gift. Total output under 1800 tokens.`,
     initiate: `TIER: Initiate — Generate full reading with all fields except: omit daily_gift.meditation and deep saturn_neptune historical analysis. Keep prose fields to 3 sentences each. Include week_ahead.`,
     mystic: `TIER: Mystic — Generate complete reading with all fields. Include natal chart context. Keep prose fields to 3-4 sentences. Full week_ahead. Full daily_gift.`,
     oracle: `TIER: Oracle — Generate the COMPLETE, MAXIMALLY DETAILED reading. This is the £50,000-tier experience. Every prose field must be FULL, RICH paragraphs — 4-6 sentences minimum per paragraph, multiple paragraphs per section as defined in the JSON schema. The benchmark is a 25-30 page printed document. Numerology body: 4 full paragraphs. Moon body: 3 full paragraphs. Main transit body: 4 full paragraphs. Saturn-Neptune: 3 full paragraphs. Dreamspell body: 4 full paragraphs. Each aspect: 3 full sentences. Shadow work: 4 italic sentences. Each priority: 3-4 sentence rationale + specific action. Full week_ahead with 2-sentence personalised notes for each day. Complete daily_gift with meditation. Do NOT truncate any field. Every field in the JSON schema must be populated to maximum depth.`
@@ -648,7 +648,7 @@ Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no pream
   "sources": "Astronomy: Swiss Ephemeris (Koch & Treindl, Astrodienst AG, ae_2026.pdf); USNO Moon Phases. Maya calendrics: Šprajc et al. (2023) Science Advances doi:10.1126/sciadv.abq7675; Aldana (2022) doi:10.34758/qyyd-vx23. Dreamspell: Argüelles (1987) The Mayan Factor. Astrology: Greene (1976) Saturn; Tarnas (2006) Cosmos & Psyche; Hand (2002) Planets in Transit; Brady (1999) Predictive Astrology; Brennan (2017) Hellenistic Astrology. Numerology: Drayer (2002); Kahn (2001) Pythagoras."
 }`;
 
-  const maxTok = {free:800, seeker:3000, initiate:5000, mystic:8000, oracle:16000}[tier] || 8192;
+  const maxTok = {free:800, seeker:4500, initiate:6000, mystic:9000, oracle:16000}[tier] || 8192;
   const raw = await callAPI('claude-sonnet-4-6', maxTok, sys, user);
 
   let reading;
@@ -1646,6 +1646,19 @@ app.post('/api/compatibility', async (req, res) => {
 });
 
 // ── HEALTH ENDPOINT — used by frontend wake check and Railway monitors ──
+app.get('/api/debug/:jobId', (req, res) => {
+  const job = jobs.get(req.params.jobId);
+  if (!job) return res.status(404).json({ status: 'not_found' });
+  res.json({
+    status: job.status,
+    error: job.error || null,
+    elapsed: job.startedAt ? Math.round((Date.now() - job.startedAt)/1000) + 's' : null,
+    phase1: job.phase1 ? 'present' : null,
+    resultKeys: job.result ? Object.keys(job.result) : null,
+    readingKeys: job.result?.reading ? Object.keys(job.result.reading) : null,
+  });
+});
+
 app.get('/api/health', (req, res) => {
   const hasKey = !!(process.env.ANTHROPIC_API_KEY);
   res.json({

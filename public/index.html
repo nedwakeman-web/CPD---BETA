@@ -3465,13 +3465,15 @@ async function loadReading(dateStr, tier) {
           clearInterval(pollingTimer); pollingTimer = null;
           clearInterval(stageTimer);
           sessionStorage.removeItem('cdp_active_job');
+          const sd = document.getElementById('stageDisplay');
+          const sb = document.getElementById('skeletonStatusBar');
+          if (sb) { sb.style.opacity='0'; setTimeout(()=>sb?.remove(),400); }
           if (poll.status === 'not_found') {
-            const sd = document.getElementById('stageDisplay');
-            if (sd) { sd.innerHTML = '<div style="color:var(--text2);font-size:15px">Session expired. <button onclick="loadReading(dateStr,\'' + activeTier + '\')" style="background:none;border:1px solid var(--gold3);border-radius:2px;color:var(--gold);padding:6px 14px;cursor:pointer">Start again ✶</button></div>'; sd.style.opacity='1'; }
-            const sb = document.getElementById('skeletonStatusBar');
-            if (sb) { sb.style.opacity='0'; setTimeout(()=>sb?.remove(),400); }
+            if (sd) { sd.style.opacity='0'; setTimeout(()=>{ if(sd){ sd.innerHTML='<div style="color:var(--text2);font-size:15px">Session expired. <button onclick="loadReading(\''+dateStr+'\',\''+activeTier+'\')" style="background:none;border:1px solid var(--gold3);border-radius:2px;color:var(--gold);padding:6px 14px;cursor:pointer">Start again ✶</button></div>'; sd.style.opacity='1'; } },400); }
           } else {
-            throw new Error(poll.error || 'Reading generation failed');
+            const errMsg = poll.error || 'Reading generation failed';
+            console.error('Reading error from server:', errMsg);
+            if (sd) { sd.style.opacity='0'; setTimeout(()=>{ if(sd){ sd.innerHTML='<div style="color:var(--text2);font-size:15px;text-align:center"><div style="margin-bottom:12px;color:#ff9999">⚠ ' + errMsg.slice(0,120) + '</div><button onclick="loadReading(\''+dateStr+'\',\''+activeTier+'\')" style="background:none;border:1px solid var(--gold3);border-radius:2px;color:var(--gold);padding:6px 14px;cursor:pointer">Try again ✶</button></div>'; sd.style.opacity='1'; } },400); }
           }
         }
       } catch(pollErr) {
