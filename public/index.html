@@ -5930,6 +5930,129 @@ function renderCalendar(){
   grid.innerHTML=html;
 }
 
+// ── Day modal drawer helpers — called from onclick attributes ──
+let _dayModalData = {}; // store computed values for drawer access
+
+function openDayKinDrawer() {
+  const d = _dayModalData;
+  if (!d.kinQ) return;
+  const chips = [
+    {q:'What is the gift and the shadow of the '+d.seal+' for '+d.firstName+' on '+d.dLabel+'?', l:'Gift & shadow'},
+    {q:'How does Tone '+d.toneNum+' ('+d.tone+') shape '+d.firstName+' approach on '+d.dLabel+'?', l:'Tone in practice'},
+  ];
+  if (d.isGAP) chips.push({q:'What specific synchronicities should '+d.firstName+' watch for on this GAP day?', l:'★ GAP arrivals'});
+  openDrawer('Dreamspell · '+d.kinFull, d.kinQ, chips);
+}
+
+function openDayEnergyDrawer(mode, num) {
+  const d = _dayModalData;
+  const nd = NUM_DATA[num] || {n:'—', m:''};
+  const modeLabel = mode==='morning'?'Morning':mode==='afternoon'?'Afternoon':'Evening';
+  openDrawer(
+    modeLabel+' Energy · '+num+' '+nd.n,
+    modeLabel+' energy on '+d.dLabel+': '+num+' ('+nd.n+'). '+(nd.m||nd.k||'')+' What specifically does this '+mode+' energy invite '+d.firstName+' to do or be?',
+    [
+      {q:'What is the single most important thing '+d.firstName+' should do this '+mode+' on '+d.dLabel+'?', l:'Priority this '+mode},
+      {q:'What should '+d.firstName+' avoid this '+mode+'?', l:'What to avoid'},
+    ]
+  );
+}
+
+function openPersonalNumDrawer(scope, num) {
+  const d = _dayModalData;
+  const nd = NUM_DATA[num] || {n:'—', m:''};
+  openDrawer(
+    'Personal '+scope.charAt(0).toUpperCase()+scope.slice(1)+' · '+num+' '+nd.n,
+    'Personal '+scope+' number '+num+' ('+nd.n+') for '+d.firstName+' on '+d.dLabel+'. '+(nd.m||'')+' What does this Personal '+scope+' energy specifically mean for '+d.firstName+' right now?',
+    [
+      {q:'How does Personal '+scope+' '+num+' shape '+d.firstName+' approach on '+d.dLabel+'?', l:'In practice today'},
+      {q:'What does Personal '+scope+' '+num+' reveal about where '+d.firstName+' is in their cycle?', l:'In the cycle'},
+    ]
+  );
+}
+
+// ── Day card save-as-image ──────────────────────────────────────
+async function saveDayCardImage(ds) {
+  const card = document.getElementById('dayCardCapture');
+  const btn = document.getElementById('dayCardSaveBtn');
+  if (!card) return;
+  if (btn) { btn.textContent = 'Capturing…'; btn.disabled = true; }
+  try {
+    if (typeof html2canvas !== 'undefined') {
+      const canvas = await html2canvas(card, {
+        backgroundColor: '#0D1E33',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        ignoreElements: el => el.classList.contains('no-capture')
+      });
+      canvas.toBlob(async blob => {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+          if (btn) { btn.textContent = '✓ Copied to clipboard'; setTimeout(()=>{ btn.textContent='⎘ Save as Image'; btn.disabled=false; }, 2500); }
+        } catch(e) {
+          // Clipboard API not available — download instead
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'cosmic-day-' + ds + '.png';
+          a.click();
+          if (btn) { btn.textContent = '✓ Downloaded'; setTimeout(()=>{ btn.textContent='⎘ Save as Image'; btn.disabled=false; }, 2500); }
+        }
+      }, 'image/png');
+    } else {
+      if (btn) { btn.textContent = '⎘ Save as Image'; btn.disabled = false; }
+      alert('Image capture library not loaded. Try saving as PDF instead.');
+    }
+  } catch(e) {
+    if (btn) { btn.textContent = '⎘ Save as Image'; btn.disabled = false; }
+  }
+}
+
+function saveDayCardPDF(ds, dLabel) {
+  const card = document.getElementById('dayCardCapture');
+  if (!card) return;
+  const w = window.open('', '_blank', 'width=600,height=800');
+  if (!w) { alert('Please allow pop-ups to save as PDF.'); return; }
+  w.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Cosmic Daily Planner · ${dLabel}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{background:#07111a;color:#E8DCC8;font-family:'EB Garamond',Georgia,serif;font-size:11pt;padding:20px}
+      .card{background:#0D1E33;border:1px solid rgba(201,160,80,0.3);border-radius:4px;padding:20px 22px;max-width:480px;margin:0 auto}
+      .card-brand{font-family:'Cormorant Garamond',serif;font-size:9pt;letter-spacing:.4em;text-transform:uppercase;color:#C9A050;margin-bottom:12px;opacity:.7}
+      .card-date{font-family:'Cormorant Garamond',serif;font-size:18pt;color:#E8C878;margin-bottom:16px;font-weight:300}
+      .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+      .box{background:#0a1825;border:1px solid rgba(201,160,80,0.12);border-radius:3px;padding:10px 11px}
+      .box-label{font-size:7pt;letter-spacing:.25em;text-transform:uppercase;color:#7A8FAA;margin-bottom:4px}
+      .box-val{font-family:'Cormorant Garamond',serif;font-size:20pt;color:#C9A050;line-height:1}
+      .box-sub{font-size:9pt;color:#9bb3c9;margin-top:3px}
+      .box-note{font-size:8pt;color:#5a7a9a;margin-top:4px;font-style:italic;line-height:1.4}
+      .energies{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px}
+      .en-card{background:#0a1825;border:1px solid rgba(201,160,80,0.12);border-radius:3px;padding:8px;text-align:center}
+      .en-label{font-size:7pt;color:#7A8FAA;margin-bottom:3px}
+      .en-num{font-family:'Cormorant Garamond',serif;font-size:18pt;color:#E8DCC8;line-height:1}
+      .en-name{font-size:8pt;color:#9bb3c9;margin-top:2px}
+      .alert{border-radius:3px;padding:9px 12px;margin-bottom:12px;font-size:9.5pt;line-height:1.5}
+      .footer{font-size:7.5pt;color:#4a6a8a;text-align:center;margin-top:14px;letter-spacing:.08em}
+      .print-btn{position:fixed;top:12px;right:12px;background:#0D1E33;border:1px solid #C9A050;
+        color:#C9A050;font-family:'EB Garamond',serif;font-size:11px;padding:8px 16px;
+        border-radius:2px;cursor:pointer;letter-spacing:.15em}
+      @media print{.print-btn{display:none}body{padding:0}}
+      @page{margin:10mm;size:A5 portrait}
+    </style>
+  </head><body>
+  <button class="print-btn" onclick="window.print()">⎙ Save as PDF</button>
+  <div class="card">
+    ${card.innerHTML.replace(/class="no-capture[^"]*"/g,'').replace(/<button[^>]*>.*?<\/button>/gs,'').replace(/onclick="[^"]*"/g,'')}
+  </div>
+  <div class="footer">✦ cosmicdailyplanner.com · Generated ${new Date().toLocaleDateString('en-GB')}</div>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── Open day modal with tappable cards ──────────────────────────
 function openDayModal(ds){
   const moon=clientMoon(ds);
   const kinD=clientKin(ds);
@@ -5938,10 +6061,9 @@ function openDayModal(ds){
   const dLabel=date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const isMaster=[11,22,33,44].includes(ud);
   const isSpecial=!isMaster&&[7,9].includes(ud);
-  const udD=NUM_DATA[ud]||{n:'—',m:''};
+  const udD=NUM_DATA[ud]||{n:'—',m:'',k:''};
   const masterCol=ud===11?'#C8A0FF':ud===22?'#C9A050':ud===33?'#4DB8A8':ud===44?'#D4922A':'';
 
-  // Month & year energies
   const [y,m,d2]=ds.split('-').map(Number);
   const mEn=numReduce(m);
   const mEnD=NUM_DATA[mEn]||{n:'—'};
@@ -5949,7 +6071,6 @@ function openDayModal(ds){
   const yEn=numReduce(yRaw);
   const yEnD=NUM_DATA[yEn]||{n:'—'};
 
-  // Personal numbers (if birth data available)
   let pd=null,pm=null,py=null,pdD={},pmD={},pyD={};
   if(profile.birthDay&&profile.birthMonth&&profile.birthYear){
     const yR=String(y).split('').reduce((a,b)=>a+parseInt(b),0);
@@ -5959,89 +6080,132 @@ function openDayModal(ds){
     pdD=NUM_DATA[pd]||{}; pmD=NUM_DATA[pm]||{}; pyD=NUM_DATA[py]||{};
   }
 
-  // Three energies
   const morning=pd||ud, afternoon=pm||mEn, evening=py||yEn;
-  const mornD=NUM_DATA[morning]||{}, aftD=NUM_DATA[afternoon]||{}, eveD=NUM_DATA[evening]||{};
-
-  // Kin color
   const kinCol=kinD.col==='Red'?'#c0392b':kinD.col==='White'?'#9bb3c9':kinD.col==='Blue'?'#2980b9':'#c9a050';
+  const firstName=getFirstName();
 
-  // Moon alert text
+  // Populate shared data for drawer helper functions
+  _dayModalData = {
+    ds, dLabel, firstName,
+    kinFull: kinD.col+' '+kinD.tone+' '+kinD.seal,
+    seal: kinD.seal, tone: kinD.tone, toneNum: (kinD.kin-1)%13+1,
+    isGAP: kinD.isGAP, kinQ: '',
+    moonQ: '', udQ: '', myQ: ''
+  };
+
+  // Pre-compute drawer questions — stored in _dayModalData for helper functions
+  const moonQ = moon.phase + ' — day ' + parseFloat(moon.cyc).toFixed(1) + ' of the lunar cycle, ' + parseFloat(moon.toNew).toFixed(1) + ' days to the New Moon. ' + (moon.isBlack?'BLACK MOON — threshold day.':moon.isShiva?'SHIVA MOON — auspicious.':'') + ' What does this lunar position ask of ' + firstName + ' on ' + dLabel + '?';
+  const kinQ = 'Dreamspell Kin ' + kinD.kin + ' — ' + kinD.col + ' ' + kinD.tone + ' ' + kinD.seal + '. Tone ' + ((kinD.kin-1)%13+1) + '. ' + (kinD.isGAP?'GALACTIC ACTIVATION PORTAL. ':'') + 'What does this Kin specifically invite ' + firstName + ' to embody on ' + dLabel + '? (Arguelles 1987)';
+  _dayModalData.kinQ = kinQ;
+  const udQ = 'Universal Day ' + ud + ' (' + udD.n + '). ' + (udD.k||'') + ' What does this number energy mean for ' + firstName + ' on ' + dLabel + '? How does it shape the quality of the day?';
+  const myQ = 'Month ' + m + ' energy: ' + mEn + ' (' + mEnD.n + '). Year ' + y + ' energy: ' + yEn + ' (' + yEnD.n + '). How do these background frequencies shape what ' + firstName + ' is navigating right now?';
+  const masterQ = isMaster ? 'Master Number ' + ud + ' (' + udD.n + ') — ' + (udD.m||'') + ' What does this Master Number day mean for ' + firstName + ' specifically? How should they use this energy well?' : '';
+
   const moonAlert=moon.isBlack
-    ?'⚠️ <strong>Black Moon</strong> — two days before the New Moon. The veil between cycles is thin. Move carefully: avoid launching anything significant today. Rest, observe, and let intuition guide without acting on it.'
+    ?'⚠️ <strong>Black Moon</strong> — two days before the New Moon. Move carefully: avoid launching anything significant. Rest, observe, and let intuition guide.'
     :moon.isShiva
-    ?'✨ <strong>Shiva Moon</strong> — two days after the New Moon. The first crescent is visible. Blissful and generative. What you plant in the next 48 hours takes root. Act with intention.'
-    :moon.isNewMoon?'🌑 <strong>New Moon</strong> — the cycle resets. Set intentions in silence. Powerful time for inner commitment.'
-    :moon.isFullMoon?'🌕 <strong>Full Moon</strong> — peak illumination. What is ready to be seen? What needs releasing?'
+    ?'✨ <strong>Shiva Moon</strong> — two days after the New Moon. What you plant in the next 48 hours takes root. Act with intention.'
+    :moon.isNewMoon?'🌑 <strong>New Moon</strong> — the cycle resets. Set intentions in silence.'
+    :moon.isFullMoon?'🌕 <strong>Full Moon</strong> — peak illumination. What is ready to be seen?'
     :'';
 
   const cont=document.getElementById('dayModalContent');
   cont.innerHTML=`
-    <button class="modal-close" onclick="closeModal()">×</button>
+    <button class="modal-close no-capture" onclick="closeModal()">×</button>
     <div class="modal-date">${dLabel}</div>
 
+    <!-- Capture zone starts here -->
+    <div id="dayCardCapture" style="background:var(--bg);border-radius:4px;padding:4px 0 8px">
+
     ${(moon.isBlack||moon.isShiva||moon.isNewMoon||moon.isFullMoon)?`
-    <div style="background:${moon.isBlack?'rgba(80,0,0,0.3)':moon.isShiva?'rgba(0,60,80,0.3)':'rgba(201,160,80,0.08)'};border:1px solid ${moon.isBlack?'rgba(200,80,80,0.3)':moon.isShiva?'rgba(80,200,180,0.25)':'rgba(201,160,80,0.2)'};border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:15px;line-height:1.6;color:var(--text2)">${moonAlert}</div>`:''}
+    <div style="background:${moon.isBlack?'rgba(80,0,0,0.3)':moon.isShiva?'rgba(0,60,80,0.3)':'rgba(201,160,80,0.08)'};border:1px solid ${moon.isBlack?'rgba(200,80,80,0.3)':moon.isShiva?'rgba(80,200,180,0.25)':'rgba(201,160,80,0.2)'};border-radius:4px;padding:11px 14px;margin-bottom:14px;font-size:14px;line-height:1.6;color:var(--text2)">${moonAlert}</div>`:''}
 
-    ${isMaster?`<div style="background:rgba(${ud===11?'200,160,255':ud===22?'201,160,80':ud===33?'77,184,168':'212,146,42'},0.08);border:1px solid ${masterCol}44;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-size:15px;color:${masterCol}">★ <strong>Master Number ${ud} Day — ${udD.n}</strong><br><span style="font-size:13px;opacity:.8">${udD.m}</span></div>`:''}
+    ${isMaster?`<div class="tappable" style="background:rgba(${ud===11?'200,160,255':ud===22?'201,160,80':ud===33?'77,184,168':'212,146,42'},0.08);border:1px solid ${masterCol}44;border-radius:4px;padding:12px 16px;margin-bottom:14px;font-size:14px;color:${masterCol};cursor:pointer"
+      data-title="Master Number ${ud} — ${udD.n}"
+      data-q="${masterQ}"
+      onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How should ${firstName} specifically use this Master Number energy today?',l:'How to use this energy'},{q:'What is the shadow or risk of Master ${ud} energy that ${firstName} should watch for?',l:'Shadow of ${ud}'}])">
+      ★ <strong>Master Number ${ud} Day — ${udD.n}</strong>
+      <br><span style="font-size:12px;opacity:.8">${udD.m||''}</span>
+      <div style="font-size:10px;color:${masterCol};margin-top:6px;opacity:.7">↗ Tap for deeper insight</div>
+    </div>`:''}
 
-    ${isSpecial?`<div style="background:rgba(201,160,80,0.07);border:1px solid rgba(201,160,80,0.18);border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:14px;color:var(--gold)">✧ <strong>Day ${ud} — ${udD.n}</strong> — a day of particular ${ud===7?'introspective depth and inner truth':'completion, compassion, and release'}.</div>`:''}
+    ${isSpecial?`<div style="background:rgba(201,160,80,0.07);border:1px solid rgba(201,160,80,0.18);border-radius:4px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--gold)">✧ <strong>Day ${ud} — ${udD.n}</strong> — a day of particular ${ud===7?'introspective depth':'completion and compassion'}.</div>`:''}
 
-    ${kinD.isGAP?`<div style="background:var(--teal3);border:1px solid var(--teal2);border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:14px;color:var(--teal)">★ <strong>Galactic Activation Portal</strong> — heightened sensitivity, synchronicities amplified. Pay close attention to what arrives today. (Argüelles 1987 Dreamspell)</div>`:''}
+    ${kinD.isGAP?`<div style="background:var(--teal3);border:1px solid var(--teal2);border-radius:4px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--teal)">★ <strong>Galactic Activation Portal</strong> — heightened sensitivity, synchronicities amplified. (Argüelles 1987)</div>`:''}
 
     <div class="modal-grid">
 
-      <!-- MOON -->
-      <div class="modal-item">
+      <!-- MOON — tappable -->
+      <div class="modal-item tappable" style="cursor:pointer"
+        data-title="Moon Phase · ${moon.phase}"
+        data-q="${moonQ}"
+        onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How does the ${moon.phase} affect ${firstName} on ${dLabel} — body, energy, sleep?',l:'Body & energy'},{q:'What does this lunar phase ask ${firstName} to release or build right now?',l:'Release or build'},{q:'What is the shadow invitation of the ${moon.phase} for ${firstName}?',l:'Shadow invitation'}])">
         <div class="modal-item-label">Moon Phase</div>
         <div class="modal-item-val" style="font-size:22px">${moon.emoji}</div>
         <div class="modal-item-sub" style="font-weight:500">${moon.phase}</div>
-        <div class="modal-item-meaning">Day ${parseFloat(moon.cyc).toFixed(1)} of lunar cycle · ${parseFloat(moon.toNew).toFixed(1)}d to New Moon</div>
+        <div class="modal-item-meaning">Day ${parseFloat(moon.cyc).toFixed(1)} · ${parseFloat(moon.toNew).toFixed(1)}d to New Moon</div>
+        <div style="font-size:10px;color:var(--teal);margin-top:6px;opacity:.7">↗ Tap for insight</div>
       </div>
 
-      <!-- DREAMSPELL KIN -->
-      <div class="modal-item">
-        <div class="modal-item-label">Dreamspell · ${kinD.isGAP?'★ Portal':'Law of Time'}</div>
+      <!-- DREAMSPELL — tappable -->
+      <div class="modal-item tappable" style="cursor:pointer"
+        onclick="openDayKinDrawer()">
+        <div class="modal-item-label">Dreamspell · ${kinD.isGAP?'★ Portal':'Kin '+kinD.kin}</div>
         <div class="modal-item-val" style="color:${kinCol};font-size:13px">Kin ${kinD.kin}</div>
         <div class="modal-item-sub" style="color:${kinCol}">${kinD.col} ${kinD.tone} ${kinD.seal}</div>
-        <div class="modal-item-meaning" style="font-size:11px">Tone ${kinD.kin>0?(kinD.kin-1)%13+1:''} · Verify: <a href="https://www.tortuga.com/oracle/" target="_blank" style="color:var(--teal)">tortuga.com/oracle</a></div>
+        <div class="modal-item-meaning" style="font-size:10px">Tone ${(kinD.kin-1)%13+1} · <a href="https://www.tortuga.com/oracle/" target="_blank" style="color:var(--teal)" onclick="event.stopPropagation()">tortuga.com/oracle</a></div>
+        <div style="font-size:10px;color:var(--teal);margin-top:6px;opacity:.7">↗ Tap for insight</div>
       </div>
 
-      <!-- UNIVERSAL DAY -->
-      <div class="modal-item">
+      <!-- UNIVERSAL DAY — tappable -->
+      <div class="modal-item tappable" style="cursor:pointer"
+        data-title="Universal Day ${ud} · ${udD.n}"
+        data-q="${udQ}"
+        onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How does Universal Day ${ud} specifically affect ${firstName} work and decisions on ${dLabel}?',l:'Work & decisions'},{q:'What does ${ud} ask ${firstName} to focus on or avoid on ${dLabel}?',l:'Focus & avoid'},{q:'What is the shadow side of ${ud} energy ${firstName} should watch for?',l:'Shadow of ${ud}'}])">
         <div class="modal-item-label">Universal Day Energy</div>
         <div class="modal-item-val" style="${isMaster?'color:'+masterCol:''};">${ud}${isMaster?'★':''}</div>
         <div class="modal-item-sub">${udD.n}</div>
         <div class="modal-item-meaning">${udD.k||''}</div>
+        <div style="font-size:10px;color:var(--gold);margin-top:6px;opacity:.7">↗ Tap for insight</div>
       </div>
 
-      <!-- MONTH & YEAR ENERGY -->
-      <div class="modal-item">
+      <!-- MONTH & YEAR ENERGY — tappable -->
+      <div class="modal-item tappable" style="cursor:pointer"
+        data-title="Month ${m} · Year ${y}"
+        data-q="${myQ}"
+        onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How does the Month ${mEn} (${mEnD.n}) background energy shape ${firstName} experience in ${['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]}?',l:'Month energy depth'},{q:'What does Year ${y} (Universal Year ${yEn} · ${yEnD.n}) want from ${firstName} right now?',l:'Year energy depth'}])">
         <div class="modal-item-label">Month · Year Energy</div>
         <div class="modal-item-val" style="font-size:15px">${mEn} · ${yEn}</div>
         <div class="modal-item-sub">${mEnD.n} · ${yEnD.n}</div>
-        <div class="modal-item-meaning" style="font-size:11px">Month ${m}: reduce(${m}) = ${mEn} · Year ${y}: reduce(${y}) = ${yEn}</div>
+        <div class="modal-item-meaning" style="font-size:10px">Month ${m}: reduce=${mEn} · Year ${y}: reduce=${yEn}</div>
+        <div style="font-size:10px;color:var(--gold);margin-top:6px;opacity:.7">↗ Tap for insight</div>
       </div>
 
     </div>
 
-    <!-- THREE ENERGIES OF THE DAY -->
-    <div style="margin:16px 0 10px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3)">Three Energies of the Day</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+    <!-- THREE ENERGIES — each tappable -->
+    <div style="margin:14px 0 8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3)">Three Energies of the Day</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
       ${['🌅 Morning','☀️ Afternoon','🌙 Evening'].map((label,i)=>{
         const num=[morning,afternoon,evening][i];
-        const nd=NUM_DATA[num]||{n:'—'};
+        const mode=['morning','afternoon','evening'][i];
+        const nd=NUM_DATA[num]||{n:'—',m:''};
         const isM=[11,22,33,44].includes(num);
         const mc=num===11?'#C8A0FF':num===22?'#C9A050':num===33?'#4DB8A8':num===44?'#D4922A':'var(--gold)';
-        return `<div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;padding:10px;text-align:center">
+        const q = mode + ' energy on ' + dLabel + ': ' + num + ' (' + (nd.n||'') + '). ' + (nd.m||nd.k||'') + ' What specifically does this ' + mode + ' energy invite ' + firstName + ' to do or be on this day?';
+        return `<div class="tappable" style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;padding:10px;text-align:center;cursor:pointer"
+          onclick="closeModal();openDayEnergyDrawer('${mode}', ${num})">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">${label}</div>
           <div style="font-size:24px;font-family:'Cormorant Garamond',serif;color:${isM?mc:'var(--text)'}">${num}${isM?'★':''}</div>
           <div style="font-size:11px;color:${isM?mc:'var(--text2)'};margin-top:2px">${nd.n}</div>
+          <div style="font-size:9px;color:var(--gold);margin-top:5px;opacity:.6">↗ Tap</div>
         </div>`;
       }).join('')}
     </div>
+
+    <!-- ENERGY GUIDE -->
     <div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;letter-spacing:.1em">ENERGY GUIDE</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;letter-spacing:.1em;text-transform:uppercase">Energy Guide</div>
       ${[['🌅 Morning',morning,NUM_DATA[morning]?.m||NUM_DATA[morning]?.k||''],
          ['☀️ Afternoon',afternoon,NUM_DATA[afternoon]?.m||NUM_DATA[afternoon]?.k||''],
          ['🌙 Evening',evening,NUM_DATA[evening]?.m||NUM_DATA[evening]?.k||'']
@@ -6051,21 +6215,47 @@ function openDayModal(ds){
       </div>`).join('')}
     </div>
 
-    ${pd?`<!-- PERSONAL NUMBERS -->
-    <div style="margin:10px 0 8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3)">Your Personal Numbers</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
-      ${[['Personal Day',pd,pdD],['Personal Month',pm,pmD],['Personal Year',py,pyD]].map(([lbl,n,nd])=>{
+    ${pd?`<!-- PERSONAL NUMBERS — each tappable -->
+    <div style="margin:12px 0 8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3)">Your Personal Numbers</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+      ${[['Personal Day',pd,pdD,'day'],['Personal Month',pm,pmD,'month'],['Personal Year',py,pyD,'year']].map(([lbl,n,nd,scope])=>{
         const isM=[11,22,33,44].includes(n);
         const mc=n===11?'#C8A0FF':n===22?'#C9A050':n===33?'#4DB8A8':n===44?'#D4922A':'var(--text)';
-        return `<div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;padding:10px;text-align:center">
+        const pq = 'Personal ' + scope + ' number ' + n + ' (' + (nd?.n||'') + ') for ' + firstName + ' on ' + dLabel + '. ' + (NUM_DATA[n]?.m||'') + ' What does this Personal ' + scope + ' energy specifically mean for ' + firstName + ' right now?';
+        return `<div class="tappable" style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;padding:10px;text-align:center;cursor:pointer"
+          onclick="closeModal();openPersonalNumDrawer('${scope}', ${n})">
           <div style="font-size:10px;color:var(--text3);margin-bottom:4px">${lbl}</div>
           <div style="font-size:22px;font-family:'Cormorant Garamond',serif;color:${isM?mc:'var(--text)'}">${n||'—'}${isM?'★':''}</div>
           <div style="font-size:11px;color:var(--text2);margin-top:2px">${nd?.n||'—'}</div>
+          <div style="font-size:9px;color:var(--gold);margin-top:5px;opacity:.6">↗ Tap</div>
         </div>`;
       }).join('')}
     </div>`:''}
 
-    <button class="modal-open-btn" onclick="closeModal();showScreen('sr',document.querySelectorAll('.npill')[0]);loadReading('${ds}')">Open Full Oracle Reading for this Day →</button>`;
+    </div><!-- end dayCardCapture -->
+
+    <!-- ACTION BUTTONS -->
+    <div class="no-capture" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button id="dayCardSaveBtn"
+        onclick="saveDayCardImage('${ds}')"
+        style="padding:9px;background:none;border:1px solid var(--div);color:var(--text3);
+        font-family:'EB Garamond',serif;font-size:13px;letter-spacing:.1em;border-radius:2px;
+        cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'"
+        onmouseout="this.style.borderColor='var(--div)';this.style.color='var(--text3)'">
+        ⎘ Save as Image
+      </button>
+      <button onclick="saveDayCardPDF('${ds}', '${dLabel.replace(/'/g,"\'")}' )"
+        style="padding:9px;background:none;border:1px solid var(--div);color:var(--text3);
+        font-family:'EB Garamond',serif;font-size:13px;letter-spacing:.1em;border-radius:2px;
+        cursor:pointer;transition:all .2s"
+        onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+        onmouseout="this.style.borderColor='var(--div)';this.style.color='var(--text3)'">
+        ⎙ Save as PDF
+      </button>
+    </div>
+
+    <button class="modal-open-btn no-capture" onclick="closeModal();showScreen('sr',document.querySelectorAll('.npill')[0]);loadReading('${ds}')">Open Full Oracle Reading for this Day →</button>`;
   document.getElementById('dayModal').classList.add('open');
 }
 
