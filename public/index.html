@@ -3325,6 +3325,7 @@ async function loadReading(dateStr, tier) {
     // Beta 2: fetch recent reading history for Oracle continuity
     recentReadingHistory = await fetchRecentHistory();
 
+    let jobId = null;
     const startRes = await fetch(API_BASE + '/api/reading/start', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -3350,17 +3351,18 @@ async function loadReading(dateStr, tier) {
           })
         });
         if (!retryRes.ok) throw new Error('Server returned ' + retryRes.status + ' — please try again');
-        const { jobId } = await retryRes.json();
-        activeJobId = jobId;
-        sessionStorage.setItem('cdp_active_job', JSON.stringify({ jobId, dateStr, tier: activeTier, startedAt: Date.now() }));
+        const retryData = await retryRes.json();
+        jobId = retryData.jobId;
       } else {
         throw new Error('Could not start reading (' + startRes.status + ')');
       }
     } else {
-      const { jobId } = await startRes.json();
-      activeJobId = jobId;
-      sessionStorage.setItem('cdp_active_job', JSON.stringify({ jobId, dateStr, tier: activeTier, startedAt: Date.now() }));
+      const startData = await startRes.json();
+      jobId = startData.jobId;
     }
+    if (!jobId) throw new Error('No job ID returned from server');
+    activeJobId = jobId;
+    sessionStorage.setItem('cdp_active_job', JSON.stringify({ jobId, dateStr, tier: activeTier, startedAt: Date.now() }));
 
     const startedAt = Date.now();
     // Kill switch — if no response after 8 minutes, show clear error
