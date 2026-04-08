@@ -532,7 +532,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .checkin-moon{font-size:22px;flex-shrink:0}
 
 /* ── PRESENCE BAR — slides in from top on return visit ── */
-.presence-bar{position:fixed;top:52px;left:0;right:0;z-index:140;
+.presence-bar{position:fixed;top:52px;left:0;right:0;z-index:95;
   background:rgba(8,30,51,0.97);border-bottom:1px solid rgba(129,205,182,0.2);
   padding:10px 20px;display:flex;align-items:center;gap:12px;
   transform:translateY(-100%);transition:transform .4s cubic-bezier(0.34,1.56,0.64,1);
@@ -1074,7 +1074,10 @@ body.print-card-mode{background:#0D1E33}
     <button class="npill" onclick="showScreen('sp',this);closeMobileNav()">Profile</button>
     <button class="npill" onclick="showScreen('shist',this);renderHistory();closeMobileNav()">History</button>
   </div>
-  <div class="topbar-right">
+  <div id="readingProgressDot" style="display:none;width:7px;height:7px;border-radius:50%;
+  background:var(--teal);animation:pulse 1.5s ease-in-out infinite;margin-right:4px;flex-shrink:0"
+  title="Reading is loading in background…"></div>
+<div class="topbar-right">
     <div id="authBtnArea">
       <button class="signin-btn" onclick="openAuth()">Sign In</button>
     </div>
@@ -3867,13 +3870,17 @@ function renderSkeletonReading(dateStr, tier) {
         ${bioVals.map(b => {
           const bw = Math.abs(b.pct), bc = b.isCrit ? 'var(--gold)' : b.pct > 0 ? 'var(--teal)' : '#e08080';
           const sign = b.pct > 0 ? '+' : '';
-          return `<div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 12px">
+          const bioDesc = b.label==='Physical' ? 'vitality, strength, coordination, stamina' : b.label==='Emotional' ? 'mood, sensitivity, creativity, intuition' : 'reasoning, memory, decision-making, alertness';
+          const bioQ = `${b.label} biorhythm today: ${sign}${b.pct}% (${b.phase}). ${bioDesc}. ${getFirstName()} was born ${profile.birthDay}/${profile.birthMonth}/${profile.birthYear}. How does this ${b.label.toLowerCase()} cycle position specifically affect their capacity for work, decisions, and relationships today? What should they do or avoid because of it?`;
+          return `<div class="tappable" style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 12px;cursor:pointer"
+            onclick="openDrawer('${b.label} Biorhythm · ${sign}${b.pct}%', '${bioQ.replace(/'/g,\"\\\"\")}', [{q:'What decisions should ${getFirstName()} make or avoid today given this ${b.label.toLowerCase()} level?',l:'Decisions today'},{q:'How does this ${b.label.toLowerCase()} cycle affect ${getFirstName()}\'s relationships right now?',l:'Relationships'},{q:'What practices best support ${b.label.toLowerCase()} recovery at this level?',l:'Recovery'}])">
             <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">${b.label}</div>
             <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:${b.col};line-height:1">${sign}${b.pct}%</div>
             <div style="height:2px;background:var(--div);border-radius:1px;margin:6px 0;overflow:hidden">
               <div style="height:100%;width:${bw}%;background:${bc};border-radius:1px;${b.pct<0?'margin-left:'+(100-bw)+'%':''}"></div>
             </div>
             <div style="font-size:11px;color:var(--text3)">${b.phase}</div>
+            <div style="font-size:10px;color:var(--gold);margin-top:5px;text-align:right">↗ Tap</div>
           </div>`;
         }).join('')}
       </div>
@@ -4018,20 +4025,26 @@ function renderSkeletonReading(dateStr, tier) {
     <div class="sec-label">Numerology of the Day</div>
     <div class="sec-hl" style="margin-bottom:12px">${isMD?'<span class=\"master-badge\">\u2605 </span>':''} Universal Day ${dispNum} — ${dispD.n}</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">
-      <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center">
+      <div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
+        onclick="openDrawer('Day Number · ${dayNum}','Today is the ${_dy}th. The Day Number ${dayNum} (${dayNumD.n||\'\'}) is the pure energy of this calendar day, reduced to its essence. ${getUserContext()} What does the number ${dayNum} specifically bring as a quality of today — not the full Universal Day, but just the energy of the day of the month itself?',[{q:'How does the Day Number ${dayNum} interact with the Full Date energy ${ud} today?',l:'Day × Full Date'},{q:'What does ${dayNum} ask of ${getFirstName()} specifically today?',l:'What it asks of you'}])">
         <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day</div>
         <div style="font-size:24px;color:${[11,22,33,44].includes(dayNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayNum}</div>
         <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayNumD.n||''}</div>
+        <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center">
+      <div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
+        onclick="openDrawer('Day · Month · ${dayMonthNum}','The Day+Month number ${dayMonthNum} (${dayMonthD.n||\'\'}) combines the energy of the ${_dy}th with the energy of month ${_mo}. This is the mid-range lens — the pulse of this particular day within this particular month. ${getUserContext()} What does this combined Day+Month energy of ${dayMonthNum} specifically mean for ${getFirstName()} today?',[{q:'How does the Day+Month energy ${dayMonthNum} shape the quality of interactions and decisions today?',l:'Interactions today'},{q:'What does ${dayMonthNum} (${dayMonthD.n||\'\'}) add to understanding today that the Full Date misses?',l:'What this adds'}])">
         <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day · Month</div>
         <div style="font-size:24px;color:${[11,22,33,44].includes(dayMonthNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayMonthNum}</div>
         <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayMonthD.n||''}</div>
+        <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--gold3);border-radius:3px;padding:10px 8px;text-align:center">
+      <div class="tappable" style="background:var(--bg3);border:1px solid var(--gold3);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
+        onclick="tapNumerology(${ud})">
         <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Full Date</div>
         <div style="font-size:24px;color:${[11,22,33,44].includes(ud)?'var(--master)':'var(--gold)'};font-weight:500">${ud}</div>
         <div style="font-size:12px;color:var(--text2);margin-top:3px">${(NUM_DATA[ud]||{}).n||''}</div>
+        <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
       </div>
     </div>
     <div class="sec-hook">The <em>Universal Day number</em> is today’s collective frequency. ${pd?`Your <em>Personal Day ${pd}</em> is the intersection of that frequency with your unique numerological blueprint.`:''}</div>
@@ -4216,6 +4229,9 @@ function renderSkeletonReading(dateStr, tier) {
 
 function startPolling(jobId, dateStr, tier, startedAt) {
   if (pollingTimer) return;
+  // Show progress dot in topbar so user knows reading is loading while on other tabs
+  const _dot = document.getElementById('readingProgressDot');
+  if (_dot) _dot.style.display = 'block';
   pollingTimer = setInterval(async () => {
     try {
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
@@ -4234,6 +4250,9 @@ function startPolling(jobId, dateStr, tier, startedAt) {
         sessionStorage.removeItem('cdp_active_job');
         window._phase1Rendered = false;
         currentReading = poll.result;
+        // Hide progress dot — reading complete
+        const _d2 = document.getElementById('readingProgressDot');
+        if (_d2) _d2.style.display = 'none';
         saveToHistory(dateStr, poll.result);
         const sb = document.getElementById('skeletonStatusBar');
         if (sb) { sb.style.opacity='0'; setTimeout(()=>sb.remove(),400); }
@@ -4241,6 +4260,8 @@ function startPolling(jobId, dateStr, tier, startedAt) {
       } else if (poll.status === 'error') {
         clearInterval(pollingTimer); pollingTimer = null;
         sessionStorage.removeItem('cdp_active_job');
+        const _d3 = document.getElementById('readingProgressDot');
+        if (_d3) _d3.style.display = 'none';
       }
     } catch(e) { /* polling error, continue */ }
   }, 2000);
