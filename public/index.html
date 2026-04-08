@@ -2159,6 +2159,133 @@ function renderContext() {
   });
   html += `</div>`;
 
+  // ═══ SECTION 5: YOUR NATURAL DIRECTION ═══
+  if (hasBirth) {
+    const lpVocData = {
+      1:{drive:'Leading, initiating, pioneering',strengths:'Initiative, courage, decisiveness, originality',env:'Requires independence and ownership. Thrives when building from scratch. Suffocates under micromanagement.',shadow:'Can bypass collaboration; difficulty asking for help',career:'Entrepreneurship, leadership, innovation, independent practice'},
+      2:{drive:'Supporting, connecting, harmonising',strengths:'Empathy, diplomacy, attention to detail, mediation',env:'Thrives in collaborative environments with clear relational purpose. Suffers in aggressive or transactional cultures.',shadow:'Tendency to defer rather than lead; absorbs others\u2019 stress',career:'Counselling, partnership roles, HR, healthcare, diplomacy'},
+      3:{drive:'Creating, communicating, expressing',strengths:'Communication, creativity, optimism, social intelligence',env:'Needs creative latitude and social stimulation. Suffocates in rigid or purely operational roles.',shadow:'Can scatter energy; difficulty with sustained discipline',career:'Writing, speaking, marketing, arts, education, media'},
+      4:{drive:'Building, organising, stabilising',strengths:'Reliability, methodical thinking, practical skill, integrity',env:'Thrives with systems, structure, and tangible outcomes. Suffocates in ambiguous or constantly shifting environments.',shadow:'Can become rigid; difficulty adapting when plans change',career:'Engineering, architecture, finance, project management, law'},
+      5:{drive:'Exploring, adapting, catalysing change',strengths:'Versatility, communication, risk appetite, cultural intelligence',env:'Requires variety, freedom, and stimulation. Suffocates in repetitive or tightly controlled environments.',shadow:'Difficulty committing; may leave before seeing things through',career:'Consulting, sales, travel, journalism, entrepreneurship, politics'},
+      6:{drive:'Caring, teaching, serving, creating beauty',strengths:'Responsibility, warmth, artistic sensibility, deep loyalty',env:'Thrives when serving a cause or community. Needs to feel their work matters to real people.',shadow:'Can over-give; difficulty setting boundaries',career:'Education, healthcare, design, social work, coaching, community leadership'},
+      7:{drive:'Investigating, understanding, seeking truth',strengths:'Analysis, research, precision, spiritual intelligence',env:'Requires depth, solitude, and intellectual challenge. Suffocates in surface-level or socially intensive work.',shadow:'Can withdraw; difficulty with teamwork or marketing oneself',career:'Research, philosophy, writing, technology, psychology, strategy'},
+      8:{drive:'Achieving, leading, building material impact',strengths:'Executive capacity, financial intelligence, authority, resilience',env:'Thrives with authority, large stakes, and visible results. Needs to feel in command of consequential decisions.',shadow:'Can prioritise achievement over relationship; power dynamics',career:'Business leadership, investment, law, medicine, large-scale entrepreneurship'},
+      9:{drive:'Serving humanity, completing cycles, creating meaning',strengths:'Universal compassion, wisdom, creative breadth, inspiration',env:'Thrives when work connects to larger purpose. Suffers in purely commercial or narrow-scope roles.',shadow:'Can neglect the personal for the universal; difficulty finishing',career:'Arts, healing, international work, spiritual leadership, philanthropy'},
+      11:{drive:'Inspiring, illuminating, bridging the seen and unseen',strengths:'Visionary insight, spiritual intelligence, creative inspiration',env:'High sensitivity requires meaningful work. Suffocates in purely material or harsh environments.',shadow:'Extremes of brilliance and doubt; can be paralysed by perfectionism',career:'Counselling, teaching, creative arts, spiritual direction, innovation'},
+      22:{drive:'Building systems that transform society at scale',strengths:'Visionary practicality, organisational mastery, systemic thinking',env:'Requires a large canvas. Suffocates in small-scale or purely administrative roles.',shadow:'Can overextend; immense pressure from the gap between vision and reality',career:'Architecture, large organisations, government, major entrepreneurship, global NGOs'},
+      33:{drive:'Healing, teaching, serving with unconditional compassion',strengths:'Compassion, healing intelligence, leadership through service',env:'Requires genuine contribution to human wellbeing. Suffers in exploitative environments.',shadow:'Can sacrifice self for others; must be careful of martyrdom',career:'Medicine, teaching, spiritual direction, humanitarian leadership'},
+      44:{drive:'Mastering material reality and structural systems',strengths:'Material mastery, systemic thinking, practical genius',env:'Needs high-stakes, complex, structured challenges. Suffocates in disorganised or low-accountability environments.',shadow:'Can become inflexible; difficulty with emotional complexity',career:'Systems leadership, finance, technology infrastructure, large-scale operations'},
+    };
+    const sealArchData = {
+      'Dragon':'The Nurturer \u2014 called to protect, initiate, and hold space for what is being born',
+      'Wind':'The Communicator \u2014 natural channel for ideas, words, and connection across minds',
+      'Night':'The Dreamer \u2014 gifts in intuition, abundance thinking, and deep inner knowing',
+      'Seed':'The Developer \u2014 natural capacity to identify potential and cultivate growth over time',
+      'Serpent':'The Embodied Knower \u2014 instinctive intelligence; wisdom that arrives through the body',
+      'World-Bridger':'The Transformer \u2014 called to facilitate endings, transitions, and threshold crossings',
+      'Hand':'The Healer \u2014 natural capacity to complete, heal, and bring things to right conclusion',
+      'Star':'The Artist \u2014 sees beauty as a form of intelligence; creates coherence through aesthetic',
+      'Moon':'The Flow Master \u2014 moves with natural cycles; facilitates emotional intelligence and flow',
+      'Dog':'The Heart-Centred Leader \u2014 loyalty, love, and service as the primary compass',
+      'Monkey':'The Sacred Trickster \u2014 playful intelligence that sees through illusion to deeper truth',
+      'Human':'The Free Agent \u2014 strong individual will; here to exercise discernment and authentic choice',
+      'Skywalker':'The Explorer \u2014 expands possibility and horizon; connects earth and sky',
+      'Wizard':'The Receptive Channel \u2014 enchants through presence; natural capacity for magical alignment',
+      'Eagle':'The Visionary \u2014 sees the large pattern; gifts in strategic and creative vision',
+      'Warrior':'The Intelligence Officer \u2014 questions fearlessly; strategic and disciplined',
+      'Earth':'The Navigator \u2014 reads signs and synchronicities; grounds higher intelligence into practical reality',
+      'Mirror':'The Reflector \u2014 shows others themselves; gifts in clarity, truth-telling, and discernment',
+      'Storm':'The Catalyst \u2014 disrupts stagnation; natural agent of transformation and renewal',
+      'Sun':'The Enlightener \u2014 life-force distilled; called to illuminate and radiate universal fire',
+    };
+    const chineseProData = {
+      Rat:'Sharp strategic mind. Excellent at spotting opportunity early and adapting quickly. Natural networker.',
+      Ox:'Steady, methodical, and reliable. Builds slowly but durably. Exceptional under sustained pressure.',
+      Tiger:'Bold, magnetic, and willing to take risks. Natural leader and initiator. Strongest in new ventures.',
+      Rabbit:'Diplomatic, perceptive, and aesthetically intelligent. Thrives in roles requiring sensitivity and refinement.',
+      Dragon:'Visionary and charismatic. Built for high-visibility roles requiring presence and ambitious scope.',
+      Snake:'Deeply intuitive and strategic. Prefers quality over speed; sees what others miss.',
+      Horse:'Energetic, independent, and persuasive. Excels in roles requiring movement, communication, and freedom.',
+      Goat:'Creative, gentle, and attuned to beauty. Thrives in roles allowing artistic expression and collaboration.',
+      Monkey:'Brilliant, versatile, and quick-learning. Excellent problem-solver; most adaptable person in the room.',
+      Rooster:'Analytical, organised, and precision-oriented. Excellent at systems, detail, and professional presentation.',
+      Dog:'Loyal, honest, and principled. Thrives in roles with genuine purpose and reliable team structures.',
+      Pig:'Generous, warm, and sincere. Excels in roles that serve others; strong business sense when aligned with values.',
+    };
+
+    const lpVoc = lpVocData[lifePath] || {};
+    const sealArch = sealArchData[birthKinSeal] || '';
+    const chinesePro = birthChinese ? (chineseProData[birthChinese.animal] || '') : '';
+
+    // Build direction context string for AI
+    const dirCtxParts = [
+      firstName ? 'Name: ' + firstName + '.' : '',
+      'Life Path ' + lifePath + ' (' + lpD.n + '). Drive: ' + (lpVoc.drive||'') + '. Strengths: ' + (lpVoc.strengths||'') + '. Shadow: ' + (lpVoc.shadow||'') + '.',
+      birthKinNum ? 'Birth Kin ' + birthKinNum + ' (' + birthKinFull + '). Archetype: ' + sealArch + '.' : '',
+      birthChinese ? 'Chinese sign: ' + birthChinese.element + ' ' + birthChinese.animal + '. ' + chinesePro : '',
+      personalYear ? 'Currently in Personal Year ' + personalYear + ' (' + ((NUM_DATA[personalYear]||{}).n||'') + ').' : '',
+    ].filter(Boolean).join(' ');
+
+    // Store for drawer helper
+    window._dirCtx = dirCtxParts;
+    window._dirLP = lifePath;
+    window._dirLPName = lpD.n;
+    window._dirBirthChinese = birthChinese;
+    window._dirKinNum = birthKinNum;
+    window._dirKinFull = birthKinFull;
+    window._dirPY = personalYear;
+
+    let dHtml = '<div class="ctx-section" id="ctx-direction">';
+    dHtml += '<div class="ctx-section-label">Your Natural Direction \u2014 career &amp; life path</div>';
+    dHtml += '<div style="font-size:13px;color:var(--text3);font-style:italic;margin-bottom:18px;line-height:1.5">Based on your Life Path, Birth Kin, and Chinese sign \u2014 your natural professional profile. Not a prescription: a mirror. The goal is recognition, not instruction.</div>';
+
+    // Life Path card
+    dHtml += '<div style="background:var(--bg2);border:1px solid var(--div);border-radius:3px;margin-bottom:12px;overflow:hidden">';
+    dHtml += '<div style="background:var(--bg3);padding:12px 16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--div)">';
+    dHtml += '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;color:var(--gold);line-height:1">' + lifePath + ([11,22,33,44].includes(lifePath)?'\u2605':'') + '</div>';
+    dHtml += '<div><div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3)">Life Path</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:var(--text)">' + lpD.n + '</div></div></div>';
+    dHtml += '<div style="padding:14px 16px">';
+    const lpRows = [['What drives you', lpVoc.drive, 'font-style:italic'], ['Natural strengths', lpVoc.strengths, ''], ['Where you thrive', lpVoc.env, ''], ['The shadow to know', lpVoc.shadow, 'font-style:italic;color:var(--text3)'], ['Natural domains', lpVoc.career, 'color:var(--gold)']];
+    lpRows.forEach(([label, val, extra]) => {
+      if (!val) return;
+      dHtml += '<div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">' + label + '</div>';
+      dHtml += '<div style="font-size:14px;color:var(--text2);margin-bottom:13px;line-height:1.6;' + extra + '">' + val + '</div>';
+    });
+    dHtml += '</div></div>';
+
+    // Dreamspell archetype
+    if (sealArch) {
+      dHtml += '<div style="background:var(--bg2);border:1px solid var(--div);border-radius:3px;margin-bottom:12px;padding:14px 16px">';
+      dHtml += '<div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--teal);margin-bottom:8px">Dreamspell Archetype \u00b7 Birth Kin ' + birthKinNum + '</div>';
+      dHtml += '<div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:var(--text);margin-bottom:6px">' + birthKinSeal + '</div>';
+      dHtml += '<div style="font-size:15px;color:var(--text2);font-style:italic;line-height:1.65">' + sealArch + '</div>';
+      dHtml += '<div style="font-size:11px;color:var(--text3);margin-top:8px">Argu\u00e9lles (1987) Dreamspell \u2014 modern system</div></div>';
+    }
+
+    // Chinese professional instinct
+    if (chinesePro && birthChinese) {
+      dHtml += '<div style="background:var(--bg2);border:1px solid var(--div);border-radius:3px;margin-bottom:14px;padding:14px 16px">';
+      dHtml += '<div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Chinese Sign \u00b7 ' + birthChinese.element + ' ' + birthChinese.animal + '</div>';
+      dHtml += '<div style="font-size:15px;color:var(--text2);font-style:italic;line-height:1.65">' + chinesePro + '</div></div>';
+    }
+
+    // Expandable AI full synthesis
+    dHtml += '<div id="directionExpanded" style="display:none"><div style="background:var(--bg2);border:1px solid var(--div);border-radius:3px;padding:16px;margin-bottom:12px"><div id="directionResult" style="font-size:15px;color:var(--text2);line-height:1.88"><div style="text-align:center;padding:20px;color:var(--text3);font-style:italic">\u263d The Oracle is synthesising your direction\u2026</div></div></div></div>';
+
+    // Expand button
+    dHtml += '<button id="directionExpandBtn" onclick="loadDirectionSynthesis(this)"';
+    dHtml += ' data-ctx="' + encodeURIComponent(dirCtxParts) + '"';
+    dHtml += ' style="width:100%;padding:12px;background:none;border:1px solid var(--gold3);color:var(--gold);font-family:\'EB Garamond\',serif;font-size:14px;letter-spacing:.15em;text-transform:uppercase;border-radius:2px;cursor:pointer;transition:all .2s;margin-bottom:10px"';
+    dHtml += ' onmouseover="this.style.background=\'var(--gold4)\'" onmouseout="this.style.background=\'none\'">\u2726 Get Your Full Direction Reading</button>';
+
+    // Ask drawer button
+    dHtml += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+    dHtml += '<button class="tap-cta" style="font-size:12px" onclick="openDirDrawer()">Ask the Oracle about your direction \u2192</button></div>';
+    dHtml += '<div style="font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;line-height:1.5">Sources: Drayer (2002) Numerology \u00b7 Kahn (2001) Pythagoras \u00b7 Argu\u00e9lles (1987) Dreamspell \u00b7 Chinese solar year signs</div>';
+    dHtml += '</div>';
+    html += dHtml;
+  }
+
   el.innerHTML = html;
 }
 
@@ -4573,6 +4700,12 @@ function fillAISections(data, dateStr) {
         </button>
       </div>`);
     scheduleCheckin(r, dateStr);
+    // Habit loop: tomorrow preview, evening reflection, streak
+    setTimeout(() => injectTomorrowPreview(dateStr), 1000);
+    if (dateStr === TODAY) {
+      showEveningReflection();
+      showStreakBadge(getStreak());
+    }
   }
 
   // Priorities
@@ -5777,6 +5910,171 @@ function openCitation(key) {
     {q:'How does the work of ' + src.label.split(' ')[0] + ' specifically apply to today\'s reading for ' + firstName + '?', l:src.label.split(' ')[0] + ' & today'},
     {q:'What does ' + src.label.split(' ')[0] + '\'s framework suggest ' + firstName + ' should pay most attention to right now?', l:'Practical application'}
   ]);
+}
+
+// ══════════════════════════════════════════════════════════
+// DIRECTION SYNTHESIS — AI full career/life direction reading
+// ══════════════════════════════════════════════════════════
+async function loadDirectionSynthesis(btn) {
+  const expanded = document.getElementById('directionExpanded');
+  const result   = document.getElementById('directionResult');
+  if (!expanded || !result) return;
+  if (expanded.style.display !== 'none' && result.dataset.loaded === '1') {
+    expanded.style.display = 'none';
+    btn.textContent = '\u2726 Get Your Full Direction Reading';
+    return;
+  }
+  expanded.style.display = 'block';
+  btn.textContent = '\u263d Consulting the Oracle\u2026';
+  btn.disabled = true;
+  const ctx = decodeURIComponent(btn.dataset.ctx || '');
+  const firstName = getFirstName();
+  const sys = `You are the Oracle at Cosmic Daily Planner — expert in translating multi-framework birth data into meaningful professional and life direction guidance.
+YOUR VOICE: Warm, precise, direct. Like the wisest mentor they have ever had. Not a careers advisor giving a list — a genuine mirror showing them something true about themselves.
+RULES:
+— Address ${firstName} directly by name throughout
+— 4-5 rich paragraphs. No bullet points. No markdown.
+— Start with what drives them at the deepest level — not what they should do, but what they are built for
+— Be honest about the shadow patterns — this is where the most value lies
+— End with one concrete question for them to sit with
+— Draw on: Drayer (2002) Numerology; Kahn (2001) Pythagoras; Arguelles (1987) Dreamspell`;
+  const userMsg = `Profile:\n${ctx}\n\nSynthesise this person's natural professional direction, working style, and life path orientation. What are they genuinely built for — not in terms of job titles, but in terms of the quality of engagement, the environments that unlock their best, and the work that gives them meaning? Be specific to this exact combination of frameworks. Be honest about what drains them and the shadow patterns most likely to show up professionally. End with one question that, if they sat with it honestly, would clarify their next move.`;
+  try {
+    const RAIL = 'https://cdp-server-production.up.railway.app';
+    const resp = await fetch(RAIL + '/api/ask', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ question: userMsg, profile, context: ctx, readingData: {} })
+    });
+    const data = await resp.json();
+    if (data.answer) {
+      result.innerHTML = data.answer.split('\n').filter(l=>l.trim())
+        .map(p=>`<p style="margin-bottom:14px">${p}</p>`).join('');
+      result.dataset.loaded = '1';
+      btn.textContent = '\u2191 Collapse direction reading';
+      btn.disabled = false;
+    } else {
+      result.innerHTML = '<p style="color:var(--red)">Could not reach the Oracle. Please try again.</p>';
+      btn.textContent = '\u2726 Get Your Full Direction Reading';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    result.innerHTML = `<p style="color:var(--red)">Connection issue: ${e.message}</p>`;
+    btn.textContent = '\u2726 Get Your Full Direction Reading';
+    btn.disabled = false;
+  }
+}
+
+function openDirDrawer() {
+  const firstName = getFirstName();
+  const lp = window._dirLP;
+  const lpName = window._dirLPName || '';
+  const birthChinese = window._dirBirthChinese;
+  const kinNum = window._dirKinNum;
+  const kinFull = window._dirKinFull || '';
+  const py = window._dirPY;
+  const ctx = window._dirCtx || '';
+  const q = 'What professional paths, environments, and working styles are most aligned with Life Path ' + lp + ' (' + lpName + ')' + (birthChinese ? ', ' + birthChinese.element + ' ' + birthChinese.animal : '') + (kinNum ? ', Birth Kin ' + kinNum : '') + '? Give specific, named directions. Be honest about both the gifts and the environments that drain this person. ' + (firstName !== 'you' ? 'Name: ' + firstName + '.' : '') + (py ? ' Currently in Personal Year ' + py + '.' : '') + ' Context: ' + ctx;
+  openDrawer('Your Natural Direction', q, [
+    {q:'What specific career pivots or roles would best suit this combination right now?', l:'Career paths for right now'},
+    {q:'What working environments should this person specifically seek or avoid?', l:'Environments to seek or avoid'},
+    {q:'What professional shadow patterns is this person most likely to face?', l:'Professional shadow patterns'},
+    {q:'What would a meaningful career transition look like at this point in their Personal Year cycle?', l:'Career transition guidance'},
+  ]);
+}
+
+// ══════════════════════════════════════════════════════════
+// HABIT LOOP — five features for daily return
+// 1. Tomorrow's Preview   2. Evening Reflection
+// 3. Streak badge         4. Progress dot on tab change
+// ══════════════════════════════════════════════════════════
+
+// 1. Tomorrow's Preview — injected at bottom of reading
+function injectTomorrowPreview(dateStr) {
+  const container = document.getElementById('ai-week');
+  if (!container || container.querySelector('#tomorrowPreview')) return;
+  const tom = new Date(dateStr + 'T12:00:00Z');
+  tom.setUTCDate(tom.getUTCDate() + 1);
+  const tds = tom.toISOString().slice(0,10);
+  const tMoon = clientMoon(tds);
+  const tKin  = clientKin(tds);
+  const tUD   = clientUD(tds);
+  const tLabel = tom.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const isMaster = [11,22,33,44].includes(tUD);
+  const mCol = tUD===11?'#C8A0FF':tUD===22?'#C9A050':tUD===33?'#4DB8A8':tUD===44?'#D4922A':'var(--text2)';
+  const signal = isMaster
+    ? '\u2605 Master Number ' + tUD + ' \u2014 ' + (NUM_DATA[tUD]?.n||'')
+    : tKin.isGAP ? '\u2605 GAP Portal \u2014 ' + tKin.col + ' ' + tKin.tone + ' ' + tKin.seal
+    : tMoon.isNewMoon ? '\uD83C\uDF11 New Moon \u2014 set intentions'
+    : tMoon.isFullMoon ? '\uD83C\uDF15 Full Moon \u2014 peak illumination'
+    : 'UD ' + tUD + ' \u00b7 ' + (NUM_DATA[tUD]?.n||'') + ' \u00b7 ' + tMoon.phase;
+  const el = document.createElement('div');
+  el.id = 'tomorrowPreview';
+  el.style.cssText = 'background:var(--bg2);border:1px solid var(--div);border-radius:3px;padding:14px 16px;margin-top:14px;cursor:pointer;transition:border-color .2s';
+  el.onmouseover = () => el.style.borderColor = 'var(--gold3)';
+  el.onmouseout  = () => el.style.borderColor = 'var(--div)';
+  el.onclick = () => openDayModal(tds);
+  el.innerHTML = '<div style="font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Tomorrow \u00b7 ' + tLabel + '</div>'
+    + '<div style="font-size:16px;color:' + mCol + ';margin-bottom:4px">' + signal + '</div>'
+    + '<div style="font-size:12px;color:var(--text3)">' + tMoon.emoji + ' ' + tMoon.phase + ' \u00b7 Kin ' + tKin.kin + '</div>'
+    + '<div style="font-size:11px;color:var(--gold);margin-top:8px;opacity:.7">\u2192 Tap to preview · Return tomorrow for your full reading</div>';
+  container.appendChild(el);
+}
+
+// 2. Evening reflection — slides in after 6pm
+function showEveningReflection() {
+  if (!currentReading?.reading) return;
+  if (new Date().getHours() < 18) return;
+  if (localStorage.getItem('cdp_reflection_' + TODAY)) return;
+  const p1 = currentReading.reading?.priorities?.[0]?.title || '';
+  setTimeout(() => {
+    const rc = document.getElementById('readingContent');
+    if (!rc || document.getElementById('eveningReflection')) return;
+    const bar = document.createElement('div');
+    bar.id = 'eveningReflection';
+    bar.style.cssText = 'background:var(--bg2);border:1px solid rgba(129,205,182,0.2);border-radius:3px;padding:16px 18px;margin-top:16px';
+    bar.innerHTML = '<div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">\u263d Evening reflection</div>'
+      + '<div style="font-size:15px;color:var(--text2);margin-bottom:14px;font-style:italic">' + (p1 ? 'Priority 1 today: \u201c' + p1.slice(0,60) + '\u201d \u2014 how did it land?' : 'How did today align with the morning reading?') + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      + ['\u2726 Aligned', '\u25c8 Mixed', '\u263d Difficult'].map((lbl,i) =>
+          `<button onclick="recordReflection(${i},this)" style="padding:8px 16px;background:none;border:1px solid var(--div);color:var(--text3);font-family:'EB Garamond',serif;font-size:13px;border-radius:2px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'" onmouseout="this.style.borderColor='var(--div)';this.style.color='var(--text3)'">${lbl}</button>`
+        ).join('') + '</div>';
+    rc.appendChild(bar);
+    bar.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }, 3500);
+}
+
+function recordReflection(score, btn) {
+  localStorage.setItem('cdp_reflection_' + TODAY, JSON.stringify({score, date:TODAY}));
+  const bar = document.getElementById('eveningReflection');
+  if (bar) {
+    bar.innerHTML = '<div style="font-size:14px;color:var(--teal);font-style:italic;text-align:center;padding:4px">\u2713 Recorded. The Oracle remembers. See you tomorrow.</div>';
+    setTimeout(() => { bar.style.transition='opacity .6s'; bar.style.opacity='0'; }, 2000);
+    setTimeout(() => bar.remove(), 2700);
+  }
+}
+
+// 3. Reading streak
+function getStreak() {
+  let sd = JSON.parse(localStorage.getItem('cdp_streak') || '{"count":0,"last":""}');
+  const yest = new Date(TODAY + 'T12:00:00Z');
+  yest.setUTCDate(yest.getUTCDate()-1);
+  const ys = yest.toISOString().slice(0,10);
+  if (sd.last === TODAY) return sd;
+  sd.count = (sd.last === ys) ? sd.count + 1 : 1;
+  sd.last = TODAY;
+  localStorage.setItem('cdp_streak', JSON.stringify(sd));
+  return sd;
+}
+
+function showStreakBadge(streak) {
+  if (streak.count < 2) return;
+  const rc = document.getElementById('readingContent');
+  if (!rc || rc.querySelector('#streakBadge')) return;
+  const b = document.createElement('div');
+  b.id = 'streakBadge';
+  b.style.cssText = 'text-align:right;padding:6px 0 0;font-size:12px;color:var(--text3);letter-spacing:.08em';
+  b.textContent = '\u2726 ' + streak.count + '-day streak';
+  rc.prepend(b);
 }
 
 async function submitAsk() {
