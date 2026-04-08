@@ -1453,7 +1453,7 @@ body.print-card-mode{background:#0D1E33}
 
 
 <!-- SHARE CARD MODAL -->
-<div id="shareCardOverlay" class="share-card-overlay" style="display:none" onclick="if(event.target===this)closeShareCard()">
+<div id="shareCardOverlay" class="share-card-overlay" style="display:none;opacity:0;transition:opacity .25s" onclick="if(event.target===this)closeShareCard()">
   <div class="share-card-box">
     <div id="synthCardPreview">
       <div class="sc-date" id="scDate"></div>
@@ -1462,7 +1462,7 @@ body.print-card-mode{background:#0D1E33}
       <div class="sc-brand">✦ Cosmic Daily Planner</div>
     </div>
     <div class="share-card-actions">
-      <button class="sc-action primary" onclick="copyShareCard()">⎘ Copy Image</button>
+      <button class="sc-action primary" onclick="copyShareCard(this)">⎘ Copy Image</button>
       <button class="sc-action" onclick="shareNative()">↗ Share</button>
       <button class="sc-action dismiss" onclick="closeShareCard()">✕ Close</button>
     </div>
@@ -3871,9 +3871,19 @@ function renderSkeletonReading(dateStr, tier) {
           const bw = Math.abs(b.pct), bc = b.isCrit ? 'var(--gold)' : b.pct > 0 ? 'var(--teal)' : '#e08080';
           const sign = b.pct > 0 ? '+' : '';
           const bioDesc = b.label==='Physical' ? 'vitality, strength, coordination, stamina' : b.label==='Emotional' ? 'mood, sensitivity, creativity, intuition' : 'reasoning, memory, decision-making, alertness';
-          const bioQ = `${b.label} biorhythm today: ${sign}${b.pct}% (${b.phase}). ${bioDesc}. ${getFirstName()} was born ${profile.birthDay}/${profile.birthMonth}/${profile.birthYear}. How does this ${b.label.toLowerCase()} cycle position specifically affect their capacity for work, decisions, and relationships today? What should they do or avoid because of it?`;
+          const fn = getFirstName();
+          const bioTitle = b.label + ' Biorhythm · ' + sign + b.pct + '%';
+          const bioQuestion = b.label + ' biorhythm today: ' + sign + b.pct + '% (' + b.phase + '). ' + bioDesc + '. ' + fn + ' was born ' + (profile.birthDay||'?') + '/' + (profile.birthMonth||'?') + '/' + (profile.birthYear||'?') + '. How does this ' + b.label.toLowerCase() + ' cycle specifically affect their capacity for work, decisions, and relationships today? What should they do or avoid?';
+          const bioChips = JSON.stringify([
+            {q:'What decisions should ' + fn + ' make or avoid today given this ' + b.label.toLowerCase() + ' level?', l:'Decisions today'},
+            {q:'How does this ' + b.label.toLowerCase() + ' cycle affect ' + fn + '\u2019s relationships right now?', l:'Relationships'},
+            {q:'What practices best support ' + b.label.toLowerCase() + ' recovery at ' + b.pct + '%?', l:'Recovery practices'}
+          ]);
           return `<div class="tappable" style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 12px;cursor:pointer"
-            onclick="openDrawer('${b.label} Biorhythm · ${sign}${b.pct}%', '${bioQ.replace(/'/g,\"\\\"\")}', [{q:'What decisions should ${getFirstName()} make or avoid today given this ${b.label.toLowerCase()} level?',l:'Decisions today'},{q:'How does this ${b.label.toLowerCase()} cycle affect ${getFirstName()}\'s relationships right now?',l:'Relationships'},{q:'What practices best support ${b.label.toLowerCase()} recovery at this level?',l:'Recovery'}])">
+            onclick="openDrawer(this.dataset.title, this.dataset.q, JSON.parse(this.dataset.chips))"
+            data-title="${bioTitle.replace(/"/g,'&quot;')}"
+            data-q="${bioQuestion.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}"
+            data-chips="${bioChips.replace(/"/g,'&quot;')}">
             <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">${b.label}</div>
             <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:${b.col};line-height:1">${sign}${b.pct}%</div>
             <div style="height:2px;background:var(--div);border-radius:1px;margin:6px 0;overflow:hidden">
@@ -4026,14 +4036,14 @@ function renderSkeletonReading(dateStr, tier) {
     <div class="sec-hl" style="margin-bottom:12px">${isMD?'<span class=\"master-badge\">\u2605 </span>':''} Universal Day ${dispNum} — ${dispD.n}</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">
       <div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
-        onclick="openDrawer('Day Number · ${dayNum}','Today is the ${_dy}th. The Day Number ${dayNum} (${dayNumD.n||\'\'}) is the pure energy of this calendar day, reduced to its essence. ${getUserContext()} What does the number ${dayNum} specifically bring as a quality of today — not the full Universal Day, but just the energy of the day of the month itself?',[{q:'How does the Day Number ${dayNum} interact with the Full Date energy ${ud} today?',l:'Day × Full Date'},{q:'What does ${dayNum} ask of ${getFirstName()} specifically today?',l:'What it asks of you'}])">
+        onclick="tapDayNumber(${dayNum}, ${ud})">
         <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day</div>
         <div style="font-size:24px;color:${[11,22,33,44].includes(dayNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayNum}</div>
         <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayNumD.n||''}</div>
         <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
       </div>
       <div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
-        onclick="openDrawer('Day · Month · ${dayMonthNum}','The Day+Month number ${dayMonthNum} (${dayMonthD.n||\'\'}) combines the energy of the ${_dy}th with the energy of month ${_mo}. This is the mid-range lens — the pulse of this particular day within this particular month. ${getUserContext()} What does this combined Day+Month energy of ${dayMonthNum} specifically mean for ${getFirstName()} today?',[{q:'How does the Day+Month energy ${dayMonthNum} shape the quality of interactions and decisions today?',l:'Interactions today'},{q:'What does ${dayMonthNum} (${dayMonthD.n||\'\'}) add to understanding today that the Full Date misses?',l:'What this adds'}])">
+        onclick="tapDayMonthNumber(${dayMonthNum}, ${_dy}, ${_mo})">
         <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day · Month</div>
         <div style="font-size:24px;color:${[11,22,33,44].includes(dayMonthNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayMonthNum}</div>
         <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayMonthD.n||''}</div>
@@ -4279,7 +4289,7 @@ function openShareCard() {
   const scMeta  = document.getElementById('scMeta');
 
   // Date label
-  const d = new Date(currentDate + 'T12:00:00Z');
+  const d = new Date((currentDate || TODAY) + 'T12:00:00Z');
   scDate.textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   // Synthesis text (strip markdown)
@@ -4307,10 +4317,10 @@ function closeShareCard() {
   overlay.style.display = 'none';
 }
 
-async function copyShareCard() {
+async function copyShareCard(btnEl) {
   const preview = document.getElementById('synthCardPreview');
-  const btn = event.target;
-  btn.textContent = 'Generating…';
+  const btn = btnEl || event?.target || document.querySelector('.sc-action.primary');
+  if (btn) btn.textContent = 'Generating…';
 
   try {
     if (typeof html2canvas !== 'undefined') {
@@ -5356,6 +5366,34 @@ function tapSynthesis() {
     {q:`What is today trying to teach ${firstName} about who they are becoming?`, l:'Who you are becoming'},
     {q:`What would ${firstName} regret not acting on today?`, l:'What not to miss'},
   ]);
+}
+
+function tapDayNumber(dayNum, fullDateNum) {
+  const firstName = getFirstName();
+  const numData = NUM_DATA[dayNum] || {n:'—', k:''};
+  openDrawer(
+    'Day Number · ' + dayNum,
+    'The Day Number ' + dayNum + ' (' + numData.n + ') is the pure energy of this calendar day — the day of the month reduced to its numerical essence. The Full Date number is ' + fullDateNum + '. ' + getUserContext() + ' What does the number ' + dayNum + ' bring as a specific quality to today? How does it interact with the Full Date energy of ' + fullDateNum + '?',
+    [
+      {q: 'How does Day Number ' + dayNum + ' (' + numData.n + ') interact with the Full Date ' + fullDateNum + ' for ' + firstName + ' today?', l: 'Day × Full Date'},
+      {q: 'What specifically does the number ' + dayNum + ' ask of ' + firstName + ' on this day of the month?', l: 'What it asks today'},
+      {q: 'How does the ' + numData.n + ' energy of ' + dayNum + ' shape ' + firstName + '’s best use of the morning?', l: 'Using this morning well'},
+    ]
+  );
+}
+
+function tapDayMonthNumber(dayMonthNum, day, month) {
+  const firstName = getFirstName();
+  const numData = NUM_DATA[dayMonthNum] || {n:'—', k:''};
+  openDrawer(
+    'Day · Month · ' + dayMonthNum,
+    'The Day+Month number ' + dayMonthNum + ' (' + numData.n + ') combines the energy of the ' + day + 'th with month ' + month + '. This mid-range lens shows the pulse of this particular day within this particular month — a more specific frequency than the Full Date. ' + getUserContext() + ' What does this Day+Month combination of ' + dayMonthNum + ' specifically mean for ' + firstName + '’s interactions and decisions today?',
+    [
+      {q: 'How does the Day+Month energy ' + dayMonthNum + ' (' + numData.n + ') shape the quality of conversations and decisions today for ' + firstName + '?', l: 'Conversations today'},
+      {q: 'What does ' + dayMonthNum + ' reveal about today that the Full Date number misses?', l: 'What this adds'},
+      {q: 'Is the Day+Month energy ' + dayMonthNum + ' in harmony or tension with ' + firstName + '’s Personal Month energy?', l: 'Harmony or tension'},
+    ]
+  );
 }
 
 function tapNumerology(num, name) {
