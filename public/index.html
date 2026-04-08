@@ -89,7 +89,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .screen{display:none}.screen.on{display:block}
 
 /* ══ READING SCREEN ══ */
-#sr{max-width:840px;margin:0 auto;padding:0 16px 120px}
+#sr{max-width:840px;margin:0 auto;padding:0 10px 120px}
 .r-head{text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--div);margin-bottom:28px}
 .r-meta{font-size:15px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
 .r-date{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,48px);color:var(--gold);
@@ -373,7 +373,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .modal-open-btn:hover{background:var(--gold4)}
 
 /* ══ HISTORY SCREEN ══ */
-#shist{max-width:840px;margin:0 auto;padding:0 24px 80px}
+#shist{max-width:840px;margin:0 auto;padding:0 12px 80px}
 .hist-head{text-align:center;padding:36px 0 24px}
 .hist-title{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);font-weight:300;margin-bottom:8px}
 .hist-sub{font-size:12px;color:var(--text3);line-height:1.6}
@@ -1639,13 +1639,24 @@ const NUM_DATA = {
 // ══════════════════════════════════════════════════════════
 function showScreen(id, btn) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  document.querySelectorAll('.npill').forEach(b => b.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  if (btn) btn.classList.add('on');
-  if (id === 'sc') renderCalendar();
-  if (id === 'sp') updateProfileSummary();
-  if (id === 'sctx') renderContext();
+  document.getElementById(id)?.classList.add('on');
+  if (btn) {
+    document.querySelectorAll('.npill').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
   updateHamburgerLabel(id);
+  if (id === 'sr' && !currentReading && !pollingTimer) {
+    const saved = sessionStorage.getItem('cdp_active_job');
+    if (saved) {
+      try {
+        const job = JSON.parse(saved);
+        if (job.jobId && (Date.now() - job.startedAt) < 600000) {
+          activeJobId = job.jobId;
+          startPolling(job.jobId, job.dateStr||TODAY, job.tier||'oracle', job.startedAt||Date.now());
+        }
+      } catch(e) { sessionStorage.removeItem('cdp_active_job'); }
+    }
+  }
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1706,7 +1717,7 @@ function renderContext() {
 
   // ── Chinese Zodiac (year of birth + current year) ────────
   const CHINESE_ANIMALS = ['Rat','Ox','Tiger','Rabbit','Dragon','Snake','Horse','Goat','Monkey','Rooster','Dog','Pig'];
-  const CHINESE_ELEMENTS = ['Wood','Wood','Fire','Fire','Earth','Earth','Metal','Metal','Water','Water'];
+  const CHINESE_ELEMENTS = ['Metal','Metal','Water','Water','Wood','Wood','Fire','Fire','Earth','Earth']; // Correct Heavenly Stems: 0,1=Metal 2,3=Water 4,5=Wood 6,7=Fire 8,9=Earth
   // CNY dates (month, day) for birth-year correction
   const CNY_DATES = {
     1950:[1,27],1951:[2,6],1952:[1,27],1953:[2,14],1954:[2,3],
@@ -2447,6 +2458,20 @@ function loadProfileUI() {
 function saveProfileField(key, val) {
   profile[key] = val;
   localStorage.setItem('cdp_profile', JSON.stringify(profile));
+  // Show name meaning when name/nickname is entered
+  if ((key === 'name' || key === 'nickname') && val) {
+    const firstName = val.split(' ')[0];
+    const meaning = getNameMeaning(firstName);
+    const card = document.getElementById('nameMeaningCard');
+    if (card && meaning) {
+      card.style.display = 'block';
+      card.innerHTML = `<div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--teal);margin-bottom:8px">Meaning of Your Name</div>
+        <div style="font-size:20px;color:var(--gold);font-weight:500;margin-bottom:4px">${firstName}</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:8px">${meaning.origin} origin</div>
+        <div style="font-size:15px;color:var(--text2);margin-bottom:6px"><strong>Meaning:</strong> ${meaning.meaning}</div>
+        <div style="font-size:15px;color:var(--text2);font-style:italic">${meaning.interp}</div>`;
+    } else if (card) { card.style.display = 'none'; }
+  }
   // Visual confirmation
   const indicator = document.getElementById('profileSaveIndicator');
   if (indicator) {
@@ -2706,6 +2731,97 @@ const TIER_STAGES = {
     'The Oracle is composing the full depth of your reading…'
   ]
 };
+
+
+// ── NAME MEANING DICTIONARY (client-side, no API call) ────────────
+const NAME_MEANINGS = {
+  // A
+  'adam':{'origin':'Hebrew','meaning':'Earth, man','interp':'Grounded presence, the one who names things'},
+  'alice':{'origin':'Germanic','meaning':'Noble, of noble kind','interp':'Natural leadership and clarity of purpose'},
+  'amelia':{'origin':'Germanic','meaning':'Work, industrious','interp':'Sustained effort that transforms into something lasting'},
+  'anna':{'origin':'Hebrew','meaning':'Grace, favour','interp':'Effortless giving; the quality of presence that asks nothing in return'},
+  'aurora':{'origin':'Latin','meaning':'Dawn','interp':'The moment before full illumination; harbinger of new cycles'},
+  // B
+  'ben':{'origin':'Hebrew','meaning':'Son of the right hand','interp':'Strength in support; the power that comes from being trusted'},
+  'benjamin':{'origin':'Hebrew','meaning':'Son of the right hand','interp':'Strength in support; the power that comes from being trusted'},
+  // C
+  'catherine':{'origin':'Greek','meaning':'Pure','interp':'Clarity unclouded by accumulation; the distilled essence'},
+  'charlotte':{'origin':'French/Germanic','meaning':'Free woman, strength','interp':'Independence of spirit expressed through care for others'},
+  'claire':{'origin':'Latin','meaning':'Clear, bright','interp':'Illumination that makes things visible to others as well as oneself'},
+  // D
+  'daniel':{'origin':'Hebrew','meaning':'God is my judge','interp':'Integrity in the absence of external validation'},
+  'david':{'origin':'Hebrew','meaning':'Beloved','interp':'The one who is loved; also the one who loves without calculation'},
+  // E
+  'edward':{'origin':'Old English','meaning':'Wealthy guardian','interp':'Stewardship of what matters; protection through generosity'},
+  'eleanor':{'origin':'Old French/Greek','meaning':'Bright, shining one','interp':'Light that guides others without diminishing itself'},
+  'emily':{'origin':'Latin','meaning':'Rival, eager','interp':'Driven by inner standard rather than external comparison'},
+  'emma':{'origin':'Germanic','meaning':'Whole, universal','interp':'The tendency to see the complete picture; wholeness as a value'},
+  // F
+  'florence':{'origin':'Latin','meaning':'Flourishing, flowering','interp':'Growth that is visible; vitality that cannot be contained'},
+  // G
+  'george':{'origin':'Greek','meaning':'Farmer, earthworker','interp':'Patient cultivation; trust in process over speed'},
+  'grace':{'origin':'Latin','meaning':'Goodness, generosity','interp':'The quality of giving that transforms the giver as much as the recipient'},
+  // H
+  'hannah':{'origin':'Hebrew','meaning':'Favour, grace','interp':'The kind of presence that makes others feel seen'},
+  'harry':{'origin':'Germanic','meaning':'Army ruler, home power','interp':'Strength that protects rather than dominates'},
+  // I
+  'isabella':{'origin':'Hebrew/Italian','meaning':'Devoted to God, pledged','interp':'Deep commitment; the capacity for sustained devotion'},
+  // J
+  'james':{'origin':'Hebrew','meaning':'Supplanter, one who follows','interp':'The willingness to learn by closely following what works'},
+  'jessica':{'origin':'Hebrew','meaning':'God beholds, foresight','interp':'Perception that goes beyond the visible'},
+  'john':{'origin':'Hebrew','meaning':'God is gracious','interp':'The grace that comes through rather than from the person'},
+  'julia':{'origin':'Latin','meaning':'Youthful, downy','interp':'Freshness that renews itself; perennial curiosity'},
+  // K
+  'kate':{'origin':'Greek','meaning':'Pure','interp':'Simplicity that is not simplistic; essence without excess'},
+  'katherine':{'origin':'Greek','meaning':'Pure','interp':'Clarity unclouded by accumulation; the distilled essence'},
+  // L
+  'laura':{'origin':'Latin','meaning':'Laurel, victory','interp':'Achievement that is recognised; mastery made visible'},
+  'lily':{'origin':'Latin/Old English','meaning':'Lily flower, purity','interp':'Beauty that does not compete; radiance without effort'},
+  'lucas':{'origin':'Latin/Greek','meaning':'Light, illumination','interp':'The one who makes things visible; clarity as a gift to others'},
+  'lucy':{'origin':'Latin','meaning':'Light','interp':'Illumination; the natural tendency to make things clear'},
+  // M
+  'mark':{'origin':'Latin','meaning':'Of Mars, warrior','interp':'Decisive action; the courage to begin'},
+  'mary':{'origin':'Hebrew','meaning':'Beloved, wished-for child','interp':'The depth that comes from being truly wanted; love as foundation'},
+  'matthew':{'origin':'Hebrew','meaning':'Gift of God','interp':'The sense that one’s presence is itself a contribution'},
+  'michael':{'origin':'Hebrew','meaning':'Who is like God?','interp':'The question as identity; power held in humility'},
+  // N
+  'natalia':{'origin':'Latin','meaning':'Born on Christmas Day, birth','interp':'New beginnings; the energy of arrival and fresh potential'},
+  'nicholas':{'origin':'Greek','meaning':'Victory of the people','interp':'Success that belongs to the collective, not the individual'},
+  // O
+  'olivia':{'origin':'Latin','meaning':'Olive tree, peace','interp':'The capacity to sustain peace through steady presence'},
+  // P
+  'paul':{'origin':'Latin','meaning':'Small, humble','interp':'The paradox of great influence from a simple foundation'},
+  'peter':{'origin':'Greek','meaning':'Rock, stone','interp':'Reliability; the quality of being constant when others shift'},
+  'philip':{'origin':'Greek','meaning':'Lover of horses, freedom','interp':'The love of what cannot be fully contained or controlled'},
+  // R
+  'rachel':{'origin':'Hebrew','meaning':'Ewe, lamb','interp':'Gentleness as strength; the power of patient waiting'},
+  'richard':{'origin':'Germanic','meaning':'Brave ruler','interp':'Courage in leadership; authority that does not need to assert itself'},
+  'robert':{'origin':'Germanic','meaning':'Bright fame','interp':'Recognition that comes from genuine contribution'},
+  'rose':{'origin':'Latin','meaning':'Rose flower','interp':'Beauty that is also a process; the unfolding that is itself the point'},
+  // S
+  'samuel':{'origin':'Hebrew','meaning':'God has heard','interp':'The deep sense of being received; being heard as a spiritual act'},
+  'sarah':{'origin':'Hebrew','meaning':'Princess, noblewoman','interp':'Dignity that comes from within; the quiet authority of one who knows their worth'},
+  'simon':{'origin':'Hebrew','meaning':'One who hears','interp':'The gift of true listening; understanding that precedes speaking'},
+  'sofia':{'origin':'Greek','meaning':'Wisdom','interp':'Clarity, insight, and inner knowing; the intelligence of the soul'},
+  'sophia':{'origin':'Greek','meaning':'Wisdom','interp':'Clarity, insight, and inner knowing; the intelligence of the soul'},
+  'sonia':{'origin':'Greek/Slavic','meaning':'Wisdom','interp':'The capacity to see through the surface to what is essential'},
+  'stephanie':{'origin':'Greek','meaning':'Crown, wreath','interp':'Achievement worn lightly; honour as a way of being, not a goal'},
+  'susan':{'origin':'Hebrew','meaning':'Lily','interp':'Purity that is not fragile; beauty that persists across conditions'},
+  // T
+  'thomas':{'origin':'Aramaic','meaning':'Twin','interp':'The one who holds paradox; two natures in one person'},
+  // V
+  'victoria':{'origin':'Latin','meaning':'Victory','interp':'The triumph that comes not from defeating others but from meeting one’s own standard'},
+  // W
+  'william':{'origin':'Germanic','meaning':'Resolute protector','interp':'Strength directed entirely toward the protection of what is loved'},
+  // Z
+  'zoe':{'origin':'Greek','meaning':'Life','interp':'Vitality as an orientation; the quality of being fully alive'}
+};
+
+function getNameMeaning(name) {
+  if (!name) return null;
+  const key = name.toLowerCase().trim().split(' ')[0]; // first name only
+  return NAME_MEANINGS[key] || null;
+}
 
 async function loadReading(dateStr, tier) {
   const activeTier = tier || currentTier || 'oracle';
@@ -3597,6 +3713,14 @@ function renderSkeletonReading(dateStr, tier) {
   const dispNum = pd||ud;
   const dispD   = NUM_DATA[dispNum] || {n:'—',m:''};
   const isMD    = [11,22,33,44].includes(dispNum);
+  // Day Number (day digit only, reduced)
+  const [_yr, _mo, _dy] = dateStr.split('-').map(Number);
+  let dayNum = _dy; while(dayNum>9&&![11,22,33,44].includes(dayNum)) dayNum=String(dayNum).split('').reduce((a,b)=>a+parseInt(b),0);
+  const dayNumD = NUM_DATA[dayNum]||{n:'—'};
+  // Day+Month Number
+  let dayMonthNum = _dy+_mo; while(dayMonthNum>9&&![11,22,33,44].includes(dayMonthNum)) dayMonthNum=String(dayMonthNum).split('').reduce((a,b)=>a+parseInt(b),0);
+  const dayMonthD = NUM_DATA[dayMonthNum]||{n:'—'};
+  // Full date = ud (already computed)
 
   // Pass stages into the skeleton for cycling display
   const _skStages = TIER_STAGES[tier] || TIER_STAGES.oracle;
@@ -3701,19 +3825,31 @@ function renderSkeletonReading(dateStr, tier) {
   </div>`;
 
   // Numerology (real data)
-  html += `<div class="r-section" id="sk-numerology">
+  html += `<div class="  html += `<div id="sk-numerology">
     <div class="sec-label">Numerology of the Day</div>
-    <div class="sec-hl">${isMD?'★ ':''} Universal Day ${dispNum} — ${dispD.n}</div>
+    <div class="sec-hl" style="margin-bottom:12px">${isMD?'<span class=\"master-badge\">\u2605 </span>':''} Universal Day ${dispNum} — ${dispD.n}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">
+      <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center">
+        <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day</div>
+        <div style="font-size:24px;color:${[11,22,33,44].includes(dayNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayNum}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayNumD.n||''}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center">
+        <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day · Month</div>
+        <div style="font-size:24px;color:${[11,22,33,44].includes(dayMonthNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayMonthNum}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayMonthD.n||''}</div>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--gold3);border-radius:3px;padding:10px 8px;text-align:center">
+        <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Full Date</div>
+        <div style="font-size:24px;color:${[11,22,33,44].includes(ud)?'var(--master)':'var(--gold)'};font-weight:500">${ud}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${(NUM_DATA[ud]||{}).n||''}</div>
+      </div>
+    </div>
     <div class="sec-hook">The <em>Universal Day number</em> is today’s collective frequency. ${pd?`Your <em>Personal Day ${pd}</em> is the intersection of that frequency with your unique numerological blueprint.`:''}</div>
-    <div class="sec-body"><p>${dispD.m||''}</p>
-      ${pd?`<p>Personal Day ${pd} (${(NUM_DATA[pd]||{}).n||''}): ${(NUM_DATA[pd]||{}).m||''}</p>`:''}
-    </div>
-    <div style="font-size:13px;color:var(--text3);font-style:italic;margin:4px 0 12px">
-      Morning — your <em>day</em> energy &nbsp;·&nbsp; Afternoon — your <em>month</em> energy &nbsp;·&nbsp; Evening — your <em>year</em> energy
-    </div>
+    <div class="sec-body" id="ai-numerology-body"><p>${dispD.m||''}</p></div>
     <div class="energies">${energyHtml}</div>
     <div style="margin-top:12px">
-      <button class="tap-cta" onclick="tapNumerology(${dispNum},'${(dispD.n||'').replace(/'/g,"\'")}')" style="font-size:12px">
+      <button class="tap-cta" onclick="tapNumerology(${dispNum},'${(dispD.n||'').replace(/'/g,\"\\\'\")}')">
         How does today’s number energy work for me? <span class="cta-arrow">→</span>
       </button>
     </div>
@@ -3868,6 +4004,38 @@ function renderSkeletonReading(dateStr, tier) {
       }
     }
   }, 1000);
+}
+
+function startPolling(jobId, dateStr, tier, startedAt) {
+  if (pollingTimer) return;
+  pollingTimer = setInterval(async () => {
+    try {
+      const elapsed = Math.round((Date.now() - startedAt) / 1000);
+      const pollRes = await fetch(API_BASE + '/api/reading/status/' + jobId);
+      const poll = await pollRes.json();
+      const maxSec = {free:60,seeker:120,initiate:180,mystic:240,oracle:360}[tier]||300;
+      const pct = Math.min(96, Math.round((elapsed/maxSec)*100));
+      const skBar = document.getElementById('skProgressBar');
+      if (skBar) skBar.style.width = pct + '%';
+      if (poll.status === 'phase1_complete' && poll.phase1 && !window._phase1Rendered) {
+        window._phase1Rendered = true;
+        fillPhase1Sections(poll.phase1);
+      }
+      if (poll.status === 'complete') {
+        clearInterval(pollingTimer); pollingTimer = null;
+        sessionStorage.removeItem('cdp_active_job');
+        window._phase1Rendered = false;
+        currentReading = poll.result;
+        saveToHistory(dateStr, poll.result);
+        const sb = document.getElementById('skeletonStatusBar');
+        if (sb) { sb.style.opacity='0'; setTimeout(()=>sb.remove(),400); }
+        fillAISections(poll.result, dateStr);
+      } else if (poll.status === 'error') {
+        clearInterval(pollingTimer); pollingTimer = null;
+        sessionStorage.removeItem('cdp_active_job');
+      }
+    } catch(e) { /* polling error, continue */ }
+  }, 2000);
 }
 
 // ── Fill Phase 1 sections (actionable core, ~25s) ─────────────────
@@ -5767,10 +5935,31 @@ async function generateCompatibility() {
     if (data.error) throw new Error(data.error);
     renderCompatResult(data);
   } catch(e) {
+    const isOverload = e.message && (e.message.toLowerCase().includes('overload') || e.message.includes('529') || e.message.includes('503'));
+    if (isOverload && (window._compatRetries||0) < 2) {
+      // Auto-retry on overload
+      window._compatRetries = (window._compatRetries||0) + 1;
+      result.innerHTML = `<div style="text-align:center;padding:32px 24px">
+        <div class="load-moon">☽</div>
+        <div style="font-size:16px;color:var(--text3);margin-top:16px;font-style:italic">
+          High demand — your reading is in the queue. Retrying automatically…
+        </div>
+        <div style="font-size:13px;color:var(--teal);margin-top:6px">Attempt ${window._compatRetries + 1} of 3</div>
+      </div>`;
+      setTimeout(() => generateCompatibility(), 4000);
+      if (btn) { btn.disabled = false; btn.textContent = '✦ Read Our Compatibility'; }
+      return;
+    }
+    window._compatRetries = 0;
+    const friendlyMsg = isOverload
+      ? 'The Oracle is handling high demand. Please try again in a moment.'
+      : e.message?.includes('pattern') || e.message?.includes('validation')
+        ? 'Please check the date of birth fields and try again.'
+        : 'Something went wrong. Please try again.';
     result.innerHTML = `<div style="background:rgba(80,0,0,.2);border:1px solid rgba(200,80,80,.3);
       color:#ff9999;padding:16px 18px;border-radius:2px;font-size:15px">
-      The Oracle encountered an issue: ${e.message}
-      <br><button onclick="generateCompatibility()" style="margin-top:12px;background:none;
+      ${friendlyMsg}
+      <br><button onclick="window._compatRetries=0;generateCompatibility()" style="margin-top:12px;background:none;
       border:1px solid #ff9999;color:#ff9999;padding:8px 16px;border-radius:2px;
       cursor:pointer;font-family:'EB Garamond',serif;font-size:13px">Try Again ↺</button>
     </div>`;
