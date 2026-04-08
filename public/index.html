@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Cosmic Daily Planner — Your Personalised Daily Oracle</title>
 <meta name="description" content="A daily Oracle unlike anything else. Swiss Ephemeris astrology, Pythagorean numerology, Dreamspell, lunar cycles and biorhythms synthesised into one deeply personal reading. Written for where you actually are in your life.">
@@ -1621,7 +1622,7 @@ body.print-card-mode{background:#0D1E33}
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  <!-- email-decode.min.js removed: causes 404 -->
 // ══════════════════════════════════════════════════════════
 // STARS
 // ══════════════════════════════════════════════════════════
@@ -3926,7 +3927,7 @@ function renderSkeletonReading(dateStr, tier) {
     <div class="sec-body" id="ai-numerology-body"><p>${dispD.m||''}</p></div>
     <div class="energies">${energyHtml}</div>
     <div style="margin-top:12px">
-      <button class="tap-cta" onclick="tapNumerology(${dispNum},'${(dispD.n||'').replace(/'/g,\"\\\'\")}')">
+      <button class="tap-cta" onclick="tapNumerology(${dispNum})">
         How does today’s number energy work for me? <span class="cta-arrow">→</span>
       </button>
     </div>
