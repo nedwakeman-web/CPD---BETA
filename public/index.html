@@ -3373,6 +3373,14 @@ async function loadReading(dateStr, tier) {
         if (Date.now() - startedAt > maxWait) {
           clearInterval(pollingTimer); pollingTimer = null;
           sessionStorage.removeItem('cdp_active_job');
+          // If Phase 1 already rendered, finalise it as the reading rather than showing error
+          if (window._phase1Rendered && currentReading) {
+            clearInterval(stageTimer);
+            const _sb = document.getElementById('skeletonStatusBar');
+            if (_sb) { _sb.style.transition='opacity .4s'; _sb.style.opacity='0'; setTimeout(()=>_sb.remove(),400); }
+            fillAISections(currentReading, dateStr);
+            return;
+          }
           cont.innerHTML = '<div style="max-width:560px;margin:0 auto;padding:60px 24px;text-align:center">'
             + '<div style="font-size:2rem;margin-bottom:20px;opacity:.4">☽</div>'
             + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:var(--text2);margin-bottom:12px">The Oracle is taking longer than expected</div>'
@@ -3445,6 +3453,8 @@ async function loadReading(dateStr, tier) {
           if (skTxt) skTxt.textContent = 'Priorities ready — deep analysis composing…';
           // Fill in phase 1 sections with fade
           fillPhase1Sections(p1);
+          // Store phase1 as currentReading so timeout fallback can finalise it
+          currentReading = { reading: p1, planets: poll.planets, moon: poll.moon, kin: poll.kin, num: poll.num };
         }
 
         if (poll.status === 'complete') {

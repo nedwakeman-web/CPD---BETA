@@ -362,8 +362,8 @@ function callAPI(model, maxTok, sys, user) {
     });
 
     req.on('error', err => reject(err));
-    req.setTimeout(120000, () => {
-      req.destroy(new Error('Socket timeout after 120s'));
+    req.setTimeout(240000, () => {
+      req.destroy(new Error('Socket timeout after 240s'));
     });
     req.write(body);
     req.end();
@@ -818,9 +818,20 @@ app.post('/api/reading/start', async (req, res) => {
           job.status = 'phase1_complete';
           console.log(`Job ${jobId} Phase 1 complete (${((Date.now() - job.startedAt)/1000).toFixed(1)}s)`);
         }
+        // Seeker: Phase 1 IS the full reading — skip Phase 2 to avoid timeout
+        if (activeTier === 'seeker') {
+          const seekerJob = jobs.get(jobId);
+          if (seekerJob) {
+            seekerJob.status = 'complete';
+            seekerJob.result = { reading: p1, planets, moon, kin, num, aspects };
+            seekerJob.completedAt = Date.now();
+            console.log(`Job ${jobId} Seeker complete via Phase 1 (${((Date.now() - seekerJob.startedAt)/1000).toFixed(1)}s)`);
+          }
+          return;
+        }
       }
 
-      // Phase 2 — full depth (runs immediately after phase 1 or alone for free)
+      // Phase 2 — full depth (runs for initiate/mystic/oracle; free goes direct)
       const r = await generateReading(ds, profile || {}, activeTier, recentHistory || [], planets, moon, kin, num, aspects);
       const job = jobs.get(jobId);
       if (job) {
