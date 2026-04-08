@@ -3270,6 +3270,55 @@ async function loadReading(dateStr, tier) {
     console.error('Skeleton render error:', skErr.message);
   }
 
+  // ── WAKE CHECK — ensure Railway server is awake before starting ──
+  // Railway hobby plan sleeps after inactivity; first ping wakes it (~5–15s)
+  const skStatusText = document.getElementById('skStatusText');
+  const skProgressBar = document.getElementById('skProgressBar');
+  try {
+    const wakeRes = await Promise.race([
+      fetch(API_BASE + '/api/health'),
+      new Promise((_, rej) => setTimeout(() => rej(new Error('wake_timeout')), 20000))
+    ]);
+    if (!wakeRes.ok) throw new Error('server_not_ok');
+    const wakeData = await wakeRes.json();
+    // Check for missing API key — surface immediately rather than waiting 8 minutes
+    if (wakeData.apiKey && wakeData.apiKey.includes('MISSING')) {
+      if (skStatusText) skStatusText.textContent = '⚠ Server configuration issue — contact support';
+      console.error('ANTHROPIC_API_KEY is missing from Railway environment variables');
+      return;
+    }
+    console.log('Server awake ✓', wakeData.version, '— uptime:', wakeData.uptime);
+  } catch(wakeErr) {
+    if (wakeErr.message === 'wake_timeout') {
+      // Server is waking up — show friendly message and retry once
+      if (skStatusText) skStatusText.textContent = 'Server waking up — this takes about 15 seconds on first load…';
+      if (skProgressBar) skProgressBar.style.width = '5%';
+      await new Promise(r => setTimeout(r, 8000));
+      try {
+        const retry = await fetch(API_BASE + '/api/health');
+        if (!retry.ok) throw new Error('still_not_ready');
+        if (skStatusText) skStatusText.textContent = 'Server ready — composing your reading…';
+      } catch(retryErr) {
+        // Server truly unreachable — show clear error
+        const sd = document.getElementById('stageDisplay');
+        if (sd) {
+          sd.style.opacity = '0';
+          setTimeout(() => {
+            if (sd) {
+              sd.innerHTML = '<div style="text-align:center;padding:20px 0">'
+                + '<div style="font-size:15px;color:var(--text2);margin-bottom:14px">The server appears to be offline.<br>This usually means Railway needs a moment to restart.</div>'
+                + '<button onclick="location.reload()" style="background:none;border:1px solid var(--gold3);border-radius:3px;color:var(--gold);padding:10px 20px;cursor:pointer;font-family:\'EB Garamond\',serif;font-size:14px">↺ Refresh and try again</button></div>';
+              sd.style.opacity = '1';
+            }
+          }, 400);
+        }
+        return;
+      }
+    }
+    // Other wake errors — proceed anyway, start will catch failures
+    console.warn('Wake check skipped:', wakeErr.message);
+  }
+
   try {
     const intention = localStorage.getItem('cdp_intention') || '';
 
@@ -3286,13 +3335,32 @@ async function loadReading(dateStr, tier) {
         recentHistory: recentReadingHistory
       })
     });
-    if (!startRes.ok) throw new Error('Could not start reading');
-    const { jobId } = await startRes.json();
-    activeJobId = jobId;
-
-    sessionStorage.setItem('cdp_active_job', JSON.stringify({
-      jobId, dateStr, tier: activeTier, startedAt: Date.now()
-    }));
+    if (!startRes.ok) {
+      // Auto-retry once on 5xx (server may have just woken)
+      if (startRes.status >= 500) {
+        await new Promise(r => setTimeout(r, 3000));
+        const retryRes = await fetch(API_BASE + '/api/reading/start', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            date: dateStr,
+            profile: {...profile, intention, cycleContext: getCycleContext()},
+            tier: activeTier,
+            user_id: currentUser?.id || null,
+            recentHistory: recentReadingHistory
+          })
+        });
+        if (!retryRes.ok) throw new Error('Server returned ' + retryRes.status + ' — please try again');
+        const { jobId } = await retryRes.json();
+        activeJobId = jobId;
+        sessionStorage.setItem('cdp_active_job', JSON.stringify({ jobId, dateStr, tier: activeTier, startedAt: Date.now() }));
+      } else {
+        throw new Error('Could not start reading (' + startRes.status + ')');
+      }
+    } else {
+      const { jobId } = await startRes.json();
+      activeJobId = jobId;
+      sessionStorage.setItem('cdp_active_job', JSON.stringify({ jobId, dateStr, tier: activeTier, startedAt: Date.now() }));
+    }
 
     const startedAt = Date.now();
     // Kill switch — if no response after 8 minutes, show clear error

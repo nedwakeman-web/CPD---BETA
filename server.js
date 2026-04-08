@@ -1645,5 +1645,49 @@ app.post('/api/compatibility', async (req, res) => {
   }
 });
 
+// ── HEALTH ENDPOINT — used by frontend wake check and Railway monitors ──
+app.get('/api/health', (req, res) => {
+  const hasKey = !!(process.env.ANTHROPIC_API_KEY);
+  res.json({
+    status: 'ok',
+    version: 'CDP v7 Beta2',
+    time: new Date().toISOString(),
+    apiKey: hasKey ? 'present' : 'MISSING — readings will fail',
+    jobs: jobs.size,
+    uptime: Math.round(process.uptime()) + 's'
+  });
+});
+
+// ── SELF-PING KEEPALIVE — prevents Railway hobby plan sleeping ──
+// Pings own health endpoint every 10 minutes
+const SELF_URL = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}/api/health`
+  : null;
+
+if (SELF_URL) {
+  setInterval(() => {
+    https.get(SELF_URL, (res) => {
+      res.resume(); // drain response
+      console.log(`Keepalive ping → ${res.statusCode}`);
+    }).on('error', (e) => {
+      console.warn('Keepalive ping failed:', e.message);
+    });
+  }, 10 * 60 * 1000); // every 10 minutes
+  console.log(`Keepalive enabled → ${SELF_URL}`);
+}
+
+// ── JOB CLEANUP — remove completed/errored jobs after 4 hours ──
+setInterval(() => {
+  const cutoff = Date.now() - (4 * 60 * 60 * 1000);
+  let cleaned = 0;
+  for (const [id, job] of jobs.entries()) {
+    if (job.startedAt < cutoff) { jobs.delete(id); cleaned++; }
+  }
+  if (cleaned > 0) console.log(`Cleaned ${cleaned} stale jobs`);
+}, 30 * 60 * 1000); // every 30 minutes
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`CDP v7 Beta2 — streaming — port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`CDP v7 Beta2 — port ${PORT}`);
+  console.log(`API key: ${process.env.ANTHROPIC_API_KEY ? 'present ✓' : 'MISSING ✗ — readings will fail'}`);
+});
