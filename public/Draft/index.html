@@ -4407,25 +4407,27 @@ function startPolling(jobId, dateStr, tier, startedAt) {
 
 // ── SHAREABLE SYNTHESIS CARD ──────────────────────────────────────
 function openShareCard() {
-  // Handle both reading data structures
-  const r = currentReading?.reading?.reading || currentReading?.reading;
-  const synth = r?.synthesis || currentReading?.reading?.synthesis;
-  if (!synth) { console.warn('No synthesis available for share card'); return; }
+  const r = currentReading?.reading;
+  if (!r?.synthesis) return;
 
   const overlay = document.getElementById('shareCardOverlay');
   const scDate  = document.getElementById('scDate');
   const scSynth = document.getElementById('scSynth');
   const scMeta  = document.getElementById('scMeta');
-  if (!overlay || !scDate || !scSynth || !scMeta) return;
 
+  // Date label
   const d = new Date((currentDate || TODAY) + 'T12:00:00Z');
   scDate.textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  const synthClean = String(synth||'')
-    .replace(/\*\*(.*?)\*\*/g,'$1').replace(/\*(.*?)\*/g,'$1')
-    .replace(/^[_*]+|[_*]+$/g,'').trim();
+  // Synthesis text (strip markdown)
+  const synthClean = String(r.synthesis||'')
+    .replace(/\*\*(.*?)\*\*/g,'$1')
+    .replace(/\*(.*?)\*/g,'$1')
+    .replace(/^[_*]+|[_*]+$/g,'')
+    .trim();
   scSynth.textContent = synthClean;
 
+  // Meta chips: Kin, moon, numerology
   const chips = [];
   if (currentReading?.kin?.full) chips.push(currentReading.kin.full);
   if (currentReading?.moon?.phase) chips.push(currentReading.moon.phase);
@@ -4439,8 +4441,7 @@ function openShareCard() {
 
 function closeShareCard() {
   const overlay = document.getElementById('shareCardOverlay');
-  overlay.style.opacity = '0';
-  setTimeout(() => { overlay.style.display = 'none'; }, 260);
+  overlay.style.display = 'none';
 }
 
 async function copyShareCard(btnEl) {
@@ -5963,22 +5964,6 @@ RULES:
   }
 }
 
-function openChineseCompatDrawer() {
-  const d = window._chineseDrawerData;
-  if (!d) return;
-  const q = (d.chBody || (d.chineseA.element + ' ' + d.chineseA.animal + ' and ' + d.chineseB.element + ' ' + d.chineseB.animal + '. Relationship type: ' + d.chType + '. ' + d.chQual + '. ' + d.chDyn + ' How does this Chinese system layer confirm or nuance what the other frameworks show about this connection?'));
-  openDrawer(
-    '☯ Chinese Astrology · ' + d.chineseA.animal + ' & ' + d.chineseB.animal,
-    q,
-    [
-      {q: 'How should ' + d.nameA + ' and ' + d.nameB + ' work practically with their ' + d.chType + ' Chinese sign dynamic?', l: 'Practical application'},
-      {q: 'What does the ' + d.chType + ' relationship mean for timing decisions and important conversations?', l: 'Timing and decisions'},
-      {q: 'How does the ' + d.chineseA.element + ' element of ' + d.nameA + ' interact with the ' + d.chineseB.element + ' element of ' + d.nameB + '?', l: 'Element interaction'},
-      {q: 'What is the growth edge this Chinese pairing creates for both ' + d.nameA + ' and ' + d.nameB + '?', l: 'Growth edge'},
-    ]
-  );
-}
-
 function openDirDrawer() {
   const firstName = getFirstName();
   const lp = window._dirLP;
@@ -6035,18 +6020,12 @@ function injectTomorrowPreview(dateStr) {
   container.appendChild(el);
 }
 
-// 2. Evening reflection — slides in after 6pm with memory + tomorrow intent
+// 2. Evening reflection — slides in after 6pm
 function showEveningReflection() {
   if (!currentReading?.reading) return;
   if (new Date().getHours() < 18) return;
   if (localStorage.getItem('cdp_reflection_' + TODAY)) return;
   const p1 = currentReading.reading?.priorities?.[0]?.title || '';
-  // Check yesterday's tomorrow-intent for follow-up
-  const yestDate = new Date(TODAY + 'T12:00:00Z');
-  yestDate.setUTCDate(yestDate.getUTCDate()-1);
-  const ystData = JSON.parse(localStorage.getItem('cdp_reflection_' + yestDate.toISOString().slice(0,10)) || 'null');
-  const ystIntent = ystData?.tomorrowIntent || '';
-  const followUp = ystIntent ? '<div style="background:rgba(129,205,182,0.08);border:1px solid rgba(129,205,182,0.2);border-radius:3px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--teal);font-style:italic">Yesterday you wanted: \u201c' + ystIntent + '\u201d \u2014 how did that go?</div>' : '';
   setTimeout(() => {
     const rc = document.getElementById('readingContent');
     if (!rc || document.getElementById('eveningReflection')) return;
@@ -6054,32 +6033,23 @@ function showEveningReflection() {
     bar.id = 'eveningReflection';
     bar.style.cssText = 'background:var(--bg2);border:1px solid rgba(129,205,182,0.2);border-radius:3px;padding:16px 18px;margin-top:16px';
     bar.innerHTML = '<div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">\u263d Evening reflection</div>'
-      + followUp
-      + '<div style="font-size:15px;color:var(--text2);margin-bottom:12px;font-style:italic">' + (p1 ? 'Priority 1 today: \u201c' + p1.slice(0,60) + '\u201d \u2014 how did it land?' : 'How did today align with the reading?') + '</div>'
-      + '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+      + '<div style="font-size:15px;color:var(--text2);margin-bottom:14px;font-style:italic">' + (p1 ? 'Priority 1 today: \u201c' + p1.slice(0,60) + '\u201d \u2014 how did it land?' : 'How did today align with the morning reading?') + '</div>'
+      + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
       + ['\u2726 Aligned', '\u25c8 Mixed', '\u263d Difficult'].map((lbl,i) =>
-          `<button onclick="recordReflection(${i},this)" style="padding:8px 14px;background:none;border:1px solid var(--div);color:var(--text3);font-family:'EB Garamond',serif;font-size:13px;border-radius:2px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'" onmouseout="this.style.borderColor='var(--div)';this.style.color='var(--text3)'">${lbl}</button>`
-        ).join('')
-      + '</div>'
-      + '<div style="border-top:1px solid var(--div2);padding-top:12px">'
-      + '<div style="font-size:13px;color:var(--text3);margin-bottom:8px">What would be most useful for tomorrow?</div>'
-      + '<input id="tomorrowIntent" placeholder="What would be most useful tomorrow?" style="width:100%;background:var(--bg3);border:1px solid var(--div);color:var(--text);font-size:14px;padding:9px 12px;border-radius:2px;outline:none" oninput="this.style.borderColor=\'var(--gold3)\'">' 
-      + '<div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">The Oracle will check in on this tomorrow evening.</div>'
-      + '</div>';
+          `<button onclick="recordReflection(${i},this)" style="padding:8px 16px;background:none;border:1px solid var(--div);color:var(--text3);font-family:'EB Garamond',serif;font-size:13px;border-radius:2px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'" onmouseout="this.style.borderColor='var(--div)';this.style.color='var(--text3)'">${lbl}</button>`
+        ).join('') + '</div>';
     rc.appendChild(bar);
     bar.scrollIntoView({behavior:'smooth',block:'nearest'});
   }, 3500);
 }
 
 function recordReflection(score, btn) {
-  const intent = document.getElementById('tomorrowIntent')?.value?.trim() || '';
-  localStorage.setItem('cdp_reflection_' + TODAY, JSON.stringify({score, date:TODAY, tomorrowIntent:intent, p1: currentReading?.reading?.priorities?.[0]?.title||''}));
+  localStorage.setItem('cdp_reflection_' + TODAY, JSON.stringify({score, date:TODAY}));
   const bar = document.getElementById('eveningReflection');
   if (bar) {
-    const msg = intent ? '\u2713 Saved. Tomorrow: \u201c' + intent.slice(0,50) + '\u201d' : '\u2713 Recorded. The Oracle remembers. See you tomorrow.';
-    bar.innerHTML = '<div style="font-size:14px;color:var(--teal);font-style:italic;text-align:center;padding:4px">' + msg + '</div>';
-    setTimeout(() => { bar.style.transition='opacity .6s'; bar.style.opacity='0'; }, 2500);
-    setTimeout(() => bar.remove(), 3200);
+    bar.innerHTML = '<div style="font-size:14px;color:var(--teal);font-style:italic;text-align:center;padding:4px">\u2713 Recorded. The Oracle remembers. See you tomorrow.</div>';
+    setTimeout(() => { bar.style.transition='opacity .6s'; bar.style.opacity='0'; }, 2000);
+    setTimeout(() => bar.remove(), 2700);
   }
 }
 
@@ -6261,63 +6231,15 @@ function renderCalendar(){
 // ── Day modal drawer helpers — called from onclick attributes ──
 let _dayModalData = {}; // store computed values for drawer access
 
-function openDayMoonDrawer() {
-  const d = _dayModalData;
-  if (!d.dLabel) return;
-  const fn = d.firstName;
-  openDrawer(
-    'Moon Phase \u00b7 ' + d.moonPhase,
-    d.moonQ || ('The Moon is ' + d.moonPhase + ' on ' + d.dLabel + '. Day ' + d.moonCycle + ' of the lunar cycle, ' + d.moonToNew + ' days to the New Moon. ' + (d.moonIsBlack ? 'BLACK MOON.' : d.moonIsShiva ? 'SHIVA MOON.' : '') + ' What does this lunar position ask of ' + fn + ' today in their body, energy, and relationships?'),
-    [
-      {q: 'How does the ' + d.moonPhase + ' affect ' + fn + ' on ' + d.dLabel + ' \u2014 body, energy, sleep?', l: 'Body & energy'},
-      {q: 'What does this lunar phase ask ' + fn + ' to release or build right now?', l: 'Release or build'},
-      {q: 'What is the shadow invitation of the ' + d.moonPhase + ' for ' + fn + '?', l: 'Shadow invitation'},
-      d.moonIsBlack ? {q: 'What specifically should ' + fn + ' NOT initiate today on this Black Moon threshold?', l: '\u26a0\ufe0f Black Moon \u2014 what not to do'} : null,
-      d.moonIsShiva ? {q: 'What specific intention should ' + fn + ' plant in the next 48 hours on this Shiva Moon?', l: '\u2728 Shiva Moon \u2014 what to plant'} : null,
-    ].filter(Boolean)
-  );
-}
-
-function openDayUDDrawer() {
-  const d = _dayModalData;
-  if (!d.dLabel) return;
-  const fn = d.firstName;
-  openDrawer(
-    'Universal Day ' + d.ud + ' \u00b7 ' + d.udName,
-    d.udQ || ('Universal Day ' + d.ud + ' (' + d.udName + ') on ' + d.dLabel + '. ' + (d.udK||'') + ' What does this number energy mean for ' + fn + ' today?'),
-    [
-      {q: 'How does Universal Day ' + d.ud + ' specifically affect ' + fn + '\u2019s work and decisions on ' + d.dLabel + '?', l: 'Work & decisions'},
-      {q: 'What does ' + d.ud + ' ask ' + fn + ' to focus on or avoid on ' + d.dLabel + '?', l: 'Focus & avoid'},
-      {q: 'What is the shadow side of ' + d.ud + ' energy ' + fn + ' should watch for?', l: 'Shadow of ' + d.ud},
-      d.isMaster ? {q: 'How should ' + fn + ' best use this Master Number ' + d.ud + ' day?', l: 'Using Master ' + d.ud} : null,
-    ].filter(Boolean)
-  );
-}
-
-function openDayMyDrawer() {
-  const d = _dayModalData;
-  if (!d.dLabel) return;
-  const fn = d.firstName;
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  openDrawer(
-    'Month ' + d.m + ' \u00b7 Year ' + d.y,
-    'Month ' + d.m + ' energy: ' + d.mEn + ' (' + d.mEnName + '). Year ' + d.y + ' energy: ' + d.yEn + ' (' + d.yEnName + '). How do these background frequencies shape what ' + fn + ' is navigating in ' + months[d.m-1] + ' ' + d.y + '?',
-    [
-      {q: 'How does the Month ' + d.mEn + ' (' + d.mEnName + ') background energy shape ' + fn + '\u2019s experience in ' + months[d.m-1] + '?', l: 'Month energy depth'},
-      {q: 'What does Year ' + d.y + ' (Universal Year ' + d.yEn + ' \u00b7 ' + d.yEnName + ') want from ' + fn + ' right now?', l: 'Year energy depth'},
-    ]
-  );
-}
-
 function openDayKinDrawer() {
   const d = _dayModalData;
-  if (!d.dLabel) return;
+  if (!d.kinQ) return;
   const chips = [
-    {q: 'What is the gift and the shadow of the ' + d.seal + ' for ' + d.firstName + ' on ' + d.dLabel + '?', l: 'Gift & shadow'},
-    {q: 'How does Tone ' + d.toneNum + ' (' + d.tone + ') shape ' + d.firstName + '\u2019s approach on ' + d.dLabel + '?', l: 'Tone in practice'},
+    {q:'What is the gift and the shadow of the '+d.seal+' for '+d.firstName+' on '+d.dLabel+'?', l:'Gift & shadow'},
+    {q:'How does Tone '+d.toneNum+' ('+d.tone+') shape '+d.firstName+' approach on '+d.dLabel+'?', l:'Tone in practice'},
   ];
-  if (d.isGAP) chips.push({q: 'What specific synchronicities should ' + d.firstName + ' watch for on this GAP day?', l: '\u2605 GAP arrivals'});
-  openDrawer('Dreamspell \u00b7 ' + d.kinFull, d.kinQ || ('Dreamspell Kin ' + d.kinFull + ' on ' + d.dLabel + '. What does this Kin specifically invite ' + d.firstName + ' to embody?'), chips);
+  if (d.isGAP) chips.push({q:'What specific synchronicities should '+d.firstName+' watch for on this GAP day?', l:'★ GAP arrivals'});
+  openDrawer('Dreamspell · '+d.kinFull, d.kinQ, chips);
 }
 
 function openDayEnergyDrawer(mode, num) {
@@ -6460,16 +6382,9 @@ function openDayModal(ds){
   const kinCol=kinD.col==='Red'?'#c0392b':kinD.col==='White'?'#9bb3c9':kinD.col==='Blue'?'#2980b9':'#c9a050';
   const firstName=getFirstName();
 
-  // Populate shared data for ALL drawer helper functions
+  // Populate shared data for drawer helper functions
   _dayModalData = {
     ds, dLabel, firstName,
-    m, y,
-    ud, udName: udD.n||'', udK: udD.k||'', isMaster,
-    mEn, mEnName: mEnD.n||'', yEn, yEnName: yEnD.n||'',
-    moonPhase: moon.phase, moonEmoji: moon.emoji,
-    moonCycle: parseFloat(moon.cyc).toFixed(1),
-    moonToNew: parseFloat(moon.toNew).toFixed(1),
-    moonIsBlack: moon.isBlack, moonIsShiva: moon.isShiva,
     kinFull: kinD.col+' '+kinD.tone+' '+kinD.seal,
     seal: kinD.seal, tone: kinD.tone, toneNum: (kinD.kin-1)%13+1,
     isGAP: kinD.isGAP, kinQ: '',
@@ -6522,7 +6437,7 @@ function openDayModal(ds){
       <div class="modal-item tappable" style="cursor:pointer"
         data-title="Moon Phase · ${moon.phase}"
         data-q="${moonQ}"
-        onclick="closeModal();openDayMoonDrawer()">
+        onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How does the ${moon.phase} affect ${firstName} on ${dLabel} — body, energy, sleep?',l:'Body & energy'},{q:'What does this lunar phase ask ${firstName} to release or build right now?',l:'Release or build'},{q:'What is the shadow invitation of the ${moon.phase} for ${firstName}?',l:'Shadow invitation'}])">
         <div class="modal-item-label">Moon Phase</div>
         <div class="modal-item-val" style="font-size:22px">${moon.emoji}</div>
         <div class="modal-item-sub" style="font-weight:500">${moon.phase}</div>
@@ -6544,7 +6459,7 @@ function openDayModal(ds){
       <div class="modal-item tappable" style="cursor:pointer"
         data-title="Universal Day ${ud} · ${udD.n}"
         data-q="${udQ}"
-        onclick="closeModal();openDayUDDrawer()">
+        onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How does Universal Day ${ud} specifically affect ${firstName} work and decisions on ${dLabel}?',l:'Work & decisions'},{q:'What does ${ud} ask ${firstName} to focus on or avoid on ${dLabel}?',l:'Focus & avoid'},{q:'What is the shadow side of ${ud} energy ${firstName} should watch for?',l:'Shadow of ${ud}'}])">
         <div class="modal-item-label">Universal Day Energy</div>
         <div class="modal-item-val" style="${isMaster?'color:'+masterCol:''};">${ud}${isMaster?'★':''}</div>
         <div class="modal-item-sub">${udD.n}</div>
@@ -6556,7 +6471,7 @@ function openDayModal(ds){
       <div class="modal-item tappable" style="cursor:pointer"
         data-title="Month ${m} · Year ${y}"
         data-q="${myQ}"
-        onclick="closeModal();openDayMyDrawer()">
+        onclick="closeModal();openDrawer(this.dataset.title, this.dataset.q, [{q:'How does the Month ${mEn} (${mEnD.n}) background energy shape ${firstName} experience in ${['January','February','March','April','May','June','July','August','September','October','November','December'][m-1]}?',l:'Month energy depth'},{q:'What does Year ${y} (Universal Year ${yEn} · ${yEnD.n}) want from ${firstName} right now?',l:'Year energy depth'}])">
         <div class="modal-item-label">Month · Year Energy</div>
         <div class="modal-item-val" style="font-size:15px">${mEn} · ${yEn}</div>
         <div class="modal-item-sub">${mEnD.n} · ${yEnD.n}</div>
@@ -7287,7 +7202,7 @@ function initCompatScreen() {
       for (let y=new Date().getFullYear();y>=1930;y--) el.add(new Option(y,y));
     }
   });
-  // Pre-fill Person A from profile
+  // Pre-fill from profile
   if (profile.name || profile.nickname) {
     const nameEl = document.getElementById('cA_name');
     if (nameEl && !nameEl.value) nameEl.value = profile.nickname || profile.name || '';
@@ -7297,22 +7212,6 @@ function initCompatScreen() {
   fillSelect('cA_year', profile.birthYear);
   if (profile.birthTime) { const el=document.getElementById('cA_time'); if(el&&!el.value) el.value=profile.birthTime; }
   if (profile.birthLocation) { const el=document.getElementById('cA_location'); if(el&&!el.value) el.value=profile.birthLocation; }
-
-  // Pre-fill Person B from last saved compat person
-  const lastB = JSON.parse(localStorage.getItem('cdp_last_compat_b') || 'null');
-  if (lastB) {
-    const bName = document.getElementById('cB_name');
-    if (bName && !bName.value && lastB.name) bName.value = lastB.name;
-    fillSelect('cB_day', lastB.birthDay);
-    fillSelect('cB_month', lastB.birthMonth);
-    fillSelect('cB_year', lastB.birthYear);
-    if (lastB.birthTime) { const el=document.getElementById('cB_time'); if(el&&!el.value) el.value=lastB.birthTime; }
-    if (lastB.birthLocation) { const el=document.getElementById('cB_location'); if(el&&!el.value) el.value=lastB.birthLocation; }
-    if (lastB.context) { const el=document.getElementById('cB_context'); if(el&&!el.value) el.value=lastB.context; }
-    // Show subtle "last used" indicator
-    const label = document.querySelector('.compat-person.person-b .compat-person-label');
-    if (label && lastB.name) label.innerHTML = 'Person B &nbsp;<span style="font-size:10px;color:var(--teal);opacity:.7;text-transform:none;letter-spacing:0">last: ' + lastB.name + '</span>';
-  }
 }
 
 function selectCompatTopic(btn) {
@@ -7356,17 +7255,6 @@ async function generateCompatibility() {
     result.scrollIntoView({behavior:'smooth', block:'start'});
     return;
   }
-
-  // Save Person B for next visit — auto-repopulates the form
-  localStorage.setItem('cdp_last_compat_b', JSON.stringify({
-    name: personB.name,
-    birthDay: personB.birthDay,
-    birthMonth: personB.birthMonth,
-    birthYear: personB.birthYear,
-    birthTime: personB.birthTime || '',
-    birthLocation: personB.birthLocation || '',
-    context: personB.context || '',
-  }));
 
   if (btn) { btn.disabled = true; btn.textContent = '☽ The Oracle is reading your connection…'; }
   result.classList.add('show');
@@ -7486,78 +7374,34 @@ function renderCompatResult(data) {
     const chQual = chineseCompat?.q || '';
     const chDyn  = chineseCompat?.d || '';
     const typeCol = chType === 'Best Match' ? 'var(--teal)' : chType === 'Affinity' ? 'var(--gold)' : chType === 'Clash' ? '#ff9999' : 'var(--text3)';
-    const typeBg  = chType === 'Best Match' ? 'rgba(129,205,182,0.08)' : chType === 'Affinity' ? 'rgba(201,160,80,0.08)' : chType === 'Clash' ? 'rgba(200,80,80,0.08)' : 'var(--bg3)';
     const chBody  = r.chinese_connection || '';
-
-    // Animal emoji map
-    const ANIMAL_EMOJI = {Rat:'🐀',Ox:'🐂',Tiger:'🐅',Rabbit:'🐇',Dragon:'🐉',Snake:'🐍',Horse:'🐴',Goat:'🐐',Monkey:'🐒',Rooster:'🐓',Dog:'🐕',Pig:'🐖'};
-    const emojiA = ANIMAL_EMOJI[chineseA.animal] || '☯';
-    const emojiB = ANIMAL_EMOJI[chineseB.animal] || '☯';
-
-    // Element colour map
-    const EL_COL = {Metal:'#b0c4d8',Water:'#6eb5d4',Wood:'#7db87d',Fire:'#d4724a',Earth:'#c9a050'};
-    const elColA = EL_COL[chineseA.element] || 'var(--text2)';
-    const elColB = EL_COL[chineseB.element] || 'var(--text2)';
-
-    // Build the open drawer call without inline template expressions
-    const chDrawerQ = (chBody || (chineseA.element+' '+chineseA.animal+' and '+chineseB.element+' '+chineseB.animal+'. '+chQual+'. '+chDyn)).replace(/'/g,"\\'").slice(0,300);
-    const safeNA = (nameA||'').replace(/'/g,"\\'");
-    const safeNB = (nameB||'').replace(/'/g,"\\'");
-
+    const safeCh  = chBody.replace(/'/g,"\\'").slice(0,300);
     html += `<div style="padding:0 24px 20px">
       <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);
-        margin-bottom:14px;display:flex;align-items:center;gap:10px;cursor:pointer"
-        onclick="openChineseCompatDrawer()">
+        margin-bottom:12px;display:flex;align-items:center;gap:10px;cursor:pointer"
+        onclick="openDrawer('☯ Chinese Astrology','${safeCh || (chineseA.element+' '+chineseA.animal+' and '+chineseB.element+' '+chineseB.animal+'. '+chQual+'. '+chDyn+' How does the Chinese system layer confirm or nuance what the other frameworks show?').replace(/'/g,"\\'")}', [{q:'How should ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} work practically with their Chinese sign dynamic?',l:'Practical application'},{q:'What does the ${chType} relationship mean for timing and important decisions?',l:'Timing and decisions'}])">
         ☯ Chinese Astrology ↗
         <span style="flex:1;height:1px;background:var(--gold3);display:inline-block"></span>
         <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0;font-style:italic">Solar year signs · CNY-corrected</span>
       </div>
-
-      <!-- Visual animal cards -->
-      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:14px">
-
-        <!-- Person A card -->
-        <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:14px 16px;text-align:center">
-          <div style="font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">${nameA}</div>
-          <div style="font-size:40px;line-height:1;margin-bottom:8px">${emojiA}</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:${elColA};margin-bottom:4px">${chineseA.animal}</div>
-          <div style="font-size:12px;color:var(--text3)">${chineseA.element}</div>
-          <div style="margin-top:8px;height:3px;border-radius:2px;background:${elColA};opacity:.4"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:12px 14px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px">${nameA}</div>
+          <div style="font-size:20px;font-family:'Cormorant Garamond',serif;color:var(--gold)">${chineseA.element} ${chineseA.animal}</div>
         </div>
-
-        <!-- Relationship badge -->
-        <div style="text-align:center;padding:8px 0">
-          <div style="width:40px;height:40px;border-radius:50%;background:${typeBg};border:1px solid ${typeCol};
-            display:flex;align-items:center;justify-content:center;margin:0 auto">
-            <span style="font-size:16px">${chType === 'Best Match' ? '✦' : chType === 'Affinity' ? '◈' : chType === 'Clash' ? '⚡' : '○'}</span>
-          </div>
-          <div style="font-size:10px;color:${typeCol};margin-top:6px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap">${chType}</div>
+        <div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:12px 14px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px">${nameB}</div>
+          <div style="font-size:20px;font-family:'Cormorant Garamond',serif;color:var(--gold)">${chineseB.element} ${chineseB.animal}</div>
         </div>
-
-        <!-- Person B card -->
-        <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:14px 16px;text-align:center">
-          <div style="font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">${nameB}</div>
-          <div style="font-size:40px;line-height:1;margin-bottom:8px">${emojiB}</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:${elColB};margin-bottom:4px">${chineseB.animal}</div>
-          <div style="font-size:12px;color:var(--text3)">${chineseB.element}</div>
-          <div style="margin-top:8px;height:3px;border-radius:2px;background:${elColB};opacity:.4"></div>
-        </div>
-
       </div>
-
-      <!-- Quality + Dynamic -->
-      <div style="background:${typeBg};border:1px solid ${typeCol}33;border-radius:3px;padding:12px 14px;margin-bottom:12px">
-        <div style="font-size:14px;color:${typeCol};font-style:italic;margin-bottom:6px">${chQual}</div>
-        ${chDyn ? `<div style="font-size:13px;color:var(--text2);line-height:1.65">${chDyn}</div>` : ''}
+      <div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:${typeCol};white-space:nowrap">${chType}</span>
+        <span style="flex:1;height:1px;background:var(--div2);display:inline-block"></span>
+        <span style="font-size:13px;color:var(--text2)">${chQual}</span>
       </div>
-
+      ${chDyn ? `<div style="font-size:14px;color:var(--text3);font-style:italic;margin-bottom:12px">${chDyn}</div>` : ''}
       ${chBody ? `<div style="font-size:15px;color:var(--text2);line-height:1.85">${chBody.split('\n').filter(l=>l.trim()).map(p=>`<p style="margin-bottom:8px">${p}</p>`).join('')}</div>` : ''}
-
-      <div style="margin-top:8px;font-size:11px;color:var(--text3);font-style:italic">Chinese solar year signs, corrected for Chinese New Year date.</div>
     </div>`;
-
-    // Store for drawer helper
-    window._chineseDrawerData = {chineseA, chineseB, chType, chQual, chDyn, nameA, nameB, chBody};
   }
 
   // Biorhythm snapshot today
