@@ -705,7 +705,7 @@ function newJobId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 function cleanOldJobs() {
-  const cutoff = Date.now() - 7200000;
+  const cutoff = Date.now() - 14400000; // 4hr TTL — survives brief Railway redeploys
   for (const [id, job] of jobs) {
     if (job.startedAt < cutoff) jobs.delete(id);
   }

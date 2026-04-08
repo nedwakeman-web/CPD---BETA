@@ -3103,6 +3103,37 @@ async function loadReading(dateStr, tier) {
           return;
         }
         const pollRes = await fetch(API_BASE + `/api/reading/status/${jobId}`);
+
+        // ── Handle 404: server restarted, job lost — don't hammer ──
+        if (pollRes.status === 404) {
+          clearInterval(pollingTimer); pollingTimer = null;
+          clearInterval(stageTimer);
+          sessionStorage.removeItem('cdp_active_job');
+          // Show a clean retry prompt rather than an error
+          const sd = document.getElementById('stageDisplay');
+          if (sd) {
+            sd.style.opacity = '0';
+            setTimeout(() => {
+              if (sd) {
+                sd.innerHTML = `<div style="text-align:center">
+                  <div style="font-size:15px;color:var(--text2);margin-bottom:14px">
+                    The server was updated while your reading was composing.
+                  </div>
+                  <button onclick="loadReading(dateStr,'${activeTier}')" style="background:none;
+                    border:1px solid var(--gold3);border-radius:3px;color:var(--gold);
+                    padding:10px 20px;cursor:pointer;font-family:'EB Garamond',serif;font-size:14px">
+                    ✦ Start a fresh reading
+                  </button>
+                </div>`;
+                sd.style.opacity = '1';
+              }
+            }, 400);
+          }
+          const sb = document.getElementById('skeletonStatusBar');
+          if (sb) { sb.style.transition='opacity .4s'; sb.style.opacity='0'; setTimeout(()=>sb?.remove(),400); }
+          return;
+        }
+
         const poll = await pollRes.json();
 
         const elapsed = Math.round((Date.now() - startedAt) / 1000);
@@ -3110,6 +3141,7 @@ async function loadReading(dateStr, tier) {
         const pct = Math.min(96, Math.round((elapsed / maxSec) * 100));
         const mins = Math.floor(elapsed/60), secs = elapsed % 60;
         const timeStr = (mins > 0 ? mins+'m ' : '') + secs + 's';
+        window._pollErrors = 0; // reset error counter on successful response
         // Update skeleton progress bar only (stage cycling handled by pbTimer)
         const skBar = document.getElementById('skProgressBar');
         if (skBar) skBar.style.width = pct + '%';
@@ -3150,14 +3182,32 @@ async function loadReading(dateStr, tier) {
             document.title = '✶ Your Oracle Reading is Ready';
             setTimeout(() => { document.title = 'Cosmic Daily Planner'; }, 5000);
           }
-        } else if (poll.status === 'error') {
+        } else if (poll.status === 'error' || poll.status === 'not_found') {
           clearInterval(pollingTimer); pollingTimer = null;
           clearInterval(stageTimer);
           sessionStorage.removeItem('cdp_active_job');
-          throw new Error(poll.error || 'Reading generation failed');
+          if (poll.status === 'not_found') {
+            const sd = document.getElementById('stageDisplay');
+            if (sd) { sd.innerHTML = '<div style="color:var(--text2);font-size:15px">Session expired. <button onclick="loadReading(dateStr,\'' + activeTier + '\')" style="background:none;border:1px solid var(--gold3);border-radius:2px;color:var(--gold);padding:6px 14px;cursor:pointer;font-family:'EB Garamond',serif">Start again ✦</button></div>'; sd.style.opacity='1'; }
+            const sb = document.getElementById('skeletonStatusBar');
+            if (sb) { sb.style.opacity='0'; setTimeout(()=>sb?.remove(),400); }
+          } else {
+            throw new Error(poll.error || 'Reading generation failed');
+          }
         }
       } catch(pollErr) {
-        console.warn('Poll error (will retry):', pollErr.message);
+        window._pollErrors = (window._pollErrors||0) + 1;
+        if (window._pollErrors > 5) {
+          clearInterval(pollingTimer); pollingTimer = null;
+          clearInterval(stageTimer);
+          sessionStorage.removeItem('cdp_active_job');
+          window._pollErrors = 0;
+          console.warn('Polling stopped after 5 consecutive errors:', pollErr.message);
+          const sd = document.getElementById('stageDisplay');
+          if (sd) { sd.innerHTML = '<div style="color:var(--text2);font-size:15px">Connection issue. <button onclick="window._pollErrors=0;loadReading(\'' + dateStr + '\',\'' + activeTier + '\')" style="background:none;border:1px solid var(--gold3);border-radius:2px;color:var(--gold);padding:6px 14px;cursor:pointer;font-family:'EB Garamond',serif">Try again ✦</button></div>'; sd.style.opacity='1'; }
+        } else {
+          console.warn('Poll error (will retry):', pollErr.message);
+        }
       }
     }, 2000);
 
