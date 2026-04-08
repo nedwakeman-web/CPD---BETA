@@ -649,7 +649,7 @@ Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no pream
 }`;
 
   const maxTok = {free:800, seeker:4500, initiate:6000, mystic:9000, oracle:16000}[tier] || 8192;
-  const raw = await callAPI('claude-sonnet-4-6', maxTok, sys, user);
+  const raw = await callAPI('claude-sonnet-4-5-20250514', maxTok, sys, user);
 
   let reading;
   try {
@@ -747,7 +747,9 @@ Generate ONLY these sections as valid JSON:
 }`;
 
   const maxTok1 = {free:400, seeker:1800, initiate:2200, mystic:2800, oracle:3500}[tier] || 2000;
-  const raw1 = await callAPI('claude-sonnet-4-6', maxTok1, sys1, user1);
+  // Use Haiku for seeker/free Phase1 (fast enough), Sonnet for deeper tiers
+  const p1Model = (tier === 'seeker' || tier === 'free') ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-5-20250514';
+  const raw1 = await callAPI(p1Model, maxTok1, sys1, user1);
 
   try {
     const cleaned = raw1.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -940,7 +942,7 @@ RULES:
       p.birthDay ? `Born: ${p.birthDay}/${p.birthMonth}/${p.birthYear}${p.birthTime ? ' at ' + p.birthTime : ''}${p.birthLocation ? ' in ' + p.birthLocation : ''}` : '',
     ].filter(Boolean).join('\n');
 
-    const ans = await callAPI('claude-sonnet-4-6', 2500, sys,
+    const ans = await callAPI('claude-sonnet-4-5-20250514', 2500, sys,
       `${fullContext}\n\nQuestion from ${firstName}: ${question}`);
     res.json({answer: ans});
   } catch(e) {
@@ -1621,7 +1623,7 @@ app.post('/api/compatibility', async (req, res) => {
       + '  "sources": "Astrology: approximate natal positions Meeus (1998) Astronomical Algorithms. Synastry: Greene (1976); Arroyo (1978); Sasportas (1989); Tarnas (2006). Numerology: Drayer (2002); Millman (1993). Dreamspell: Arguelles (1987) modern system. Biorhythms: Teltscher, Fliess, Swoboda (classical three-cycle theory). Natal moon phase archetypes."\n'
       + '}';
 
-    const raw = await callAPI('claude-sonnet-4-6', 12000, sys, user);
+    const raw = await callAPI('claude-sonnet-4-5-20250514', 12000, sys, user);
     let reading;
     try {
       const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -1668,6 +1670,19 @@ app.get('/api/debug/:jobId', (req, res) => {
     resultKeys: job.result ? Object.keys(job.result) : null,
     readingKeys: job.result?.reading ? Object.keys(job.result.reading) : null,
   });
+});
+
+app.get('/api/test', async (req, res) => {
+  const start = Date.now();
+  try {
+    const result = await callAPI('claude-haiku-4-5-20251001', 50,
+      'Respond with exactly: {"ok":true}',
+      'Say {"ok":true} and nothing else.');
+    const ms = Date.now() - start;
+    res.json({ ok: true, ms, response: result.slice(0,50) });
+  } catch(e) {
+    res.json({ ok: false, error: e.message, ms: Date.now()-start });
+  }
 });
 
 app.get('/api/health', (req, res) => {
