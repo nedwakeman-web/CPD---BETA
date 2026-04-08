@@ -493,6 +493,52 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .ctx-section{border:1px solid var(--div);background:var(--bg2);border-radius:3px;
   padding:22px 24px;margin-bottom:18px}
 
+
+/* ── SHAREABLE CARD ─────────────────────────────────────── */
+.share-card-overlay{position:fixed;inset:0;background:rgba(5,12,22,0.88);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+.share-card-box{background:var(--bg);border:1px solid var(--gold3);border-radius:4px;
+  max-width:440px;width:100%;overflow:hidden}
+#synthCardPreview{background:linear-gradient(160deg,#0D1E33 0%,#0a1628 60%,#071020 100%);
+  padding:32px 28px;position:relative;overflow:hidden}
+#synthCardPreview::before{content:'';position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,160,80,0.06) 0%,transparent 70%)}
+.sc-date{font-size:11px;letter-spacing:.35em;text-transform:uppercase;
+  color:rgba(201,160,80,0.6);margin-bottom:16px;font-family:'EB Garamond',serif}
+.sc-synth{font-family:'Cormorant Garamond',serif;font-size:clamp(15px,3.5vw,18px);
+  color:rgba(240,230,204,0.92);line-height:1.75;font-style:italic;margin-bottom:20px}
+.sc-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.sc-chip{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(240,230,204,0.45);padding:4px 10px;border:1px solid rgba(240,230,204,0.12);
+  border-radius:2px;font-family:'EB Garamond',serif}
+.sc-brand{font-size:11px;letter-spacing:.4em;text-transform:uppercase;
+  color:rgba(201,160,80,0.4);font-family:'Cormorant Garamond',serif}
+.share-card-actions{padding:16px 20px;background:var(--bg2);border-top:1px solid var(--div);
+  display:flex;gap:10px;flex-wrap:wrap}
+.sc-action{flex:1;min-width:120px;padding:10px;background:none;border:1px solid var(--div);
+  border-radius:3px;color:var(--text2);font-family:'EB Garamond',serif;font-size:14px;
+  cursor:pointer;transition:border-color .2s,color .2s;text-align:center}
+.sc-action:hover{border-color:var(--gold);color:var(--gold)}
+.sc-action.primary{background:rgba(201,160,80,0.08);border-color:var(--gold3);color:var(--gold)}
+
+/* ── AFTERNOON CHECK-IN ──────────────────────────────────── */
+.checkin-bar{position:fixed;bottom:0;left:0;right:0;z-index:150;
+  background:var(--bg2);border-top:1px solid var(--teal2);
+  padding:14px 20px;display:flex;align-items:center;gap:14px;
+  transform:translateY(100%);transition:transform .4s cubic-bezier(0.34,1.56,0.64,1)}
+.checkin-bar.visible{transform:translateY(0)}
+.checkin-moon{font-size:22px;flex-shrink:0}
+.checkin-text{flex:1;min-width:0}
+.checkin-prompt{font-size:15px;color:var(--text2);line-height:1.5;font-style:italic;
+  font-family:'Cormorant Garamond',serif}
+.checkin-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.checkin-btns{display:flex;gap:8px;flex-shrink:0}
+.checkin-btn{padding:8px 14px;background:none;border:1px solid var(--teal2);
+  border-radius:3px;color:var(--teal);font-family:'EB Garamond',serif;
+  font-size:13px;cursor:pointer;white-space:nowrap}
+.checkin-btn.dismiss{border-color:var(--div);color:var(--text3)}
+
 /* ── SKELETON LOADING ANIMATION ── */
 @keyframes skPulse{0%{opacity:.35}50%{opacity:.7}100%{opacity:.35}}
 @keyframes moonSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
@@ -1371,6 +1417,37 @@ body.print-card-mode{background:#0D1E33}
         <a href="/privacy.html" target="_blank" style="color:var(--text3);text-decoration:underline;text-underline-offset:2px;opacity:.8">Privacy Policy</a>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- SHARE CARD MODAL -->
+<div id="shareCardOverlay" class="share-card-overlay" style="display:none" onclick="if(event.target===this)closeShareCard()">
+  <div class="share-card-box">
+    <div id="synthCardPreview">
+      <div class="sc-date" id="scDate"></div>
+      <div class="sc-synth" id="scSynth"></div>
+      <div class="sc-meta" id="scMeta"></div>
+      <div class="sc-brand">✦ Cosmic Daily Planner</div>
+    </div>
+    <div class="share-card-actions">
+      <button class="sc-action primary" onclick="copyShareCard()">⎘ Copy Image</button>
+      <button class="sc-action" onclick="shareNative()">↗ Share</button>
+      <button class="sc-action dismiss" onclick="closeShareCard()">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- AFTERNOON CHECK-IN BAR -->
+<div id="checkinBar" class="checkin-bar">
+  <div class="checkin-moon" id="checkinMoon">☽</div>
+  <div class="checkin-text">
+    <div class="checkin-prompt" id="checkinPrompt">How is your day unfolding?</div>
+    <div class="checkin-sub" id="checkinSub">Your morning energy is still with you</div>
+  </div>
+  <div class="checkin-btns">
+    <button class="checkin-btn" onclick="openCheckinReading()">Open Reading</button>
+    <button class="checkin-btn dismiss" onclick="dismissCheckin()">✕</button>
   </div>
 </div>
 
@@ -3825,7 +3902,7 @@ function renderSkeletonReading(dateStr, tier) {
   </div>`;
 
   // Numerology (real data)
-  html += `<div class="  html += `<div id="sk-numerology">
+  html += `<div id="sk-numerology">
     <div class="sec-label">Numerology of the Day</div>
     <div class="sec-hl" style="margin-bottom:12px">${isMD?'<span class=\"master-badge\">\u2605 </span>':''} Universal Day ${dispNum} — ${dispD.n}</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">
@@ -4038,6 +4115,188 @@ function startPolling(jobId, dateStr, tier, startedAt) {
   }, 2000);
 }
 
+
+// ── SHAREABLE SYNTHESIS CARD ──────────────────────────────────────
+function openShareCard() {
+  const r = currentReading?.reading;
+  if (!r?.synthesis) return;
+
+  const overlay = document.getElementById('shareCardOverlay');
+  const scDate  = document.getElementById('scDate');
+  const scSynth = document.getElementById('scSynth');
+  const scMeta  = document.getElementById('scMeta');
+
+  // Date label
+  const d = new Date(currentDate + 'T12:00:00Z');
+  scDate.textContent = d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // Synthesis text (strip markdown)
+  const synthClean = String(r.synthesis||'')
+    .replace(/\*\*(.*?)\*\*/g,'$1')
+    .replace(/\*(.*?)\*/g,'$1')
+    .replace(/^[_*]+|[_*]+$/g,'')
+    .trim();
+  scSynth.textContent = synthClean;
+
+  // Meta chips: Kin, moon, numerology
+  const chips = [];
+  if (currentReading?.kin?.full) chips.push(currentReading.kin.full);
+  if (currentReading?.moon?.phase) chips.push(currentReading.moon.phase);
+  const ud = currentReading?.num?.ud;
+  if (ud) chips.push('Universal Day ' + ud);
+  scMeta.innerHTML = chips.map(t => `<span class="sc-chip">${t}</span>`).join('');
+
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.style.opacity = '1', 10);
+}
+
+function closeShareCard() {
+  const overlay = document.getElementById('shareCardOverlay');
+  overlay.style.display = 'none';
+}
+
+async function copyShareCard() {
+  const preview = document.getElementById('synthCardPreview');
+  const btn = event.target;
+  btn.textContent = 'Generating…';
+
+  try {
+    if (typeof html2canvas !== 'undefined') {
+      const canvas = await html2canvas(preview, {
+        backgroundColor: '#0D1E33',
+        scale: 2,
+        useCORS: true,
+        logging: false
+      });
+      canvas.toBlob(async blob => {
+        try {
+          // Try clipboard API first
+          await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+          btn.textContent = '✓ Copied to clipboard';
+        } catch(e) {
+          // Fallback: download
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'cosmic-reading-' + (currentDate||TODAY) + '.png';
+          a.click();
+          btn.textContent = '✓ Downloaded';
+        }
+        setTimeout(() => { btn.textContent = '⎘ Copy Image'; }, 2500);
+      }, 'image/png');
+    } else {
+      // No html2canvas — copy text fallback
+      const scSynth = document.getElementById('scSynth');
+      const scDate  = document.getElementById('scDate');
+      const text = scDate.textContent + '\n\n' + scSynth.textContent + '\n\n✦ cosmicdailyplanner.com';
+      await navigator.clipboard.writeText(text);
+      btn.textContent = '✓ Text copied';
+      setTimeout(() => { btn.textContent = '⎘ Copy Image'; }, 2000);
+    }
+  } catch(e) {
+    btn.textContent = 'Try share →';
+    shareNative();
+  }
+}
+
+async function shareNative() {
+  const scSynth = document.getElementById('scSynth');
+  const scDate  = document.getElementById('scDate');
+  const text = scDate.textContent + '\n\n' + scSynth.textContent + '\n\ncosmicdailyplanner.com';
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'My Cosmic Daily Reading', text, url: 'https://cosmicdailyplanner.com' });
+    } catch(e) { /* user cancelled */ }
+  } else {
+    // Fallback: copy text
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.sc-action:not(.primary):not(.dismiss)');
+      if (btn) { btn.textContent = '✓ Copied'; setTimeout(()=>{ btn.textContent='↗ Share'; },2000); }
+    });
+  }
+}
+
+// ── AFTERNOON / EVENING CHECK-IN ─────────────────────────────────
+let checkinShown = false;
+let checkinTimer = null;
+
+function scheduleCheckin(r, dateStr) {
+  // Don't show twice in same day
+  const lastCheckin = localStorage.getItem('cdp_last_checkin');
+  if (lastCheckin === TODAY) return;
+  if (checkinShown) return;
+
+  // Determine delay: 3 hours after reading generated (simulated as 3-5s for demo)
+  // In production: check current time vs morning session time
+  const now = new Date();
+  const hour = now.getHours();
+
+  let delay, promptText, subText, moonEmoji;
+
+  if (hour >= 6 && hour < 12) {
+    // Morning reading generated — check in at noon (3-6 hour delay)
+    delay = Math.max(5000, (12 - hour) * 3600000);
+    promptText = 'Midday check-in — how is your morning energy holding?';
+    subText = 'Your Universal Day is still with you';
+    moonEmoji = '◑';
+  } else if (hour >= 12 && hour < 17) {
+    // Afternoon — check in at 6pm
+    delay = Math.max(5000, (18 - hour) * 3600000);
+    promptText = 'Your afternoon energy is shifting. How are you navigating it?';
+    subText = 'Open your reading to see what the evening brings';
+    moonEmoji = '🌙';
+  } else if (hour >= 17) {
+    // Evening — check in now with closing prompt
+    delay = 4000;
+    promptText = 'The day is closing. What was the best moment?';
+    subText = 'Your evening numerology energy is ' + (r?.numerology?.three_energies?.evening?.name || 'active');
+    moonEmoji = '☽';
+  } else {
+    return; // Middle of night, skip
+  }
+
+  // Personalise prompt with morning's main theme
+  if (r?.priorities?.[0]?.title) {
+    promptText = 'Priority 1 this morning: “' + r.priorities[0].title + '”. How did that land?';
+  }
+
+  if (checkinTimer) clearTimeout(checkinTimer);
+  checkinTimer = setTimeout(() => {
+    showCheckin(moonEmoji, promptText, subText);
+  }, delay);
+}
+
+function showCheckin(emoji, prompt, sub) {
+  if (checkinShown) return;
+  checkinShown = true;
+  const bar  = document.getElementById('checkinBar');
+  const moon = document.getElementById('checkinMoon');
+  const text = document.getElementById('checkinPrompt');
+  const subEl= document.getElementById('checkinSub');
+  if (!bar) return;
+  if (moon) moon.textContent = emoji;
+  if (text) text.textContent = prompt;
+  if (subEl) subEl.textContent = sub;
+  bar.classList.add('visible');
+}
+
+function dismissCheckin() {
+  const bar = document.getElementById('checkinBar');
+  if (bar) bar.classList.remove('visible');
+  localStorage.setItem('cdp_last_checkin', TODAY);
+}
+
+function openCheckinReading() {
+  dismissCheckin();
+  // Show the reading tab and scroll to synthesis
+  const readingBtn = document.querySelector('.npill');
+  showScreen('sr', readingBtn);
+  setTimeout(() => {
+    const synth = document.getElementById('ai-synthesis');
+    if (synth) synth.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 300);
+}
+
+
 // ── Fill Phase 1 sections (actionable core, ~25s) ─────────────────
 function fillPhase1Sections(p1) {
   function fadeIn(el, html) {
@@ -4140,7 +4399,18 @@ function fillAISections(data, dateStr) {
   const synthEl = document.getElementById('ai-synthesis');
   if (synthEl && r?.synthesis) {
     const synthText = String(r.synthesis||'').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'$1').trim();
-    fadeIn(synthEl, `<div class="synthesis tappable" onclick="tapSynthesis()" title="Tap for deeper insight">${synthText}<div class="tap-hint">↗ Go deeper</div></div>`);
+    fadeIn(synthEl, `<div class="synthesis tappable" onclick="tapSynthesis()" title="Tap for deeper insight">${synthText}<div class="tap-hint">↗ Go deeper</div></div>
+      <div style="text-align:center;margin-top:14px">
+        <button onclick="openShareCard()" style="background:none;border:1px solid rgba(201,160,80,0.35);
+          border-radius:3px;color:rgba(201,160,80,0.75);padding:8px 18px;cursor:pointer;
+          font-family:'EB Garamond',serif;font-size:13px;letter-spacing:.12em;
+          transition:border-color .2s,color .2s"
+          onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+          onmouseout="this.style.borderColor='rgba(201,160,80,0.35)';this.style.color='rgba(201,160,80,0.75)'">
+          ✦ Share Today’s Reading
+        </button>
+      </div>`);
+    scheduleCheckin(r, dateStr);
   }
 
   // Priorities
