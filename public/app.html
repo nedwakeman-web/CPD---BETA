@@ -562,11 +562,11 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .checkin-moon{font-size:22px;flex-shrink:0}
 
 /* ── PRESENCE BAR — slides in from top on return visit ── */
-.presence-bar{position:fixed;top:52px;left:0;right:0;z-index:95;
+.presence-bar{position:fixed;top:52px;left:0;right:0;z-index:99;
   background:rgba(8,30,51,0.97);border-bottom:1px solid rgba(129,205,182,0.2);
-  padding:8px 20px 8px 16px;display:flex;align-items:center;max-width:calc(100% - 160px);gap:12px;
+  padding:8px 20px 8px 16px;display:flex;align-items:center;gap:12px;
   transform:translateY(-100%);transition:transform .4s cubic-bezier(0.34,1.56,0.64,1);
-  backdrop-filter:blur(12px)}
+  backdrop-filter:blur(12px);overflow:hidden}
 .presence-bar.visible{transform:translateY(0)}
 .presence-emoji{font-size:18px;flex-shrink:0}
 .presence-text-wrap{flex:1;min-width:0}
@@ -1090,10 +1090,10 @@ body.print-card-mode{background:#0D1E33}
 
 /* ── CDP v8 ENTRY SCREEN ─────────────────────────────────────────── */
 #cdpEntry{position:fixed;inset:0;background:var(--navy,#0D1E33);z-index:9999;
-  display:flex;align-items:center;justify-content:center;padding:24px;
-  opacity:0;transition:opacity 0.4s}
+  display:flex;align-items:flex-start;justify-content:center;padding:24px;
+  opacity:0;transition:opacity 0.4s;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #cdpEntry.visible{opacity:1}
-.entry-box{max-width:480px;width:100%;text-align:center}
+.entry-box{max-width:480px;width:100%;text-align:center;padding-bottom:40px;padding-top:20px}
 .entry-tier-badge{display:inline-flex;align-items:center;gap:8px;
   font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.14em;
   padding:7px 18px;border:1px solid var(--gold,#C9A84C);color:var(--gold,#C9A84C);
@@ -1207,6 +1207,21 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
         <span class="entry-skip" onclick="skipDob()">Skip</span>
       </div>
       <div class="entry-dob-hint" id="entryDobHint">Without this, you receive a universal reading. With it, your Life Path, Personal Year and natal chart are integrated.</div>
+    </div>
+    <div class="entry-field">
+      <label class="entry-label">BIRTH TIME <span>for Ascendant and natal chart</span></label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="entry-input" id="entryBirthHour" style="flex:1;padding:12px 10px">
+          <option value="">Hour</option>
+          <option value="0">00</option><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option><option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+        </select>
+        <select class="entry-input" id="entryBirthMin" style="flex:1;padding:12px 10px">
+          <option value="">Min</option>
+          <option value="0">00</option><option value="5">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
+        </select>
+        <span style="font-size:13px;color:#6B8BAF;white-space:nowrap">local time</span>
+      </div>
+      <div style="font-size:12px;color:#6B8BAF;font-style:italic;margin-top:5px">If unknown, leave blank. Used for Ascendant calculation.</div>
     </div>
     <div class="entry-field">
       <label class="entry-label">BIRTH LOCATION <span>for Ascendant and natal chart</span></label>
@@ -9213,6 +9228,8 @@ function beginFromEntry() {
   var day       = document.getElementById('entryDay').value;
   var month     = document.getElementById('entryMonth').value;
   var year      = document.getElementById('entryYear').value;
+  var birthHour   = document.getElementById('entryBirthHour').value;
+  var birthMin    = document.getElementById('entryBirthMin').value;
   var birthPlace= document.getElementById('entryBirthPlace').value.trim();
   var location  = document.getElementById('entryLocation').value.trim();
   var intention = document.getElementById('entryIntention').value.trim();
@@ -9220,6 +9237,8 @@ function beginFromEntry() {
   if (name)       localStorage.setItem('cdp_name', name);
   if (intention)  localStorage.setItem('cdp_intention', intention);
   else            localStorage.removeItem('cdp_intention');
+  if (birthHour) localStorage.setItem('cdp_bh', birthHour);
+  if (birthMin)  localStorage.setItem('cdp_bmin', birthMin);
   if (birthPlace) localStorage.setItem('cdp_birth_place', birthPlace);
   if (location)   localStorage.setItem('cdp_location', location);
   localStorage.setItem('cdp_lang', cdpLang);
