@@ -1217,7 +1217,7 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
         </select>
         <select class="entry-input" id="entryBirthMin" style="flex:1;padding:12px 10px">
           <option value="">Min</option>
-          <option value="0">00</option><option value="5">05</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
+          <option value="0">00</option><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option><option value="6">06</option><option value="7">07</option><option value="8">08</option><option value="9">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option>
         </select>
         <span style="font-size:13px;color:#6B8BAF;white-space:nowrap">local time</span>
       </div>
@@ -7683,7 +7683,7 @@ async function signInWithGoogle() {
   try {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin }
+      options: { redirectTo: window.location.origin + '/app?mode=' + (cdpEntryMode||'quick') }
     });
     if (error) showAuthMsg(document.getElementById('magicMsg'), error.message, 'error');
   } catch(e) {
@@ -7757,6 +7757,8 @@ async function syncProfileToSupabase() {
 
 async function syncProfileFromSupabase() {
   if (!sb || !currentUser) return;
+  // Mark entry as done for authenticated users — skip entry screen on return
+  localStorage.setItem('cdp_entry_done', '1');
   try {
     const { data, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
     if (error || !data) return;
@@ -9178,7 +9180,29 @@ function showEntryScreen(mode) {
   var savedName = localStorage.getItem('cdp_name') || '';
   var savedDob  = localStorage.getItem('cdp_dob')  || '';
   if (savedName) document.getElementById('entryName').value = savedName;
-  if (savedDob)  { document.getElementById('entryDob').value = savedDob; document.getElementById('entryDobHint').style.display='none'; }
+  if (savedDob) {
+    var dobParts = savedDob.split('/');
+    if (dobParts.length === 3) {
+      var dayEl = document.getElementById('entryDay');
+      var monEl = document.getElementById('entryMonth');
+      var yrEl  = document.getElementById('entryYear');
+      if (dayEl) dayEl.value = parseInt(dobParts[0],10);
+      if (monEl) monEl.value = parseInt(dobParts[1],10);
+      if (yrEl)  yrEl.value  = parseInt(dobParts[2],10);
+    }
+    var hint = document.getElementById('entryDobHint');
+    if (hint) hint.style.display = 'none';
+  }
+  // Restore birth time
+  var savedBH = localStorage.getItem('cdp_bh') || '';
+  var savedBM = localStorage.getItem('cdp_bmin') || '';
+  if (savedBH) { var bh = document.getElementById('entryBirthHour'); if(bh) bh.value = savedBH; }
+  if (savedBM) { var bm = document.getElementById('entryBirthMin');  if(bm) bm.value = savedBM; }
+  // Restore locations
+  var savedBP = localStorage.getItem('cdp_birth_place') || '';
+  var savedLoc = localStorage.getItem('cdp_location') || '';
+  if (savedBP) { var bp = document.getElementById('entryBirthPlace'); if(bp) bp.value = savedBP; }
+  if (savedLoc){ var lc = document.getElementById('entryLocation');   if(lc) lc.value = savedLoc; }
   // Set language toggle
   setLang(cdpLang, true);
   // Show entry screen
@@ -9251,6 +9275,8 @@ function beginFromEntry() {
   } else {
     localStorage.removeItem('cdp_dob');
   }
+  // Mark entry as done for returning users
+  localStorage.setItem('cdp_entry_done', '1');
   // Hide entry screen
   var el = document.getElementById('cdpEntry');
   el.classList.remove('visible');
@@ -9292,10 +9318,25 @@ function showModeSelector() { showEntryScreen(cdpEntryMode); }
     s.textContent = '#modeSelector{display:none!important}';
     document.head.appendChild(s);
     function init() {
-      if (m && ['free','quick','standard','mystic','deep'].indexOf(m) > -1) {
-        cdpEntryMode = m;
-      }
-      showEntryScreen(cdpEntryMode);
+      try {
+        if (m && ['free','quick','standard','mystic','deep'].indexOf(m) > -1) {
+          cdpEntryMode = m;
+        }
+        // Only show entry screen if not already admitted (returning user with full profile)
+        var hasName = localStorage.getItem('cdp_name');
+        var hasDob  = localStorage.getItem('cdp_dob');
+        var hasSkipped = localStorage.getItem('cdp_entry_done');
+        if (hasSkipped && hasName) {
+          // Returning user — skip entry screen, go straight to reading
+          document.getElementById('modeSelector').style.display = 'none';
+          document.getElementById('cdpTierBar').style.display = 'flex';
+          updateTierBar(cdpEntryMode);
+          selectMode(cdpEntryMode);
+          startWithMode(true);
+        } else {
+          showEntryScreen(cdpEntryMode);
+        }
+      } catch(e) { console.warn('CDP init error:', e); }
     }
     if (document.readyState === 'complete') {
       setTimeout(init, 200);
