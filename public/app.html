@@ -2037,6 +2037,52 @@ const NUM_DATA = {
     evening:'Master Evening — review the architecture of your long-term vision.'},
 };
 
+// ── Modern/Neuroscience language variants for NUM_DATA ──────────────────────
+// Language mode: Ancient = symbolic/archetypal. Modern = neuroscience-framed.
+// Refs: Barrett (2017) How Emotions are Made; Dehaene (2014) Consciousness and the Brain;
+//       Bremer (2022) Predictive Coding; Huberman (2021) circadian neuroscience.
+const NUM_NEURO = {
+  1:{morning:'Dopaminergic drive peaks in early novelty. Your salience network is primed for independent initiation — the prefrontal cortex is receptive to new goal-encoding (Barrett 2017).',
+     afternoon:'Norepinephrine sustains directed effort. Consolidate the initiative you began — executive circuits reward focused, uninterrupted action chains.',
+     evening:'Reward circuitry recalibrates. Review what the dopamine signal told you today: what did your brain code as genuinely worth pursuing?'},
+  2:{morning:'Social cognition networks (temporoparietal junction) are most attuned early. Mirror-neuron activity supports collaborative sensing — listen before asserting.',
+     afternoon:'Interoceptive awareness of relationship tension is heightened. The insular cortex reads emotional tone with precision; trust somatic signals in negotiations.',
+     evening:'Oxytocin cycles favour bonding and repair. The evening is neurochemically suited to tending close relationships — reach out.'},
+  3:{morning:'Default Mode Network creativity windows open before task-positive routines dominate. Novel associations form most freely in the first hours (Dehaene 2014).',
+     afternoon:'Verbal fluency and working memory load increase as the cortical arousal curve rises. Expression and idea-synthesis are neurologically supported.',
+     evening:'Limbic emotional tagging of the day\'s creative output. Journal, share, or voice-record insights before sleep consolidation encodes them.'},
+  4:{morning:'Prefrontal cortex executive function is sharpest in the morning cortisol window (Huberman 2021). Systematic planning and procedural memory access are optimal.',
+     afternoon:'Cognitive stamina favours sustained attention tasks. Avoid decision fatigue by batching routine work; your anterior cingulate cortex rewards consistent effort.',
+     evening:'Consolidation phase: the hippocampus files the day\'s structured learning. Review systems, not outcomes — the brain encodes process more durably than results.'},
+  5:{morning:'Novelty-seeking circuitry (dopamine D1 receptors) fires strongly with environmental variation. Disrupt routine deliberately — the brain\'s prediction-error signal is a learning catalyst.',
+     afternoon:'Adaptive flexibility is a prefrontal function — but afternoon cortisol dips can loosen it into impulsivity. Channel the change-energy into calculated pivots, not reactive ones.',
+     evening:'Consolidation of a day\'s cognitive flexibility. The brain\'s default mode integrates disparate experiences during wind-down. Notice what surprised you.'},
+  6:{morning:'Caregiving behaviour activates the medial prefrontal cortex and releases oxytocin. Morning relational investment sets the hormonal tone for the day\'s social engagement.',
+     afternoon:'Prosocial behaviour peaks when cortisol is moderate (mid-cycle). Your capacity to regulate others\' affect is highest — lead with attuned presence.',
+     evening:'Ventral vagal activation (Porges, polyvagal theory) is supported by warm social connection. The nervous system downregulates most effectively in safe relational space.'},
+  7:{morning:'Theta brainwave activity (associated with insight and pattern recognition) is accessible in morning quiet before cortical noise rises. Sit still before engaging screens.',
+     afternoon:'Analytical depth — lateral prefrontal activation — is sustained through focused inquiry. Question the data beneath the surface; the brain rewards precise interrogation.',
+     evening:'Gamma-band integration: the cortex synthesises the day\'s inputs into coherent insight during quiet, low-stimulation evenings. Protect this window.'},
+  8:{morning:'High-arousal decision-making is best when cortisol is elevated (morning peak). Executive authority and consequence-weighting are neurologically sharpest now.',
+     afternoon:'The brain\'s reward anticipation circuitry (nucleus accumbens) is active. Leverage afternoon momentum for high-stakes communication and material decisions.',
+     evening:'Parasympathetic review: what did your autonomic nervous system signal was genuinely important today? Align tomorrow\'s intentions with somatic, not just cognitive, priority signals.'},
+  9:{morning:'The brain\'s completion circuitry — the striatum encoding task closure — is primed for morning wrap-ups. What unfinished loops from yesterday need closing before you begin anew?',
+     afternoon:'Compassion fatigue research (Singer & Klimecki 2014) shows that afternoon empathic engagement is sustainable when bounded. Give generously, but from a regulated nervous system.',
+     evening:'The default mode network\'s self-referential processing during evening wind-down integrates the cycle of the day. Release judgement; the hippocampus will consolidate what matters.'},
+  11:{morning:'Master Morning (11): Heightened interoceptive sensitivity — the insular cortex picks up subtle signals others miss. Intuition is a predictive processing output (Clark 2016); trust it early.',
+      afternoon:'Unusual pattern-recognition clarity. The brain\'s predictive models are running with wider priors today — unusual connections and foresight are neurologically available.',
+      evening:'Integration of a day of heightened signal. Protect the evening from noise: what arrived in consciousness today that bypassed ordinary filtering?'},
+  22:{morning:'Master Morning (22): Executive network and default mode network are in rare simultaneous activation — the neural signature of visionary planning meeting practical architecture.',
+      afternoon:'Prefrontal-parietal coordination supports large-scale systems thinking. The brain is capable of holding both the macro vision and micro detail in working memory simultaneously.',
+      evening:'The mind\'s architectural work needs consolidation. Sleep spindles during NREM will process the day\'s complex structural learning — prime the system with clear intention before rest.'},
+  33:{morning:'Master Morning (33): Limbic empathy circuits (anterior cingulate, insula) are operating at scale. Caregiving, teaching, and healing are neurochemically and structurally supported.',
+      afternoon:'Oxytocin and serotonin feedback loops sustain generosity without depletion — but only when the nervous system is regulated. Resource your own calm first (Porges 2011).',
+      evening:'The day\'s service leaves a neurological imprint. The brain\'s reward system treats genuine altruism as intrinsically motivating (Moll et al. 2006). Notice what that felt like.'},
+  44:{morning:'Master Morning (44): Prefrontal executive architecture and basal ganglia habitual efficiency are both primed. Systems that are built to last begin in the morning clarity window.',
+      afternoon:'Deep pattern recognition and material mastery. The brain\'s expertise circuitry (chunk-based pattern storage in basal ganglia) is at full capacity for complex strategic work.',
+      evening:'Structural review: what did you build, or move toward building, today? The hippocampus encodes procedural mastery through sleep — reinforce intention before rest.'}
+};
+
 // ══════════════════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════════════════
@@ -4500,20 +4546,25 @@ function renderSkeletonReading(dateStr, tier) {
   };
   const curH = new Date().getHours();
   const activeW = curH < 12 ? 'morning' : curH < 18 ? 'afternoon' : 'evening';
+  const isModernMode = (typeof cdpLang !== 'undefined' && cdpLang === 'modern') || localStorage.getItem('cdp_lang') === 'modern';
   const energyHtml = ['morning','afternoon','evening'].map(k => {
     const fb = teNums[k];
     const fD = NUM_DATA[fb.n] || {n:'—',m:''};
+    const fN = (typeof NUM_NEURO !== 'undefined' && NUM_NEURO[fb.n]) || {};
+    const guidanceText = isModernMode ? (fN[k]||fD[k]||fD.m||'') : (fD[k]||fD.m||'');
     const isM = [11,22,33,44].includes(fb.n);
     const icons = {morning:'☀︎',afternoon:'◑',evening:'☽'};
     const lbls  = {morning:'Morning',afternoon:'Afternoon',evening:'Evening'};
+    const modeBadge = isModernMode ? '<span style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);border:1px solid rgba(29,158,117,0.3);padding:1px 5px;border-radius:2px;margin-left:6px">Neuro</span>' : '';
     return `<div class="energy-card${activeW===k?' active-window':''} tappable"
-      onclick="tapEnergy('${k}',${fb.n},'${(fD.n||'').replace(/'/g,"\'")}','${(fD.m||'').replace(/'/g,"\'").slice(0,80)}…')"
+      onclick="tapEnergy('${k}',${fb.n},'${(fD.n||'').replace(/'/g,"\'")}','${guidanceText.replace(/'/g,"\'").slice(0,80)}…')"
       title="Tap for deeper ${lbls[k]} guidance">
-      <div class="energy-time">${icons[k]} ${lbls[k]}${activeW===k?' <span style="color:var(--teal);font-size:11px">· Now</span>':''}</div>
+      <div class="energy-time">${icons[k]} ${lbls[k]}${activeW===k?' <span style="color:var(--teal);font-size:11px">· Now</span>':''}${modeBadge}</div>
       <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text3);margin-bottom:3px">${fb.lbl}</div>
       <div class="energy-num" style="${isM?'color:var(--master)':''}">${fb.n}${isM?'<span style="font-size:14px">★</span>':''}</div>
       <div class="energy-name">${fD.n}</div>
-      <div class="energy-guidance">${fD.m||''}</div>
+      <div class="energy-guidance">${guidanceText}</div>
+      ${isModernMode ? '<div style="font-size:9px;color:rgba(29,158,117,0.5);margin-top:4px;font-style:italic">Neuroscience mode · Barrett · Huberman · Dehaene</div>' : ''}
       <div style="font-size:11px;color:var(--gold3);margin-top:8px;text-align:right">↗ Tap for insight</div>
     </div>`;
   }).join('');
