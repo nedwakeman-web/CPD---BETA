@@ -4750,8 +4750,7 @@ function renderSkeletonReading(dateStr, tier) {
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
         <span style="font-size:13px;color:var(--text2);font-family:'Cormorant Garamond',serif" id="skElapsedTxt"></span>
-        <span style="font-size:12px;color:#C9A050;cursor:pointer;letter-spacing:.1em;font-family:'Cinzel',serif;background:rgba(201,160,80,0.18);border:1px solid rgba(201,160,80,0.7);padding:4px 12px;border-radius:2px;font-weight:600"
-          onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">⟳ Change Depth</span>
+        <span style="font-size:12px;color:var(--bg);background:var(--gold);cursor:pointer;letter-spacing:.1em;font-family:'Cinzel',serif;padding:5px 12px;border-radius:2px;font-weight:600" onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">⟳ Change Depth</span>
       </div>
     </div>
     <div style="height:2px;background:var(--div);overflow:hidden">
@@ -5646,8 +5645,8 @@ function fillPhase1Sections(p1) {
           <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:3px;line-height:1.3">${udD.n||''}</div>
           <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-style:italic">${udKw}</div>
           ${isGAP ? '<div style="font-size:9px;color:var(--teal);letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;border:1px solid rgba(129,205,182,.3);border-radius:2px;padding:2px 4px;display:inline-block">★ Portal</div>' : ''}
-          <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${moonData.emoji} <span style="font-size:10px">${moonData.phase}</span></div>
-          <div style="font-size:10px;color:var(--teal2);margin-bottom:6px;line-height:1.3">${kinData.seal}</div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${moonData.emoji} <span style="font-size:10px">${moonData.phase}</span></div>
+          <div style="font-size:10px;color:var(--teal);margin-bottom:6px;line-height:1.3">${kinData.seal}</div>
           <div style="flex:1"></div>
           ${noteClean
             ? `<div style="font-size:12px;color:var(--text2);line-height:1.55;font-style:italic;border-top:1px solid var(--div2);padding-top:7px;margin-top:4px;text-align:left">${noteClean.slice(0,120)}${noteClean.length>120?'…':''}</div>`
@@ -5896,7 +5895,7 @@ function fillAISections(data, dateStr) {
         <div style="font-size:12px;color:var(--text);font-weight:500;margin-bottom:3px;line-height:1.3">${udD.n||''}</div>
         <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-style:italic">${udKw}</div>
         ${isGAP ? '<div style="font-size:9px;color:var(--teal);letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;border:1px solid rgba(129,205,182,.3);border-radius:2px;padding:2px 4px;display:inline-block">★ Portal</div>' : ''}
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${moonData.emoji} <span style="font-size:10px">${moonData.phase}</span></div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">${moonData.emoji} <span style="font-size:10px">${moonData.phase}</span></div>
         <div style="font-size:10px;color:var(--teal2);margin-bottom:6px;line-height:1.3">${kinData.seal||d.kin||''}</div>
         <div style="flex:1"></div>
         ${noteClean
@@ -6020,11 +6019,15 @@ function renderReading(data, dateStr) {
   }
 
   const mLabel = MODE_LABELS[selectedMode] || MODE_LABELS.standard;
-  html += `<div style="text-align:center;margin-bottom:4px">
-    <button class="mode-chip" onclick="changeModeAndReload()" title="Change reading depth">
-      ${mLabel.icon} ${mLabel.label} · ${mLabel.time} &nbsp;·&nbsp; <span style="color:var(--gold3)">Change ↗</span>
-    </button>
-  </div>`;
+  const _nextUp = {free:'quick',quick:'standard',standard:'mystic',mystic:'deep'}[selectedMode];
+  const _nextUpName = {quick:'Full Reading',standard:'Monthly Arc',mystic:'Yearly Reading',deep:'Oracle'}[_nextUp]||'';
+  if (_nextUp) {
+    html += `<div style="text-align:center;margin-bottom:8px">
+      <button onclick="selectMode('${_nextUp}');startWithMode()" style="background:rgba(201,160,80,0.08);border:1px solid rgba(201,160,80,0.35);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;padding:5px 14px;border-radius:2px;cursor:pointer">
+        ✦ Try ${_nextUpName} — go deeper
+      </button>
+    </div>`;
+  }
 
   if (profile.birthDay && profile.birthYear && num?.lp) {
     const lpD = NUM_DATA[num.lp] || {n:'—'};
@@ -8022,7 +8025,7 @@ async function signInWithGoogle() {
   try {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/app?mode=' + (cdpEntryMode||'quick') }
+      options: { redirectTo: window.location.href.split('#')[0] + (window.location.href.includes('?') ? '' : '?mode=quick') }
     });
     if (error) showAuthMsg(document.getElementById('magicMsg'), error.message, 'error');
   } catch(e) {
@@ -10120,6 +10123,44 @@ function downloadGuidePDF() {
   w.document.close();
   setTimeout(function(){ w.print(); }, 700);
 }
+
+function buildProfileCard(p, isActive) {
+  const lp = p.birthDay && p.birthYear ? computeLP(p.birthDay, p.birthMonth, p.birthYear) : null;
+  const dob = p.birthDay ? p.birthDay+'/'+p.birthMonth+'/'+p.birthYear : 'No DOB set';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid '+(isActive?'var(--gold)':'var(--div)')+';background:'+(isActive?'rgba(201,168,76,0.06)':'var(--bg3)')+';cursor:pointer;transition:all .2s';
+  wrap.onclick = function() { selectProfile(p.id); };
+  const avatar = document.createElement('div');
+  avatar.style.cssText = 'width:36px;height:36px;border-radius:50%;background:'+(isActive?'var(--gold)':'var(--div)')+';display:flex;align-items:center;justify-content:center;font-family:"Cormorant Garamond",serif;font-size:18px;font-weight:500;color:'+(isActive?'var(--navy)':'var(--text2)');
+  avatar.textContent = (p.name||'?').slice(0,1);
+  const info = document.createElement('div');
+  info.style.cssText = 'flex:1';
+  const nameEl = document.createElement('div');
+  nameEl.style.cssText = 'font-family:"Cormorant Garamond",serif;font-size:18px;font-weight:500;color:'+(isActive?'var(--gold)':'var(--text)');
+  nameEl.textContent = p.name+(p.nickname&&p.nickname!==p.name?' · '+p.nickname:'');
+  const metaEl = document.createElement('div');
+  metaEl.style.cssText = 'font-size:13px;color:var(--text3)';
+  metaEl.textContent = (p.relationship?p.relationship+' · ':'')+dob+(lp?' · LP '+lp:'');
+  info.appendChild(nameEl);
+  info.appendChild(metaEl);
+  wrap.appendChild(avatar);
+  wrap.appendChild(info);
+  if (isActive) {
+    const badge = document.createElement('span');
+    badge.style.cssText = 'font-family:"Cinzel",serif;font-size:10px;letter-spacing:.1em;color:var(--gold)';
+    badge.textContent = 'ACTIVE';
+    wrap.appendChild(badge);
+  }
+  if (p.id !== 'me') {
+    const del = document.createElement('button');
+    del.style.cssText = 'background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:4px 8px';
+    del.textContent = '×';
+    del.onclick = function(e) { e.stopPropagation(); deleteProfile(p.id); };
+    wrap.appendChild(del);
+  }
+  return wrap.outerHTML;
+}
+
 
 function openHelp() {
   var drawers = document.querySelectorAll('#helpDrawer');
