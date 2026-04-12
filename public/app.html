@@ -95,7 +95,8 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
   .wgt{padding:12px 8px}
   .wgt-val{font-size:18px}
   /* Biorhythms full width */
-  .bio-card{min-width:0!important;width:100%!important}
+  .bio-grid{grid-template-columns:1fr!important}
+  .bio-card{min-width:0!important}
   /* Numerology cards */
   .num-blocks{grid-template-columns:1fr!important}
   /* Week ahead */
@@ -109,7 +110,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .screen{display:none}.screen.on{display:block}
 
 /* ══ READING SCREEN ══ */
-#sr{max-width:1400px;margin:0 auto;padding:0 24px 120px;scroll-padding-top:120px;box-sizing:border-box}
+#sr{max-width:1400px;margin:0 auto;padding:0 24px 120px;scroll-padding-top:120px}
 .r-head{text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--div);margin-bottom:28px}
 .r-meta{font-size:15px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
 .r-date{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,48px);color:var(--gold);
@@ -1223,150 +1224,6 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
   .tbr-tiers,.tbr-guide{display:none!important}
 }
 
-
-/* ══════════════════════════════════════
-   MOBILE FIXES — comprehensive
-══════════════════════════════════════ */
-@media(max-width:640px){
-  body{overflow-x:hidden}
-
-  /* Reading screen padding */
-  #sr{padding:0 4px 100px!important;width:100%!important;box-sizing:border-box!important;max-width:100vw!important}
-  .r-section{padding:14px 12px!important;margin-bottom:12px}
-  .r-head{padding:20px 0 16px!important}
-  .r-date{font-size:clamp(22px,6vw,32px)!important}
-
-  /* Widgets - 2 col, no overflow */
-  .widgets{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}
-  .wgt{padding:10px 8px!important;min-width:0!important;word-break:break-word}
-  .wgt-val{font-size:16px!important}
-
-  /* Energies - stack */
-  .energies{grid-template-columns:1fr!important}
-
-  /* Week ahead - 2 col, contained */
-  .week-grid{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important}
-  .week-day{min-width:0!important;overflow:hidden!important;word-break:break-word!important;
-    padding:10px 14px!important;font-size:13px!important;
-    display:grid!important;grid-template-columns:80px 1fr!important;gap:8px!important;text-align:left!important}
-  .week-day-name{font-size:11px!important;white-space:normal!important;justify-content:flex-start!important}
-
-  /* Biorhythms - single col, no overflow */
-  .bio-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
-  .bio-card:last-child:nth-child(odd){grid-column:1/-1!important}
-  .bio-card{min-width:0!important;width:100%!important;box-sizing:border-box!important}
-
-  /* Numerology blocks - full width */
-  .num-blocks{grid-template-columns:1fr!important}
-  .ne-cards{grid-template-columns:1fr!important}
-  .two-col{grid-template-columns:1fr!important}
-  .planet-grid{grid-template-columns:1fr!important}
-
-  /* All sections full width */
-  .r-section, .col-card, .energy-card, .wgt,
-  .bio-card, .ne-card, .week-day, .planet-row,
-  .compat-section{
-    max-width:100%!important;
-    box-sizing:border-box!important;
-    word-break:break-word!important;
-  }
-
-  /* Drawers full width */
-  #insightDrawer{left:0!important;right:0!important;width:100vw!important;box-sizing:border-box}
-  .drawer-body{padding:14px!important}
-
-  /* Help drawer full width */
-  #helpDrawer > div > div:first-child{
-    width:100vw!important;right:0!important;left:0!important;padding:16px!important;
-    box-sizing:border-box!important;
-  }
-
-  /* Profile library */
-  #profileLibrary > div > div:first-child{
-    width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;
-    left:8px!important;right:8px!important;
-    transform:translateY(-50%)!important;margin-left:0!important;
-    box-sizing:border-box!important;
-  }
-
-  /* Mode selector */
-  #modeSelector{padding:8px!important}
-  .mode-box{width:100%!important;max-width:100%!important}
-  .mode-btn{padding:10px 12px!important}
-  .mode-btn-title{font-size:15px!important}
-  .mode-btn-desc{font-size:11px!important}
-
-  /* Tier modal */
-  .tier-modal-box{width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;
-    margin:8px!important}
-
-  /* Compat sections */
-  .compat-section{padding:12px 10px!important}
-  .compat-headline{padding:14px 12px!important;font-size:18px!important}
-  .compat-synthesis{padding:14px 12px!important;font-size:15px!important}
-
-  /* Prevent any element going off screen */
-  *{max-width:100vw;word-wrap:break-word}
-  img,canvas,svg{max-width:100%!important}
-
-  /* Topbar */
-  .brand{font-size:10px!important;letter-spacing:.2em!important}
-  .tbr-tiers,.tbr-guide{display:none!important}
-}
-
-
-/* ══ COMPATIBILITY READING ══ */
-.compat-wrap{max-width:760px;margin:0 auto;padding:0 0 80px}
-.compat-synthesis-block{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,22px);
-  color:var(--text);font-style:italic;line-height:1.9;padding:28px 32px;text-align:center;
-  border-bottom:1px solid var(--div);background:var(--bg2);margin-bottom:0}
-.compat-section{background:var(--bg2);border:1px solid var(--div);border-radius:2px;
-  padding:24px 28px;margin-bottom:16px;cursor:pointer;transition:border-color .2s}
-.compat-section:hover{border-color:var(--gold3)}
-.compat-section-label{font-size:10px;letter-spacing:.35em;text-transform:uppercase;
-  color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.compat-section-label::after{content:'';flex:1;height:1px;background:var(--div)}
-.compat-section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,22px);
-  color:var(--gold);font-weight:400;margin-bottom:10px;line-height:1.4}
-.compat-section-body{font-size:16px;color:var(--text2);line-height:1.85}
-.compat-section-body p{margin-bottom:.8em}
-.compat-aspects-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-@media(max-width:600px){.compat-aspects-grid{grid-template-columns:1fr}}
-.compat-aspect{border:1px solid var(--div);background:var(--bg3);padding:12px 14px;
-  border-radius:2px;cursor:pointer;transition:all .2s}
-.compat-aspect:hover{border-color:var(--gold3);background:var(--gold4)}
-.compat-aspect-name{font-size:14px;color:var(--gold);margin-bottom:4px;font-style:italic}
-.compat-aspect-stars{font-size:12px;color:var(--teal);margin-bottom:6px;letter-spacing:.05em}
-.compat-aspect-body{font-size:14px;color:var(--text3);line-height:1.6}
-.compat-bio-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
-@media(max-width:500px){.compat-bio-row{grid-template-columns:1fr}}
-.compat-bio-card{border:1px solid var(--div);background:var(--bg3);padding:12px;border-radius:2px;text-align:center}
-.compat-bio-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
-.compat-bio-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:2px}
-.compat-bio-desc{font-size:12px;color:var(--text3)}
-.compat-headline{font-family:'Cormorant Garamond',serif;font-size:clamp(20px,3vw,26px);
-  color:var(--text);font-weight:300;line-height:1.5;padding:28px 28px 20px;font-style:italic;
-  border-bottom:1px solid var(--div)}
-.compat-tap-hint{font-size:10px;color:var(--gold3);margin-top:8px;letter-spacing:.1em}
-
-
-  /* Force full width for all cards */
-  .r-section, .col-card, .wgt, .energy-card,
-  .num-block, .ne-card, .planet-row {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  /* Bio grid 2+1 */
-  .bio-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
-  }
-  .bio-card:last-child:nth-child(odd) {
-    grid-column: 1 / -1 !important;
-  }
-
 </style>
 </head>
 <body>
@@ -1524,9 +1381,6 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
     <button class="npill" onclick="showScreen('scompat',this);initCompatScreen();closeMobileNav()">Compatibility</button>
     <button class="npill" onclick="showScreen('sp',this);closeMobileNav()">Profile</button>
     <button class="npill" onclick="showScreen('shist',this);renderHistory();closeMobileNav()">History</button>
-    <div style="height:1px;background:var(--div);margin:4px 0"></div>
-    <button class="npill" onclick="closeMobileNav();showTierOverview()" style="color:var(--gold)">⚡ Tiers</button>
-    <button class="npill" onclick="closeMobileNav();openHelp()" style="color:var(--teal)">? Guide</button>
   </div>
   <div id="readingProgressDot" style="display:none;width:7px;height:7px;border-radius:50%;
   background:var(--teal);animation:pulse 1.5s ease-in-out infinite;margin-right:4px;flex-shrink:0"
@@ -3765,7 +3619,10 @@ async function loadReading(dateStr, tier) {
         ${{'free':'Daily Snapshot','seeker':'Full Reading','oracle':'Deep Reading','initiate':'Initiate','mystic':'Mystic'}[activeTier]||activeTier}
         &nbsp;·&nbsp; ${{'free':'Instant','seeker':'~2 min','oracle':'~5 min','initiate':'~3 min','mystic':'~4 min'}[activeTier]||''}
       </span>
-
+      <span style="font-size:14px;color:var(--gold);cursor:pointer;letter-spacing:.1em;text-decoration:underline;text-underline-offset:3px;font-family:'Cinzel',serif"
+        onclick="if(pollingTimer){clearInterval(pollingTimer);pollingTimer=null;}changeModeAndReload()">
+        Change Depth
+      </span>
     </div>
 
     <div id="stageList">
@@ -4908,10 +4765,10 @@ function renderSkeletonReading(dateStr, tier) {
       <span style="font-size:13px;color:var(--text3);font-style:italic">${_tierBadge.desc}</span>
     </div>
     <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:8px">
-      <button onclick="changeModeAndReload()" style="background:rgba(201,160,80,0.12);border:1px solid rgba(201,160,80,0.35);
-        font-size:11px;color:var(--gold);cursor:pointer;padding:4px 10px;letter-spacing:.1em;
-        border-radius:2px;font-family:'Cinzel',serif">
-        ⟳ Change Depth
+      <button onclick="changeModeAndReload()" style="background:none;border:none;
+        font-size:12px;color:var(--gold3);cursor:pointer;padding:0;letter-spacing:.08em;
+        text-decoration:underline;text-underline-offset:3px">
+        change depth
       </button>
       ${_nextTier ? '<span style="color:var(--text3);font-size:11px">·</span><button onclick="selectMode(\'' + _nextTier + '\');startWithMode()" class="next-tier-btn" style="background:none;border:none;font-size:13px;color:var(--teal);cursor:pointer;padding:0;letter-spacing:.06em;">try ' + (_nextLabel||'') + ' →</button>' : ''}
     </div>
@@ -5267,15 +5124,13 @@ function openShareCard(btnEl) {
   const synth = r?.synthesis || currentReading?.synthesis;
   if (!synth) {
     // Try to find the button that was clicked
-    try {
-      const btn = btnEl || document.querySelector('button[onclick*="openShareCard"]');
-      if (btn) {
-        const orig = btn.textContent;
-        btn.textContent = 'Reading still composing — try again in a moment';
-        btn.style.opacity = '0.6';
-        setTimeout(() => { btn.textContent = orig; btn.style.opacity = ''; }, 3000);
-      }
-    } catch(_e) {}
+    const btn = btnEl || document.querySelector('button[onclick*="openShareCard"]');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Reading still composing — try again in a moment';
+      btn.style.opacity = '0.6';
+      setTimeout(() => { btn.textContent = orig; btn.style.opacity = ''; }, 3000);
+    }
     return;
   }
 
@@ -6141,13 +5996,11 @@ function renderReading(data, dateStr) {
   }
 
   const mLabel = MODE_LABELS[selectedMode] || MODE_LABELS.standard;
-  const _nextTierKey = {free:'quick',quick:'standard',standard:'mystic',mystic:'deep'}[selectedMode];
-  const _nextTierName = {quick:'Full Reading',standard:'Monthly Arc',mystic:'Yearly Reading',deep:'Oracle Deep Dive'}[_nextTierKey]||'';
-  if (_nextTierKey) {
-    html += `<div style="text-align:center;margin-bottom:8px">
-      <button onclick="selectMode('${_nextTierKey}');startWithMode()" style="background:rgba(201,160,80,0.1);border:1px solid rgba(201,160,80,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer">✦ Try ${_nextTierName} — go deeper</button>
-    </div>`;
-  }
+  html += `<div style="text-align:center;margin-bottom:4px">
+    <button class="mode-chip" onclick="changeModeAndReload()" title="Change reading depth">
+      ${mLabel.icon} ${mLabel.label} · ${mLabel.time} &nbsp;·&nbsp; <span style="color:var(--gold3)">Change ↗</span>
+    </button>
+  </div>`;
 
   if (profile.birthDay && profile.birthYear && num?.lp) {
     const lpD = NUM_DATA[num.lp] || {n:'—'};
@@ -8144,11 +7997,7 @@ async function signInWithGoogle() {
   try {
     const { error } = await sb.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: (function(){
-          const base = window.location.origin;
-          const path = window.location.pathname.endsWith('.html') ? window.location.pathname : '/app?mode=' + (cdpEntryMode||'quick');
-          return base + path + (path.includes('?') ? '&' : '?') + 'auth=1';
-        })() }
+      options: { redirectTo: window.location.origin + '/app?mode=' + (cdpEntryMode||'quick') }
     });
     if (error) showAuthMsg(document.getElementById('magicMsg'), error.message, 'error');
   } catch(e) {
@@ -9121,7 +8970,26 @@ async function generateCompatibility() {
 }
 
 function renderCompatResult(data) {
-  const { reading: r, natalA, natalB, kinA, kinB, numA, numB,
+  // Strip AI markdown wrappers (```json ... ```) from any field
+  function stripMD(v) {
+    if (!v) return '';
+    var s = String(v).trim().replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```$/,'');
+    if (s.charAt(0)==='{') { try { var o=JSON.parse(s); return o.synthesis||o.headline||o.framework_convergence||s; } catch(e){} }
+    return s;
+  }
+  // Parse reading if it came back as a JSON string
+  var rawR = data.reading;
+  if (typeof rawR === 'string') {
+    var rs = rawR.trim().replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/\s*```$/,'');
+    try { rawR = JSON.parse(rs); } catch(e){}
+  }
+  var rClean = (rawR && typeof rawR==='object') ? rawR : (data.reading||{});
+  ['synthesis','headline','framework_convergence','convergence_gifts','tensions_growth',
+   'shared_pleasures','guidance_a','guidance_b','question_together','biorhythm_today',
+   'chinese_connection','dreamspell_connection','numerology_connection'].forEach(function(k){
+    if (rClean[k]) rClean[k] = stripMD(rClean[k]);
+  });
+  const { reading: r = rClean, natalA, natalB, kinA, kinB, numA, numB,
     moonPhaseA, moonPhaseB, bioA, bioB, bioSynastry,
     numCross, dreamspellCross, moonPhaseCross,
     chineseA, chineseB, chineseCompat,
@@ -9142,140 +9010,359 @@ function renderCompatResult(data) {
       chips || []);
   }
 
-  // ── Rebuild HTML in structured PDF-matching layout ──
-  let html = `<div class="compat-wrap">`;
+  let html = `<div style="background:var(--bg2);border:1px solid rgba(201,160,80,0.2);border-radius:3px;overflow:hidden;margin-bottom:20px">`;
 
-  // Names header
-  html += `<div style="text-align:center;padding:28px 20px 16px;border-bottom:1px solid var(--div);background:var(--bg2);margin-bottom:16px">
-    <div style="font-size:11px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Compatibility Reading</div>
-    <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(22px,4vw,32px);color:var(--gold);font-weight:300">${nameA||'Person A'} &amp; ${nameB||'Person B'}</div>
-  </div>`;
-
-  // Headline as pull-quote
+  // Headline — tappable
   if (r.headline) {
-    const safeH = (r.headline||'').replace(/'/g,"\'").slice(0,200);
+    const safeH = (r.headline||'').replace(/'/g,"\\'").slice(0,200);
     html += `<div class="compat-headline tappable" style="cursor:pointer"
-      onclick="openDrawer('Connection','${safeH} — What is the single most important thing to understand about this connection?',[{q:'What is their greatest shared gift?',l:'Greatest gift'},{q:'What is their primary growth edge together?',l:'Growth edge'}])">
-      ${r.headline}
-      <div class="compat-tap-hint">↗ Tap to go deeper</div>
-    </div>`;
+      onclick="openDrawer('Connection · Headline','${safeH} — Go deeper: what is the single most important thing ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} most need to understand about this connection right now?',[{q:'What does this connection want from both people?',l:'What this connection wants'},{q:'What is the greatest risk if they ignore what this connection is asking?',l:'The risk of not listening'}])">${r.headline}</div>`;
   }
 
-  // Opening synthesis
+  // Synthesis — tappable
   if (r.synthesis) {
-    const safeS = (r.synthesis||'').replace(/'/g,"\'").slice(0,300);
-    html += `<div class="compat-section tappable"
-      onclick="openDrawer('Opening Synthesis','${safeS} — Expand on this.',[{q:'What does this connection most need right now?',l:'What\'s needed now'},{q:'What is the single most clarifying thing to understand?',l:'Key insight'}])">
-      <div class="compat-section-label">Where They Stand</div>
-      <div class="compat-section-body">${r.synthesis.split('\n').filter(l=>l.trim()).map(p=>`<p>${p}</p>`).join('')}</div>
-      <div class="compat-tap-hint">↗ Tap to go deeper</div>
-    </div>`;
+    const safeS = (r.synthesis||'').replace(/'/g,"\\'").slice(0,300);
+    html += `<div class="compat-synthesis tappable" style="cursor:pointer"
+      onclick="openDrawer('Opening Synthesis','${safeS} — Expand on this. What is the underlying dynamic that all six frameworks are pointing to?',[{q:'Where exactly do the six frameworks most agree about this connection?',l:'Where all frameworks agree'},{q:'What would change if both people fully understood what this synthesis is saying?',l:'The change this insight asks for'}])">${r.synthesis}<div style="font-size:11px;color:var(--gold);margin-top:8px;letter-spacing:.1em;text-transform:uppercase">↗ Go deeper</div></div>`;
   }
 
   // Framework convergence
   if (r.framework_convergence) {
-    const safeFW = (r.framework_convergence||'').replace(/'/g,"\'").slice(0,300);
-    html += `<div class="compat-section tappable"
-      onclick="openDrawer('Where Frameworks Converge','${safeFW}',[{q:'Which convergence is most significant?',l:'Most significant'},{q:'Where do the frameworks disagree?',l:'Points of divergence'}])">
-      <div class="compat-section-label">Where Five Frameworks Converge</div>
-      <div class="compat-section-body">${r.framework_convergence.split('\n').filter(l=>l.trim()).map(p=>`<p>${p}</p>`).join('')}</div>
-      <div class="compat-tap-hint">↗ Tap to go deeper</div>
+    const safeFW = (r.framework_convergence||'').replace(/'/g,"\\'").slice(0,300);
+    html += `<div style="padding:0 24px 20px">
+      <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--teal);
+        margin-bottom:12px;display:flex;align-items:center;gap:10px;cursor:pointer"
+        onclick="openDrawer('Where Six Frameworks Converge','${safeFW} — Which single convergence across all six frameworks is most significant for this relationship right now?',[{q:'If they could only act on one convergence signal, what should it be?',l:'The one signal to act on'}])">
+        Where Six Frameworks Converge ↗
+        <span style="flex:1;height:1px;background:var(--teal2);display:inline-block"></span>
+      </div>
+      <div style="font-size:16px;color:var(--text2);line-height:1.85">
+        ${r.framework_convergence.split('\n').filter(l=>l.trim()).map(p=>`<p style="margin-bottom:10px">${p}</p>`).join('')}
+      </div>
     </div>`;
   }
 
-  // Biorhythms — structured cards
-  if (bioSynastry && bioSynastry.length) {
-    const safeBioQ = (r.biorhythm_today||'What do the biorhythm cycles say about their dynamic today?').replace(/'/g,"\'").slice(0,200);
-    const bCards = bioSynastry.map(b => {
-      const aCol = (b.aPct||0) > 20 ? 'var(--teal)' : (b.aPct||0) < -20 ? '#ff9999' : 'var(--gold)';
-      const bColr = (b.bPct||0) > 20 ? 'var(--teal)' : (b.bPct||0) < -20 ? '#ff9999' : 'var(--gold)';
-      return `<div class="compat-bio-card" style="cursor:pointer"
-        onclick="openDrawer('${b.cycle||''} Biorhythm','${safeBioQ}',[{q:'How should they plan around this cycle?',l:'Planning tip'}])">
-        <div class="compat-bio-label">${b.cycle||''}</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0">
-          <div style="text-align:center">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${nameA||'A'}</div>
-            <div class="compat-bio-val" style="color:${aCol}">${(b.aPct||0) > 0 ? '+' : ''}${b.aPct||0}%</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${nameB||'B'}</div>
-            <div class="compat-bio-val" style="color:${bColr}">${(b.bPct||0) > 0 ? '+' : ''}${b.bPct||0}%</div>
-          </div>
+  // ── CHINESE ASTROLOGY SECTION (new 6th framework) ──
+  if (chineseA && chineseB) {
+    const chType = chineseCompat?.t || 'Neutral';
+    const chQual = chineseCompat?.q || '';
+    const chDyn  = chineseCompat?.d || '';
+    const typeCol = chType === 'Best Match' ? 'var(--teal)' : chType === 'Affinity' ? 'var(--gold)' : chType === 'Clash' ? '#ff9999' : 'var(--text3)';
+    const typeBg  = chType === 'Best Match' ? 'rgba(129,205,182,0.08)' : chType === 'Affinity' ? 'rgba(201,160,80,0.08)' : chType === 'Clash' ? 'rgba(200,80,80,0.08)' : 'var(--bg3)';
+    const chBody  = r.chinese_connection || '';
+
+    // Animal emoji map
+    const ANIMAL_EMOJI = {Rat:'🐀',Ox:'🐂',Tiger:'🐅',Rabbit:'🐇',Dragon:'🐉',Snake:'🐍',Horse:'🐴',Goat:'🐐',Monkey:'🐒',Rooster:'🐓',Dog:'🐕',Pig:'🐖'};
+    const emojiA = ANIMAL_EMOJI[chineseA.animal] || '☯';
+    const emojiB = ANIMAL_EMOJI[chineseB.animal] || '☯';
+
+    // Element colour map
+    const EL_COL = {Metal:'#b0c4d8',Water:'#6eb5d4',Wood:'#7db87d',Fire:'#d4724a',Earth:'#c9a050'};
+    const elColA = EL_COL[chineseA.element] || 'var(--text2)';
+    const elColB = EL_COL[chineseB.element] || 'var(--text2)';
+
+    // Build the open drawer call without inline template expressions
+    const chDrawerQ = (chBody || (chineseA.element+' '+chineseA.animal+' and '+chineseB.element+' '+chineseB.animal+'. '+chQual+'. '+chDyn)).replace(/'/g,"\\'").slice(0,300);
+    const safeNA = (nameA||'').replace(/'/g,"\\'");
+    const safeNB = (nameB||'').replace(/'/g,"\\'");
+
+    html += `<div style="padding:0 24px 20px">
+      <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);
+        margin-bottom:14px;display:flex;align-items:center;gap:10px;cursor:pointer"
+        onclick="openChineseCompatDrawer()">
+        ☯ Chinese Astrology ↗
+        <span style="flex:1;height:1px;background:var(--gold3);display:inline-block"></span>
+        <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0;font-style:italic">Solar year signs · CNY-corrected</span>
+      </div>
+
+      <!-- Visual animal cards -->
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:14px">
+
+        <!-- Person A card -->
+        <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:14px 16px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">${nameA}</div>
+          <div style="font-size:40px;line-height:1;margin-bottom:8px">${emojiA}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:${elColA};margin-bottom:4px">${chineseA.animal}</div>
+          <div style="font-size:12px;color:var(--text3)">${chineseA.element}</div>
+          <div style="margin-top:8px;height:3px;border-radius:2px;background:${elColA};opacity:.4"></div>
         </div>
-        <div class="compat-bio-desc">${b.dynamic||''}</div>
-      </div>`;
-    }).join('');
-    html += `<div class="compat-section tappable" onclick="openDrawer('Biorhythms Today','${safeBioQ}',[{q:'When are their cycles most aligned this month?',l:'Best alignment'},{q:'How does this affect their dynamic today?',l:'Today\'s dynamic'}])">
-      <div class="compat-section-label">Biorhythms Today · tap to go deeper</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${bCards}</div>
-      ${r.biorhythm_today ? '<div style="font-size:14px;color:var(--text3);line-height:1.7;margin-top:12px">'+r.biorhythm_today.slice(0,300)+'</div>' : ''}
+
+        <!-- Relationship badge -->
+        <div style="text-align:center;padding:8px 0">
+          <div style="width:40px;height:40px;border-radius:50%;background:${typeBg};border:1px solid ${typeCol};
+            display:flex;align-items:center;justify-content:center;margin:0 auto">
+            <span style="font-size:16px">${chType === 'Best Match' ? '✦' : chType === 'Affinity' ? '◈' : chType === 'Clash' ? '⚡' : '○'}</span>
+          </div>
+          <div style="font-size:10px;color:${typeCol};margin-top:6px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap">${chType}</div>
+        </div>
+
+        <!-- Person B card -->
+        <div style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:14px 16px;text-align:center">
+          <div style="font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">${nameB}</div>
+          <div style="font-size:40px;line-height:1;margin-bottom:8px">${emojiB}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:${elColB};margin-bottom:4px">${chineseB.animal}</div>
+          <div style="font-size:12px;color:var(--text3)">${chineseB.element}</div>
+          <div style="margin-top:8px;height:3px;border-radius:2px;background:${elColB};opacity:.4"></div>
+        </div>
+
+      </div>
+
+      <!-- Quality + Dynamic -->
+      <div style="background:${typeBg};border:1px solid ${typeCol}33;border-radius:3px;padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:14px;color:${typeCol};font-style:italic;margin-bottom:6px">${chQual}</div>
+        ${chDyn ? `<div style="font-size:13px;color:var(--text2);line-height:1.65">${chDyn}</div>` : ''}
+      </div>
+
+      ${chBody ? `<div style="font-size:15px;color:var(--text2);line-height:1.85">${chBody.split('\n').filter(l=>l.trim()).map(p=>`<p style="margin-bottom:8px">${p}</p>`).join('')}</div>` : ''}
+
+      <div style="margin-top:8px;font-size:11px;color:var(--text3);font-style:italic">Chinese solar year signs, corrected for Chinese New Year date.</div>
     </div>`;
+
+    // Store for drawer helper
+    window._chineseDrawerData = {chineseA, chineseB, chType, chQual, chDyn, nameA, nameB, chBody};
   }
 
-  // Synastry aspects — grid layout
-  if (synAspects?.length) {
-    const aspectCards = synAspects.slice(0,6).map(a => {
-      // Server returns: aspect (name), interpretation OR body, strength
-      const aspName = a.aspect || a.name || '';
-      const aspBody = a.interpretation || a.body || a.description || '';
-      const safeAQ = aspBody.replace(/'/g,"\'").slice(0,200);
-      const safeAN = aspName.replace(/'/g,"\'");
-      const stars = Math.min(5, Math.max(1, Math.round(a.strength||3)));
-      return `<div class="compat-aspect tappable"
-        onclick="openDrawer('${safeAN}','${safeAQ} — What does this aspect mean for their day-to-day relationship?',[{q:'How do they navigate this?',l:'How to navigate'},{q:'What is the gift in this tension?',l:'The gift'},{q:'How has this aspect shaped the last year?',l:'Last year'}])">
-        <div class="compat-aspect-name">${aspName}</div>
-        <div class="compat-aspect-stars">${'●'.repeat(stars)}${'○'.repeat(5-stars)}</div>
-        <div class="compat-aspect-body">${aspBody.slice(0,140)}${aspBody.length>140?'…':''}</div>
+  // Biorhythm snapshot today
+  if (bioSynastry && bioSynastry.length) {
+    const safeBio = (r.biorhythm_today||'').replace(/'/g,"\\'").slice(0,200);
+    html += `<div style="padding:0 24px 20px">
+      <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);
+        margin-bottom:12px;display:flex;align-items:center;gap:10px;cursor:pointer"
+        onclick="openDrawer('Biorhythms Today','${safeBio || 'What do the biorhythm cycles of '+nameA+' and '+nameB+' say about their dynamic today?'}',[{q:'How should ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} plan their week around their biorhythm cycles?',l:'Planning around cycles'},{q:'When are their biorhythm peaks most aligned this month?',l:'When to align energy'}])">
+        Biorhythms Today ↗
+        <span style="flex:1;height:1px;background:var(--gold3);display:inline-block"></span>
+        <span style="font-size:9px;color:var(--text3);letter-spacing:.05em;text-transform:none;font-style:italic">Physical 23d · Emotional 28d · Intellectual 33d</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">`;
+    bioSynastry.forEach(b => {
+      const aCol = b.aPct > 20 ? 'var(--teal)' : b.aPct < -20 ? '#ff9999' : 'var(--text3)';
+      const bCol = b.bPct > 20 ? 'var(--teal)' : b.bPct < -20 ? '#ff9999' : 'var(--text3)';
+      html += `<div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 12px">
+        <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">${b.cycle}</div>
+        <div style="font-size:12px;margin-bottom:4px"><span style="color:${aCol}">${nameA}: ${b.aPct > 0 ? '+' : ''}${b.aPct}%</span></div>
+        <div style="font-size:12px;margin-bottom:6px"><span style="color:${bCol}">${nameB}: ${b.bPct > 0 ? '+' : ''}${b.bPct}%</span></div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.5">${b.dynamic}</div>
       </div>`;
-    }).join('');
-    html += `<div class="compat-section">
-      <div class="compat-section-label">Key Synastry Aspects · tap any to go deeper</div>
-      <div class="compat-aspects-grid">${aspectCards}</div>
-    </div>`;
+    });
+    html += `</div>`;
+    if (r.biorhythm_today) html += `<div style="font-size:15px;color:var(--text2);line-height:1.75;margin-top:12px">${r.biorhythm_today.split('\n').filter(l=>l.trim()).map(p=>`<p style="margin-bottom:8px">${p}</p>`).join('')}</div>`;
+    html += `</div>`;
   }
 
-  // Tensions and gifts sections from reading
-  const sections = [
-    {key:'convergence_gifts', label:'What Brings Out the Best', icon:'✦'},
-    {key:'tensions_growth', label:'Growth Edges', icon:'⚡'},
-    {key:'shared_pleasures', label:'Where They Click Best', icon:'◈'},
-    {key:'guidance_a', label:`Guidance for ${nameA||'Person A'}`, icon:'↗'},
-    {key:'guidance_b', label:`Guidance for ${nameB||'Person B'}`, icon:'↗'},
-    {key:'question_together', label:'A Question to Sit With Together', icon:'?'},
-  ];
+  // Natal signatures
+  if (natalA || natalB) {
+    html += `<div style="padding:0 24px 20px">
+      <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);
+        margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        Natal Signatures
+        <span style="flex:1;height:1px;background:var(--div);display:inline-block"></span>
+        <span style="font-size:9px;color:var(--text3);letter-spacing:.05em;text-transform:none;font-style:italic">Approximate mean longitudes · Meeus (1998)</span>
+      </div>
+      <div class="compat-natal">`;
+    [[natalA, nameA, kinA, numA, moonPhaseA, chineseA], [natalB, nameB, kinB, numB, moonPhaseB, chineseB]].forEach(([natal, name, kin, num, moonPh, chinese]) => {
+      if (!natal) return;
+      html += `<div class="compat-natal-card">
+        <div class="compat-natal-name">${name}</div>`;
+      natal.slice(0,7).forEach(p => {
+        html += `<div class="compat-natal-row"><span class="compat-natal-planet">${p.name}</span><span class="compat-natal-pos">${p.degStr}</span></div>`;
+      });
+      if (kin) html += `<div style="font-size:12px;color:var(--teal);margin-top:7px;line-height:1.4">${kin.full}${kin.isGAP ? ' ★' : ''}</div>`;
+      if (num && num.lp) html += `<div style="font-size:12px;color:var(--gold);margin-top:3px">LP ${num.lp} · PY ${num.py || '?'}</div>`;
+      if (chinese) html += `<div style="font-size:11px;color:var(--text3);margin-top:3px">☯ ${chinese.element} ${chinese.animal}</div>`;
+      if (moonPh) html += `<div style="font-size:11px;color:var(--text3);margin-top:3px;font-style:italic">${moonPh.phase}</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+    if (moonPhaseCross) {
+      html += `<div style="margin-top:10px;background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:12px 14px">
+        <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Natal Moon Phase Archetypes</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div style="font-size:13px;color:var(--text2)"><strong style="color:var(--gold)">${nameA}:</strong> ${moonPhaseCross.phaseA}<br><span style="font-size:11px;color:var(--text3);font-style:italic">${moonPhaseCross.archetypeA}</span></div>
+          <div style="font-size:13px;color:var(--text2)"><strong style="color:var(--gold)">${nameB}:</strong> ${moonPhaseCross.phaseB}<br><span style="font-size:11px;color:var(--text3);font-style:italic">${moonPhaseCross.archetypeB}</span></div>
+        </div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.65">${moonPhaseCross.dynamicNote}</div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
 
-  sections.forEach(sec => {
-    const body = r[sec.key];
-    if (!body) return;
-    const safeB = (body||'').replace(/'/g,"\'").slice(0,300);
-    html += `<div class="compat-section tappable"
-      onclick="openDrawer('${sec.icon} ${sec.label}','${safeB}',[{q:'Go deeper on this.',l:'Go deeper'},{q:'What practice supports this?',l:'Practical step'}])">
-      <div class="compat-section-label">${sec.icon} ${sec.label}</div>
-      <div class="compat-section-body">${body.split('\n').filter(l=>l.trim()).map(p=>`<p>${p}</p>`).join('')}</div>
-      <div class="compat-tap-hint">↗ Tap to go deeper</div>
+  // Key aspects — each tappable
+  if (r.key_aspects && r.key_aspects.length) {
+    html += `<div style="padding:0 24px 20px">
+      <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);
+        margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        Key Synastry Aspects
+        <span style="flex:1;height:1px;background:var(--div);display:inline-block"></span>
+      </div>
+      <div class="compat-aspects">`;
+    const _allAspects = (r.key_aspects && r.key_aspects.length) ? r.key_aspects : (synAspects||[]);
+    _allAspects.forEach((a, i) => {
+      const raw = (synAspects && synAspects[i]) || {};
+      const aspName  = a.aspect  || raw.aspect  || '';
+      const aspInterp= a.interpretation || raw.interpretation || a.body || raw.body || '';
+      const aspStr   = Math.min(5,Math.max(1,Math.round(a.str||raw.str||a.strength||raw.strength||3)));
+      const safeAsp  = aspName.replace(/'/g,"\'").slice(0,120);
+      const safeInt  = aspInterp.replace(/'/g,"\'").slice(0,300);
+      html += `<div class="compat-aspect-item tappable" style="cursor:pointer;margin-bottom:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--div2);border-radius:3px"
+        onclick="openDrawer('${safeAsp}','${safeInt} What does this mean for ${(nameA||'them').replace(/'/g,"\'")} and ${(nameB||'them').replace(/'/g,"\'")} day-to-day?',[{q:'How do they navigate this?',l:'Navigation'},{q:'What is the gift here?',l:'The gift'}])">
+        <div style="font-size:14px;color:var(--gold);font-style:italic;margin-bottom:5px">${aspName}</div>
+        <div style="font-size:12px;color:var(--teal);letter-spacing:.05em;margin-bottom:7px">${st(aspStr)}</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.65">${aspInterp.slice(0,180)}${aspInterp.length>180?'…':''}</div>
+        <div style="font-size:10px;color:var(--gold3);margin-top:6px;text-align:right">↗ tap for full interpretation</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  html += `</div>`; // close main card
+
+  // Gifts / Tensions / Topic sections — each tappable
+  [[r.gifts,'var(--teal2)','✦ '],[r.tensions,'rgba(200,80,80,.3)','⚡ '],[r.topic_specific,'var(--gold3)','◈ ']].forEach(([section, borderColor, icon]) => {
+    if (!section || !section.headline) return;
+    const safeHL = (section.headline||'').replace(/'/g,"\\'").slice(0,100);
+    const safeBody = (section.body||'').replace(/'/g,"\\'").slice(0,300);
+    html += `<div class="r-section tappable" style="border-left:2px solid ${borderColor};margin-bottom:14px;cursor:pointer"
+      onclick="openDrawer('${icon.trim()} ${safeHL}','${safeHL}. ${safeBody} — Go deeper: what is the single most actionable insight here for ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} right now?',[{q:'What is the one most practical thing they can do this week based on this?',l:'One thing this week'},{q:'Where does this theme show up most in daily life?',l:'In daily life'}])">
+      <div class="sec-hl" style="font-size:20px">${icon}${section.headline}</div>
+      <div class="sec-body">${prose(section.body)}</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:8px;letter-spacing:.08em">↗ Go deeper</div>
     </div>`;
   });
 
-  // Dreamspell + Numerology mini-cards
-  if (dreamspellCross || numCross) {
-    html += `<div class="compat-section">
-      <div class="compat-section-label">Framework Signatures</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${dreamspellCross ? `<div style="border:1px solid var(--div);background:var(--bg3);padding:12px;border-radius:2px">
-          <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:6px">Dreamspell</div>
-          <div style="font-size:15px;color:var(--gold);font-family:'Cormorant Garamond',serif">${dreamspellCross.combinedKin||''}</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:4px">${dreamspellCross.quality||''}</div>
+  // Framework deep-dives — each tappable
+  [
+    ['Dreamspell Connection', r.dreamspell_connection, '◈'],
+    ['Numerology Connection', r.numerology_connection, ''],
+    ['Natal Moon Archetypes', r.natal_moon_connection, '☽'],
+  ].forEach(([label, body, icon]) => {
+    if (!body) return;
+    const safeLabel = label.replace(/'/g,"\\'");
+    const safeBody = body.replace(/'/g,"\\'").slice(0,300);
+    html += `<div class="r-section tappable" style="margin-bottom:14px;cursor:pointer"
+      onclick="openDrawer('${icon ? icon+' ' : ''}${safeLabel}','${safeBody} — What does this framework specifically reveal about how ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} can practically use this understanding?',[{q:'How does ${safeLabel.toLowerCase()} specifically affect their communication?',l:'Communication'},{q:'What does this reveal about the timing of this relationship?',l:'Timing'}])">
+      <div class="sec-label">${icon ? icon + ' ' : ''}${label}</div>
+      <div class="sec-body">${prose(body)}</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:8px;letter-spacing:.08em">↗ Go deeper</div>
+    </div>`;
+  });
+
+  // For them
+  if (r.for_them) {
+    html += `<div class="r-section" style="margin-bottom:14px">
+      <div style="font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:14px">Specific Guidance</div>
+      <div class="compat-for-them">
+        ${r.for_them.for_a ? `<div class="compat-for-card tappable" style="cursor:pointer"
+          onclick="openDrawer('For ${(nameA||'').replace(/'/g,"\\'")}','${(r.for_them.for_a||'').replace(/'/g,"\\'").slice(0,300)} — Go deeper: what is the single most important thing ${(nameA||'').replace(/'/g,"\\'")} needs to hear and act on?',[{q:'What specifically makes it hard for ${(nameA||'').replace(/'/g,"\\'")} to embody what this reading asks of them?',l:'What makes it hard'},{q:'What would change most quickly if ${(nameA||'').replace(/'/g,"\\'")} acted on this?',l:'The fastest change'}])">
+          <div class="compat-for-label">For ${nameA} ↗</div>
+          <div class="compat-for-text">${r.for_them.for_a}</div>
         </div>` : ''}
-        ${numCross ? `<div style="border:1px solid var(--div);background:var(--bg3);padding:12px;border-radius:2px">
-          <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--master);margin-bottom:6px">Numerology</div>
-          <div style="font-size:15px;color:var(--gold);font-family:'Cormorant Garamond',serif">LP ${numCross.lpA||''} + ${numCross.lpB||''} = ${numCross.combined||''}</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:4px">${numCross.quality||''}</div>
+        ${r.for_them.for_b ? `<div class="compat-for-card tappable" style="cursor:pointer"
+          onclick="openDrawer('For ${(nameB||'').replace(/'/g,"\\'")}','${(r.for_them.for_b||'').replace(/'/g,"\\'").slice(0,300)} — What is the single most important thing ${(nameB||'').replace(/'/g,"\\'")} needs to hear and act on?',[{q:'What specifically makes it hard for ${(nameB||'').replace(/'/g,"\\'")} to embody what this reading asks of them?',l:'What makes it hard'},{q:'What would change most quickly if ${(nameB||'').replace(/'/g,"\\'")} acted on this?',l:'The fastest change'}])">
+          <div class="compat-for-label">For ${nameB} ↗</div>
+          <div class="compat-for-text">${r.for_them.for_b}</div>
         </div>` : ''}
       </div>
     </div>`;
   }
 
-  html += `</div>`;
+  // The question to sit with — tappable
+  if (r.a_question_to_sit_with) {
+    const safeQ = r.a_question_to_sit_with.replace(/'/g,"\\'").slice(0,200);
+    html += `<div class="shadow-box tappable" style="margin-bottom:14px;cursor:pointer"
+      onclick="openDrawer('A Question to Sit With Together','${safeQ} — Help ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} go deeper on this. What does sitting with this question honestly look like in practice?',[{q:'What would change if they asked each other this question directly?',l:'Asking it directly'},{q:'What is the fear that makes this question hard to sit with?',l:'The fear beneath the question'}])">
+      <div style="font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">A Question to Sit With Together ↗</div>
+      <div class="shadow-text">${r.a_question_to_sit_with}</div>
+    </div>`;
+  }
+
+  // Closing
+  if (r.closing) html += `<div class="closing" style="margin-bottom:14px">${r.closing}</div>`;
+
+  // Numerology cross pre-computed data
+  if (numCross) {
+    html += `<div class="r-section tappable" style="margin-bottom:14px;cursor:pointer"
+      onclick="openDrawer('Life Path Cross-Analysis','LP ${numCross.lpA} and ${numCross.lpB}: ${(numCross.quality||'').replace(/'/g,"\\'")}. ${(numCross.dynamic||'').replace(/'/g,"\\'").slice(0,200)} — What does this specific Life Path pairing mean for how ${(nameA||'').replace(/'/g,"\\'")} and ${(nameB||'').replace(/'/g,"\\'")} navigate decisions, conflict, and long-term planning together?',[{q:'How do LP ${numCross.lpA} and LP ${numCross.lpB} handle conflict differently, and how can they bridge it?',l:'Conflict and bridge'},{q:'What does their combined frequency ${numCross.combined} say about what they are here to build together?',l:'What they are here to build'}])">
+      <div class="sec-label">Life Path Cross-Analysis ↗</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+        <div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 14px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">LP Pairing</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold)">${numCross.lpA} + ${numCross.lpB}</div>
+          <div style="font-size:12px;color:var(--teal)">${numCross.quality}</div>
+        </div>
+        <div style="background:var(--bg3);border:1px solid var(--div2);border-radius:2px;padding:10px 14px">
+          <div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Combined Frequency</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--gold)">${numCross.combined}</div>
+          <div style="font-size:12px;color:var(--text3)">${numCross.combinedName}</div>
+        </div>
+      </div>
+      <div style="font-size:15px;color:var(--text2);line-height:1.75">${numCross.dynamic}</div>
+      ${numCross.pyDynamic ? `<div style="font-size:14px;color:var(--text3);margin-top:8px;font-style:italic">${numCross.pyDynamic}</div>` : ''}
+    </div>`;
+  }
+
+  // Dreamspell cross pre-computed data
+  if (dreamspellCross) {
+    html += `<div class="r-section tappable" style="margin-bottom:14px;cursor:pointer"
+      onclick="openDrawer('◈ Dreamspell Synastry','Chromatic: ${(dreamspellCross.chromaticDesc||'').replace(/'/g,"\\'").slice(0,150)}. Tonal: ${(dreamspellCross.toneRelation||'').replace(/'/g,"\\'").slice(0,100)}. Combined Kin: ${(dreamspellCross.combinedFull||'').replace(/'/g,"\\'")}. What does this Dreamspell connection mean for the shared purpose and galactic arc of this relationship?',[{q:'What is the higher purpose encoded in their combined Kin ${(dreamspellCross.combinedFull||'').replace(/'/g,"\\'")}?',l:'Their combined Kin purpose'},{q:'How does the chromatic relationship shape how they process and express energy together?',l:'How they process energy'}])">
+      <div class="sec-label">◈ Dreamspell Synastry ↗</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:6px">${dreamspellCross.chromaticDesc}</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:6px">Tonal relationship: ${dreamspellCross.toneRelation}</div>
+      ${dreamspellCross.bothGAP ? `<div style="font-size:13px;color:var(--teal);margin-bottom:6px">Both born on Galactic Activation Portal days.</div>` : ''}
+      ${dreamspellCross.sameWavespell ? `<div style="font-size:13px;color:var(--teal);margin-bottom:6px">Born in the same wavespell.</div>` : ''}
+      <div style="font-size:13px;color:var(--gold);margin-top:6px">Combined Kin: ${dreamspellCross.combinedFull}</div>
+    </div>`;
+  }
+
+  // Sources
+  if (r.sources) {
+    html += `<div class="r-section"><div class="sec-label">Sources and Methodology</div><div class="sources-text">${r.sources}</div></div>`;
+  }
+
+  // Engagement chips -- built with string concatenation to avoid nested template literal issues
+  const compatChips = [
+    { q: 'What is the single most important thing ' + nameA + ' and ' + nameB + ' could do differently this week to strengthen their connection?', l: 'One thing to do this week' },
+    { q: 'What are the three most powerful gifts this relationship has that neither ' + nameA + ' nor ' + nameB + ' may be fully using?', l: 'Unused gifts' },
+    { q: 'When ' + nameA + ' and ' + nameB + ' are at their worst with each other, what is really happening beneath the surface?', l: 'What is really happening in conflict' },
+    { q: 'What does the Dreamspell combined Kin ' + (dreamspellCross ? dreamspellCross.combinedFull : '') + ' say about the higher purpose of this connection?', l: 'The higher purpose' },
+    { q: 'How do their biorhythm cycles affect their day-to-day dynamic, and how should they plan around it?', l: 'Planning around biorhythms' },
+    { q: 'What does each person most need to feel loved and seen in this relationship, and how can the other provide it?', l: 'How each needs to be loved' },
+  ];
+
+  var safeNA = nameA.replace(/['"]/g, '');
+  var safeNB = nameB.replace(/['"]/g, '');
+  var chipsHtml = compatChips.map(function(c) {
+    var safeQ = c.q.replace(/['"]/g, '');
+    return '<button class="chip" onclick="askCompatChip(\'' + safeQ + '\',\'' + safeNA + '\',\'' + safeNB + '\')">' + c.l + '</button>';
+  }).join('');
+
+  var askHtml = '<div class="ask-section" style="margin-top:24px">';
+  askHtml += '<div class="ask-label">Go Deeper with the Oracle</div>';
+  askHtml += '<div style="font-size:.82rem;color:var(--text3);margin-bottom:12px">Ask anything about this connection</div>';
+  askHtml += '<div class="ask-box">';
+  askHtml += '<input class="ask-input" id="compatAskInput" placeholder="Ask the Oracle..." onkeydown="if(event.key===&quot;Enter&quot;)submitCompatAsk(&quot;' + safeNA + '&quot;,&quot;' + safeNB + '&quot;)">';
+  askHtml += '<button class="ask-btn" onclick="submitCompatAsk(&quot;' + safeNA + '&quot;,&quot;' + safeNB + '&quot;)">Ask ↑</button>';
+  askHtml += '</div>';
+  askHtml += '<div class="ask-chips">' + chipsHtml + '</div>';
+  askHtml += '<div class="ask-response" id="compatAskResponse"></div>';
+  askHtml += '</div>';
+  html += askHtml;
+
+
+  // Buttons
+  html += `<div style="text-align:center;margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button onclick="exportCompatPDF()"
+      style="background:none;border:1px solid var(--gold3);color:var(--gold);
+      font-family:'EB Garamond',serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+      padding:10px 22px;border-radius:2px;cursor:pointer;transition:all .2s">
+      Save as PDF
+    </button>
+    <button onclick="document.getElementById('compatResult').classList.remove('show');window.scrollTo({top:0,behavior:'smooth'})"
+      style="background:none;border:1px solid var(--div);color:var(--text3);
+      font-family:'EB Garamond',serif;font-size:13px;letter-spacing:.2em;text-transform:uppercase;
+      padding:10px 22px;border-radius:2px;cursor:pointer;transition:all .2s">
+      Read Another Connection
+    </button>
+  </div>`;
 
   document.getElementById('compatResult').innerHTML = html;
   document.getElementById('compatResult').scrollIntoView({behavior:'smooth', block:'start'});
