@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-  (function() {
-    var h = window.location.hash;
-    var s = window.location.search;
-    if (h.includes('access_token') || h.includes('error_description') || s.includes('code=')) {
-      window.location.replace('/app?mode=quick' + h);
-    }
-  })();
-</script>
 <meta charset="UTF-8">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -35,7 +26,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<!-- Plausible analytics: active on cosmicdailyplanner.com only -->
+<!-- Plausible analytics -->
+<script defer data-domain="cosmicdailyplanner.com" src="https://plausible.io/js/script.js"></script>
+<script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -132,7 +125,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .wgt-icon{font-size:26px;margin-bottom:7px}
 .wgt-label{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
 .wgt-val{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:400;line-height:1.3}
-.wgt-sub{font-size:14px;color:var(--text3);margin-top:3px}
+.wgt-sub{font-size:14px;color:var(--text2);margin-top:3px}
 .r-loading{text-align:center;padding:80px 20px}
 .load-moon{font-size:52px;animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
@@ -519,8 +512,8 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .drawer-send:hover{background:var(--gold4)}
 .tappable{cursor:pointer;position:relative;transition:all .2s}
 .tappable:hover{opacity:.85}
-.tap-hint{font-size:12px;color:var(--gold3);letter-spacing:.12em;text-transform:uppercase;
-  float:right;margin-top:3px;opacity:.7;font-family:'EB Garamond',serif}
+.tap-hint{font-size:12px;color:rgba(201,160,80,0.65);letter-spacing:.12em;text-transform:uppercase;
+  float:right;margin-top:3px;opacity:1;font-family:'EB Garamond',serif}
 .tappable:hover .tap-hint{opacity:1;color:var(--gold)}
 /* ── SECTION HOOKS & CTAs ── */
 .sec-hook{font-size:15px;color:var(--text2);font-style:italic;line-height:1.65;
@@ -1116,8 +1109,8 @@ body.print-card-mode{background:#0D1E33}
 /* ── CDP v8 ENTRY SCREEN ─────────────────────────────────────────── */
 #cdpEntry{position:fixed;inset:0;background:var(--navy,#0D1E33);z-index:9999;
   display:flex;align-items:flex-start;justify-content:center;padding:24px;
-  opacity:0;transition:opacity 0.4s;overflow-y:auto;-webkit-overflow-scrolling:touch}
-#cdpEntry.visible{opacity:1}
+  opacity:0;pointer-events:none;transition:opacity 0.4s;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#cdpEntry.visible{opacity:1;pointer-events:auto}
 .entry-box{max-width:480px;width:100%;text-align:center;padding-bottom:40px;padding-top:20px}
 .entry-tier-badge{display:inline-flex;align-items:center;gap:8px;
   font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.14em;
@@ -1267,7 +1260,7 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
 
 <!-- TOPBAR -->
 <!-- ── CDP v8 ENTRY SCREEN ────────────────────────────────────────── -->
-<div id="cdpEntry">
+<div id="cdpEntry" style="display:none">
   <div class="entry-box">
     <div id="entryTierBadge" class="entry-tier-badge">⚡ Full Reading &nbsp;·&nbsp; SEEKER</div>
     <div class="entry-change" onclick="toggleEntryTiers()">Change depth ↓</div>
@@ -1339,8 +1332,8 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
     <div class="entry-toggle-row">
       <span class="entry-toggle-label">READING LANGUAGE</span>
       <div class="entry-toggle">
-        <button id="langAncient" class="active" onclick="setLang('ancient')">&#9672; ANCIENT</button>
-        <button id="langModern" onclick="setLang('modern')">&#9651; MODERN</button>
+        <button id="langAncient" class="active" onclick="setLang('ancient')">☽ TRADITION</button>
+        <button id="langModern" onclick="setLang('modern')">⬡ SCIENCE</button>
       </div>
     </div>
     <button class="entry-btn" onclick="beginFromEntry()">&#9733; BEGIN MY READING</button>
@@ -1434,6 +1427,12 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
       </svg>
     </button>
     <button id="profileLibBtn" class="thm" onclick="openProfileLibrary()" title="Profiles" style="font-family:'Cinzel',serif;font-size:13px">☿</button>
+    <!-- Persistent language toggle — always visible in reading -->
+    <div id="langToggleBar" style="display:inline-flex;gap:3px;margin-right:4px" title="Switch: Tradition (ancient wisdom) or Science (neuroscience framing)">
+      <button id="tbLangAncient" onclick="setLang('ancient');updateLangToggleBar()" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 10px;border:1px solid rgba(201,160,80,0.6);border-radius:2px;background:var(--gold);color:#0D1E33;font-weight:600;cursor:pointer;transition:all .2s">☽ Tradition</button>
+      <button id="tbLangModern" onclick="setLang('modern');updateLangToggleBar()" style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 10px;border:1px solid rgba(29,158,117,0.4);border-radius:2px;background:transparent;color:rgba(29,158,117,0.6);cursor:pointer;transition:all .2s">⬡ Science</button>
+    </div>
+    <button class="thm" onclick="window.location.href='/'" title="Two Telescopes — How CDP works" style="font-size:12px;color:rgba(29,158,117,0.85);border-color:rgba(29,158,117,0.4)">ℹ</button>
     <button class="thm tbr-tiers" onclick="showTierOverview()" title="View all tiers">Tiers</button>
     <button class="thm tbr-guide" onclick="openHelp()" title="Guide">Guide</button>
   <button class="thm" onclick="toggleTheme()" id="thmBtn">◑</button>
@@ -1496,7 +1495,13 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
   <div class="compat-people">
     <!-- Person A — auto-filled from profile -->
     <div class="compat-person">
-      <div class="compat-person-label">Person A · You</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="compat-person-label" style="margin-bottom:0">Person A · You</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+  <button onclick="openCompatProfilePicker('A')" style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.5);color:var(--teal);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer" title="Load a saved profile">⊕ Load Profile</button>
+  <button onclick="saveCompatPersonToProfiles('A')" style="background:rgba(201,160,80,0.12);border:1px solid rgba(201,160,80,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer" title="Save this person to your profile library">⊕ Save Profile</button>
+</div>
+      </div>
       <div class="form-group">
         <label class="form-label">Name</label>
         <input class="form-input" id="cA_name" placeholder="Your name">
@@ -1521,7 +1526,13 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
 
     <!-- Person B -->
     <div class="compat-person person-b">
-      <div class="compat-person-label">Person B · The Other Person</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="compat-person-label" style="margin-bottom:0">Person B · The Other Person</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+  <button onclick="openCompatProfilePicker('B')" style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.5);color:var(--teal);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer" title="Load a saved profile">⊕ Load Profile</button>
+  <button onclick="saveCompatPersonToProfiles('B')" style="background:rgba(201,160,80,0.12);border:1px solid rgba(201,160,80,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer" title="Save this person to your profile library">⊕ Save Profile</button>
+</div>
+      </div>
       <div class="form-group">
         <label class="form-label">Name</label>
         <input class="form-input" id="cB_name" placeholder="Their name or nickname">
@@ -1986,7 +1997,7 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
     <div class="share-sub">Share the Oracle with someone who'd genuinely use it. The invitation code is <strong style="color:var(--gold)">COSMIC2026</strong>.</div>
     <div class="share-invite-box">
       <div class="share-invite-label">Ready-to-send message</div>
-      <div class="share-invite-text" id="shareInviteText">Something genuinely different, deeply interesting, and personally valuable — a daily Oracle weaving astrology, numerology, Dreamspell and lunar cycles into one precise, personalised reading. Try it: cosmicdailyplanner.com — invitation code: COSMIC2026</div>
+      <div class="share-invite-text" id="shareInviteText">Your reading is loading — tap the share icon after your reading appears to send a personalised message. Or use the default: Something genuinely different, deeply interesting, and personally valuable — a daily Oracle weaving astrology, numerology, Dreamspell and lunar cycles into one precise, personalised reading. Try it: cosmicdailyplanner.com — invitation code: COSMIC2026</div>
       <button class="share-copy-btn" onclick="copyInviteText()">Copy</button>
     </div>
     <div class="share-btns">
@@ -2944,18 +2955,99 @@ function selectMode(mode) {
   document.getElementById(map[mode])?.classList.add('selected');
 }
 
-function showModeSelector() {
-  const saved = localStorage.getItem('cdp_mode');
-  // Always show the selector — no auto-skip until tier gating is live
-  // Pre-highlight their last choice if they have one
-  if (saved) { selectedMode = saved; selectMode(saved); }
-  // Update skip link to show what mode will be used
-  const skipLbl = document.getElementById('modeSkipLink');
-  if (skipLbl) {
-    const modeNames = {free:'Daily Snapshot', quick:'Full Reading', standard:'Monthly Arc', mystic:'Yearly Reading', deep:'Oracle Deep Dive'};
-    skipLbl.textContent = saved ? 'Use last setting (' + (modeNames[saved]||saved) + ')' : 'Skip — use default';
+
+// ── ENTRY SCREEN — begin reading from form ───────────────────────────────────
+function beginFromEntry() {
+  var name     = (document.getElementById('entryName')     || {}).value || '';
+  var dob      = (document.getElementById('entryDOB')      || {}).value || '';
+  var location = (document.getElementById('entryLocation') || {}).value || '';
+  var intention= (document.getElementById('entryIntention')|| {}).value || '';
+
+  // Save to profile
+  if (name || dob || location) {
+    try {
+      var p = JSON.parse(localStorage.getItem('cdp_profile') || '{}');
+      if (name) p.name = name.trim();
+      if (location) p.location = location.trim();
+      if (dob) {
+        var parts = dob.split(/[-\/]/);
+        if (parts.length === 3) { p.birthDay = parseInt(parts[0]); p.birthMonth = parseInt(parts[1]); p.birthYear = parseInt(parts[2]); }
+      }
+      localStorage.setItem('cdp_profile', JSON.stringify(p));
+    } catch(e) {}
   }
-  document.getElementById('modeSelector').classList.add('visible');
+  if (intention) { try { localStorage.setItem('cdp_intention', intention.trim()); } catch(e) {} }
+
+  // Hide entry screen
+  var ce = document.getElementById('cdpEntry');
+  if (ce) { ce.classList.remove('visible'); setTimeout(function(){ ce.style.display='none'; }, 420); }
+
+  // Start reading
+  startWithMode(true);
+}
+
+
+// ── LANGUAGE TOGGLE ──────────────────────────────────────────────────────────
+function setLang(lang) {
+  try { localStorage.setItem('cdp_lang', lang); } catch(e) {}
+  updateLangToggleBar();
+}
+
+
+// ── SAVE COMPATIBILITY PERSON TO PROFILE LIBRARY (no auth needed) ────────────
+function saveCompatPersonToProfiles(side) {
+  var p = side === 'A' ? 'cA' : 'cB';
+  var name = (document.getElementById(p+'_name') || {}).value || '';
+  var dobDay = (document.getElementById(p+'_day') || {}).value || '';
+  var dobMonth = (document.getElementById(p+'_month') || {}).value || '';
+  var dobYear = (document.getElementById(p+'_year') || {}).value || '';
+  var birthTime = (document.getElementById(p+'_time') || {}).value || '';
+  var birthPlace = (document.getElementById(p+'_location') || {}).value || '';
+
+  if (!name.trim()) {
+    alert('Please enter a name before saving.');
+    return;
+  }
+
+  try {
+    var profiles = JSON.parse(localStorage.getItem('cdp_profiles_v1') || '[]');
+    var existing = profiles.findIndex(function(p) { return p.name && p.name.toLowerCase() === name.trim().toLowerCase(); });
+    var newProfile = {
+      id: existing >= 0 ? profiles[existing].id : ('p_' + Date.now()),
+      name: name.trim(),
+      birthDay: parseInt(dobDay) || null,
+      birthMonth: dobMonth || null,
+      birthYear: parseInt(dobYear) || null,
+      birthTime: birthTime || null,
+      birthPlace: birthPlace || null,
+      savedAt: new Date().toISOString()
+    };
+    if (existing >= 0) {
+      profiles[existing] = newProfile;
+    } else {
+      profiles.push(newProfile);
+    }
+    localStorage.setItem('cdp_profiles_v1', JSON.stringify(profiles));
+    // Show confirmation
+    var btn = event.target;
+    var orig = btn.textContent;
+    btn.textContent = '✓ Saved!';
+    btn.style.background = 'rgba(29,158,117,0.25)';
+    btn.style.color = 'var(--teal)';
+    btn.style.borderColor = 'var(--teal)';
+    setTimeout(function() { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+  } catch(e) {
+    console.error('Profile save error:', e);
+    alert('Could not save profile. Please try again.');
+  }
+}
+
+function showModeSelector() {
+  // Mode selector removed — tier choice is on landing page, switching via tier bar in-app
+  // Start immediately with saved mode or default (Full Reading / Seeker)
+  const saved = localStorage.getItem('cdp_mode') || 'quick';
+  selectedMode = saved;
+  startWithMode(true);
 }
 
 function startWithMode(skipSelector) {
@@ -3115,16 +3207,29 @@ async function sendFeedback(){
   }
 }
 
+
+// ── SHARE VARIABLES — built dynamically from current reading ───────────────
+function getShareMsg() {
+  var r = currentReading && (currentReading.reading || currentReading);
+  var synth = r && r.synthesis ? r.synthesis.slice(0,220) + '…' : '';
+  var kin = currentReading && currentReading.kin ? currentReading.kin.full || '' : '';
+  var ud = currentReading && currentReading.num ? 'Day ' + (currentReading.num.ud||'') : '';
+  if (synth) return synth + '\n\ncosmicdailyplanner.com — invitation code: COSMIC2026';
+  return 'Something genuinely different — a daily Oracle weaving astrology, numerology, Dreamspell and lunar cycles into one precise, personalised reading. Try it: cosmicdailyplanner.com — invitation code: COSMIC2026';
+}
+var SHARE_URL = 'https://cosmicdailyplanner.com';
+
 // ══════════════════════════════════════════════════════════
 // SHARE & INVITE
 // ══════════════════════════════════════════════════════════
 function openShare() {
+  // Update share invite text with personalised reading content if available
+  var inviteEl = document.getElementById('shareInviteText');
+  if (inviteEl) { inviteEl.textContent = getShareMsg(); }
   if (navigator.share) {
-    var r = currentReading && (currentReading.reading || currentReading);
-    var synth = r && r.synthesis ? r.synthesis.slice(0,200) : '';
     navigator.share({
       title: 'Cosmic Daily Planner',
-      text: synth ? synth + '\n\ncosmicdailyplanner.com' : 'My daily cosmic reading — cosmicdailyplanner.com',
+      text: getShareMsg(),
       url: 'https://cosmicdailyplanner.com'
     }).catch(function(){ document.getElementById('shareModal').classList.add('open'); });
   } else {
@@ -3133,26 +3238,26 @@ function openShare() {
 }
 
 function shareToLinkedIn() {
-  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL)}`, '_blank', 'width=600,height=500');
+  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SHARE_URL||"https://cosmicdailyplanner.com")}`, '_blank', 'width=600,height=500');
 }
 function shareToX() {
-  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(SHARE_SHORT)}`, '_blank', 'width=600,height=400');
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareMsg().slice(0,200))}`, '_blank', 'width=600,height=400');
 }
 function shareToFacebook() {
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL)}&quote=${encodeURIComponent(SHARE_MSG)}`, '_blank', 'width=600,height=500');
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL||"https://cosmicdailyplanner.com")}&quote=${encodeURIComponent(getShareMsg())}`, '_blank', 'width=600,height=500');
 }
 function shareToWhatsApp() {
-  window.open(`https://wa.me/?text=${encodeURIComponent(SHARE_MSG)}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(getShareMsg())}`, '_blank');
 }
 function shareToTelegram() {
-  window.open(`https://t.me/share/url?url=${encodeURIComponent(SHARE_URL)}&text=${encodeURIComponent(SHARE_MSG)}`, '_blank');
+  window.open(`https://t.me/share/url?url=${encodeURIComponent(SHARE_URL||"https://cosmicdailyplanner.com")}&text=${encodeURIComponent(getShareMsg())}`, '_blank');
 }
 function shareViaEmail() {
-  window.location.href = `mailto:?subject=Something worth trying — Cosmic Daily Planner&body=${encodeURIComponent(SHARE_MSG)}`;
+  window.location.href = `mailto:?subject=Something worth trying — Cosmic Daily Planner&body=${encodeURIComponent(getShareMsg())}`;
 }
 function shareToInstagram() {
   // Instagram has no web share URL — copy text then open app
-  navigator.clipboard.writeText(SHARE_MSG).catch(()=>{});
+  navigator.clipboard.writeText(getShareMsg()).catch(()=>{});
   const btn = document.querySelector('.share-copy-btn');
   if (btn) { btn.textContent = 'Copied ✓'; setTimeout(()=>btn.textContent='Copy', 2500); }
   // Small delay so copy registers, then open Instagram
@@ -3164,7 +3269,7 @@ function shareToInstagram() {
 }
 function shareToTikTok() {
   // TikTok has no web share URL — copy text then open app
-  navigator.clipboard.writeText(SHARE_SHORT).catch(()=>{});
+  navigator.clipboard.writeText(getShareMsg()).catch(()=>{});
   setTimeout(() => {
     window.open('https://www.tiktok.com', '_blank');
   }, 300);
@@ -3744,7 +3849,7 @@ async function loadReading(dateStr, tier) {
       + '<div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Moon</div>'
       + '<div style="font-size:34px;line-height:1;margin-bottom:4px">' + (moon.emoji||'☽') + '</div>'
       + '<div style="font-size:12px;color:var(--text3)">' + (moon.phase||'') + '</div>'
-      + '<div style="font-size:11px;color:var(--text3);opacity:.6;margin-top:2px">Day ' + moon.cycle + ' of 29</div>'
+      + '<div style="font-size:11px;color:var(--text2);opacity:.8;margin-top:2px">Day ' + Math.round(moon.cyc) + ' of 29</div>'
       + '</div>'
       + '<div style="background:var(--bg2);padding:20px 14px;text-align:center">'
       + '<div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Dreamspell</div>'
@@ -4038,7 +4143,7 @@ async function loadReading(dateStr, tier) {
           const sd = document.getElementById('stageDisplay');
           if (sd) { sd.innerHTML = '<div style="color:var(--text2);font-size:15px">Connection issue. <button onclick="window._pollErrors=0;loadReading(\'' + dateStr + '\',\'' + activeTier + '\')" style="background:none;border:1px solid var(--gold3);border-radius:2px;color:var(--gold);padding:6px 14px;cursor:pointer">Try again ✶</button></div>'; sd.style.opacity='1'; }
         } else {
-          console.warn('Poll error (will retry):', pollErr.message);
+          console.warn('Poll error (will retry):', pollErr.message, pollErr.stack||'');
         }
       }
     }, 2000);
@@ -4628,8 +4733,8 @@ function renderSkeletonReading(dateStr, tier) {
   const lunarCycle = 29.53058867;
   const moonAge = ((today - knownNew) / 86400000 % lunarCycle + lunarCycle) % lunarCycle;
   const toNew = lunarCycle - moonAge;
-  const isBlack = toNew >= 0 && toNew <= 2.0;
-  const isShiva = moonAge >= 0.5 && moonAge <= 2.5;
+  const isBlack = toNew >= 0.6 && toNew <= 2.6;  // 2 days before new moon
+  const isShiva = moonAge >= 1.0 && moonAge <= 2.5;  // 2 days after new moon
   const moonPhase = moonAge < 1.85 ? 'New Moon' : moonAge < 7.38 ? 'Waxing Crescent'
     : moonAge < 9.22 ? 'First Quarter' : moonAge < 14.77 ? 'Waxing Gibbous'
     : moonAge < 16.61 ? 'Full Moon' : moonAge < 22.15 ? 'Waning Gibbous'
@@ -4713,7 +4818,7 @@ function renderSkeletonReading(dateStr, tier) {
       <div class="energy-num" style="${isM?'color:var(--master)':''}">${fb.n}${isM?'<span style="font-size:14px">★</span>':''}</div>
       <div class="energy-name">${fD.n}</div>
       <div class="energy-guidance">${guidanceText}</div>
-      <div style="font-size:11px;color:rgba(201,160,80,0.8);margin-top:8px;text-align:right;font-weight:500">↗ Tap for insightht</div>
+      <div style="font-size:11px;color:rgba(201,160,80,0.8);margin-top:8px;text-align:right;font-weight:500">↗ Tap for insight</div>
     </div>`;
   }).join('');
 
@@ -4802,7 +4907,7 @@ function renderSkeletonReading(dateStr, tier) {
     </div>
     <div style="display:inline-flex;align-items:center;gap:12px;margin-bottom:8px">
 
-      ${_nextTier ? '<span style="color:var(--text3);font-size:11px">·</span><button onclick="selectMode(\'' + _nextTier + '\');startWithMode()" class="next-tier-btn" style="background:none;border:none;font-size:13px;color:var(--teal);cursor:pointer;padding:0;letter-spacing:.06em;">try ' + (_nextLabel||'') + ' →</button>' : ''}
+      ${_nextTier ? '<button onclick="selectMode(\'' + _nextTier + '\');startWithMode()" class="next-tier-btn" style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.45);border-radius:20px;font-family:\'Cinzel\',serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--teal);cursor:pointer;padding:5px 14px;margin-left:8px;transition:all .2s" onmouseover="this.style.background=\'rgba(29,158,117,0.22)\'" onmouseout="this.style.background=\'rgba(29,158,117,0.12)\'">↑ ' + (_nextLabel||'') + '</button>' : ''}
     </div>
     <div class="r-date">${dateLabel}</div>
     <div class="r-loc">${(profile.location||'').toUpperCase()}</div>
@@ -4824,37 +4929,37 @@ function renderSkeletonReading(dateStr, tier) {
         ${isMD?'★':''}</div>
       <div class="wgt-val" style="${isMD?'color:var(--master)':''}">${dispNum}</div>
       <div class="wgt-name">${dispD.n}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.3;font-style:italic">${dispD.k||''}</div>
-      <div style="font-size:9px;color:var(--gold3);margin-top:5px">↗ tap for insight</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.3;font-style:italic">${dispD.k||''}</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>
     <div class="wgt tappable" style="cursor:pointer" title="Tap for lunar insight"
       onclick="openWgtMoon('${moonPhase}','${wgtMoonQ.replace(/'/g,String.fromCharCode(92,39))}',${isBlack?1:0},${isShiva?1:0})">
       <div class="wgt-label">Moon</div>
       <div class="wgt-icon">${moonEmoji}</div>
       <div class="wgt-val" style="font-size:13px;line-height:1.3">${moonPhase}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;font-style:italic">${isBlack?'Liminal threshold — pause & reflect':isShiva?'Fertile renewal window':'Day ${Math.round(moonAge)} of 29'}</div>
-      <div style="font-size:9px;color:var(--gold3);margin-top:5px">↗ tap for insight</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">${isBlack?'Liminal threshold · pause and reflect':isShiva?'Fertile renewal window':'Day ' + Math.round(moonAge) + ' of 29'}</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>
     <div class="wgt tappable" style="cursor:pointer" title="Tap for Dreamspell insight"
       onclick="openWgtKin('${kinFull}','${wgtKinQ.replace(/'/g,String.fromCharCode(92,39))}',${isGAP?1:0})">
       <div class="wgt-label">Kin</div>
       <div class="wgt-icon">${isGAP?'★':'◈'}</div>
       <div class="wgt-val" style="font-size:11px;line-height:1.4">${kinFull}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;font-style:italic">${isGAP?'Portal day — synchronicities amplified':'Your Dreamspell archetype today'}</div>
-      <div style="font-size:9px;color:var(--teal);margin-top:5px">↗ tap for insight</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">${isGAP?'Portal day · synchronicities amplified':'Your Dreamspell archetype today'}</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>
     ${lp ? `<div class="wgt tappable" style="cursor:pointer" title="Tap for Life Path insight"
       onclick="openDrawer('Life Path ${lp} · ${lpD.n}', '${wgtLPQ.replace(/'/g,"\'")}', [{q:'What is the vocational direction and natural strengths of Life Path ${lp}?',l:'Vocation & strengths'},{q:'What is the shadow pattern of Life Path ${lp} to know and work with?',l:'Shadow pattern'},{q:'How does Life Path ${lp} interact with Personal Year ${py||'?'}?',l:'LP × Personal Year'}])">
       <div class="wgt-label">Life Path</div>
       <div class="wgt-val" style="${[11,22,33,44].includes(lp)?'color:var(--master)':''}">${lp}</div>
       <div class="wgt-name">${lpD.n}</div>
-      <div style="font-size:9px;color:var(--gold3);margin-top:5px">↗</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>` : '<div class="wgt"><div class="wgt-label">Profile</div><div class="wgt-name" style="font-size:13px;margin-top:8px">Add birth date<br>for personal readings</div></div>'}
   </div>`;
 
   // Tap hint — appears immediately, signals interactivity before reading loads
   html += `<div style="text-align:center;font-size:11px;color:var(--gold3);letter-spacing:.15em;
-    margin:-8px 0 12px;opacity:.7">↗ Tap any card above for an instant Oracle insight</div>`;
+    margin:-8px 0 12px;opacity:1;color:rgba(201,160,80,0.6)">↗ Tap any card above for an instant Oracle insight</div>`;
 
   // Moon badges
   if (isBlack) html += `<div style="margin-bottom:16px"><span class="moon-badge badge-black">⚠️ Black Moon — 2 days before New Moon — threshold day</span></div>`;
@@ -4898,42 +5003,121 @@ function renderSkeletonReading(dateStr, tier) {
   // Biorhythms (real data)
   if (bioHtml) html += bioHtml;
 
+  // ── Numerology — month and year component energies ──────────────
+  const monthEn = numReduce(_mo);
+  const monthEnD = NUM_DATA[monthEn] || {n:'—',m:'',k:''};
+  const yearRaw = String(_yr).split('').reduce((a,b)=>a+parseInt(b),0);
+  const yearEn = numReduce(yearRaw);
+  const yearEnD = NUM_DATA[yearEn] || {n:'—',m:'',k:''};
+
+  // Pre-compute conditional HTML to avoid nested template literal escaping
+  const _col = (n) => [11,22,33,44].includes(n) ? 'var(--master)' : 'var(--gold)';
+  const _star = (n) => [11,22,33,44].includes(n) ? '<span style="font-size:14px">★</span>' : '';
+  const _masterBadge = [11,22,33,44].includes(ud)
+    ? '<span style="font-size:12px;color:var(--master);display:block;margin-top:3px">★ Master Number — ' + ((NUM_DATA[ud]||{}).m||'') + '</span>'
+    : '';
+
+  // Natal chart link
+  const hasNatal = !!(profile.birthDay && profile.birthMonth && profile.birthYear);
+  const _natalDob = hasNatal
+    ? ('Born ' + profile.birthDay + '/' + profile.birthMonth + '/' + profile.birthYear + (profile.birthTime ? ' · ' + profile.birthTime : ''))
+    : '';
+  const natalLinkHtml = hasNatal ? (
+    '<div style="background:var(--bg2);border:1px solid rgba(29,158,117,0.25);border-radius:3px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">' +
+    '<span style="font-size:18px">♄</span>' +
+    '<div style="flex:1;min-width:180px">' +
+    '<div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);margin-bottom:3px">Natal Chart · Deep Dive</div>' +
+    '<div style="font-size:13px;color:var(--text2)">' + _natalDob + '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    '<a href="https://www.astro.com/cgi/ade.cgi" target="_blank" rel="noopener" style="font-family:\'Cinzel\',serif;font-size:10px;letter-spacing:.12em;color:var(--navy);background:var(--teal);padding:7px 14px;border-radius:2px;text-decoration:none;white-space:nowrap">Astrodienst Chart ↗</a>' +
+    '<a href="https://astro.com/horoscopes/personal-daily-horoscope" target="_blank" rel="noopener" style="font-family:\'Cinzel\',serif;font-size:10px;letter-spacing:.12em;color:var(--teal);border:1px solid var(--teal);padding:7px 14px;border-radius:2px;text-decoration:none;white-space:nowrap;background:transparent">Daily Transits ↗</a>' +
+    '</div></div>'
+  ) : '';
+
+  // Personal numerology row (only if birth data entered)
+  const _personalNumHtml = pd ? (
+    '<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;margin-top:4px">Your Personal Numerology</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">' +
+    '<div class="tappable" style="background:var(--bg3);border:1px solid rgba(29,158,117,0.25);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer" onclick="tapEnergy(\'morning\',' + pd + ',\'\',\'\')">' +
+    '<div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:4px">Personal Day</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;line-height:1;color:' + _col(pd) + '">' + pd + _star(pd) + '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-top:4px">' + ((NUM_DATA[pd]||{}).n||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--teal);margin-top:5px;opacity:.7">↗</div></div>' +
+    '<div class="tappable" style="background:var(--bg3);border:1px solid rgba(29,158,117,0.25);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer" onclick="tapEnergy(\'afternoon\',' + (pm||monthEn) + ',\'\',\'\')">' +
+    '<div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:4px">Personal Month</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;line-height:1;color:' + _col(pm||monthEn) + '">' + (pm||monthEn) + _star(pm||monthEn) + '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-top:4px">' + ((NUM_DATA[pm||monthEn]||{}).n||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--teal);margin-top:5px;opacity:.7">↗</div></div>' +
+    '<div class="tappable" style="background:var(--bg3);border:1px solid rgba(29,158,117,0.25);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer" onclick="tapEnergy(\'evening\',' + (py||yearEn) + ',\'\',\'\')">' +
+    '<div style="font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--teal);margin-bottom:4px">Personal Year</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:28px;line-height:1;color:' + _col(py||yearEn) + '">' + (py||yearEn) + _star(py||yearEn) + '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-top:4px">' + ((NUM_DATA[py||yearEn]||{}).n||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--teal);margin-top:5px;opacity:.7">↗</div></div>' +
+    '</div>'
+  ) : '';
+
   // Numerology (real data)
-  html += `<div id="sk-numerology">
-    <div class="sec-label">Numerology of the Day</div>
-    <div class="sec-hl" style="margin-bottom:12px">${isMD?'<span class=\"master-badge\">\u2605 </span>':''} Universal Day ${dispNum} — ${dispD.n}</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">
-      <div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
-        onclick="tapDayNumber(${dayNum}, ${ud})">
-        <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day</div>
-        <div style="font-size:24px;color:${[11,22,33,44].includes(dayNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayNum}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayNumD.n||''}</div>
-        <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
-      </div>
-      <div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
-        onclick="tapDayMonthNumber(${dayMonthNum}, ${_dy}, ${_mo})">
-        <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Day · Month</div>
-        <div style="font-size:24px;color:${[11,22,33,44].includes(dayMonthNum)?'var(--master)':'var(--gold)'};font-weight:500">${dayMonthNum}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:3px">${dayMonthD.n||''}</div>
-        <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
-      </div>
-      <div class="tappable" style="background:var(--bg3);border:1px solid var(--gold3);border-radius:3px;padding:10px 8px;text-align:center;cursor:pointer"
-        onclick="tapNumerology(${ud})">
-        <div style="font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Full Date</div>
-        <div style="font-size:24px;color:${[11,22,33,44].includes(ud)?'var(--master)':'var(--gold)'};font-weight:500">${ud}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:3px">${(NUM_DATA[ud]||{}).n||''}</div>
-        <div style="font-size:10px;color:var(--gold);margin-top:4px">↗</div>
-      </div>
-    </div>
-    <div class="sec-hook">The <em>Universal Day number</em> is today’s collective frequency. ${pd?`Your <em>Personal Day ${pd}</em> is the intersection of that frequency with your unique numerological blueprint.`:''}</div>
-    <div class="sec-body" id="ai-numerology-body"><p>${dispD.m||''}</p></div>
-    <div class="energies">${energyHtml}</div>
-    <div style="margin-top:12px">
-      <button class="tap-cta" onclick="tapNumerology(${dispNum})">
-        How does today’s number energy work for me? <span class="cta-arrow">→</span>
-      </button>
-    </div>
-  </div>`;
+  html += '<div id="sk-numerology">' +
+    '<div class="sec-label">Numerology of the Day</div>' +
+
+    // Universal Day headline
+    '<div class="tappable" style="background:var(--bg2);border-left:3px solid var(--gold);border-radius:0 3px 3px 0;padding:14px 18px;margin-bottom:14px;cursor:pointer" onclick="tapNumerology(' + ud + ')">' +
+    '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">' +
+    '<span style="font-family:\'Cormorant Garamond\',serif;font-size:42px;line-height:1;color:' + _col(ud) + '">' + ud + _star(ud) + '</span>' +
+    '<div>' +
+    '<div style="font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:2px">Universal Day Energy</div>' +
+    '<div style="font-size:17px;color:var(--text2);font-family:\'Cormorant Garamond\',serif">' + ((NUM_DATA[ud]||{}).n||'') + '</div>' +
+    _masterBadge +
+    '</div>' +
+    '<span style="margin-left:auto;font-size:10px;color:var(--gold);opacity:.7">↗ Tap</span>' +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--text3);margin-top:8px;line-height:1.6">' + ((NUM_DATA[ud]||{}).k||'') + '</div>' +
+    '</div>' +
+
+    // Three component energies: Day · Month · Year
+    '<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Component Energies — Day · Month · Year</div>' +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 14px">' +
+
+    // Day block
+    '<div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:12px 8px;text-align:center;cursor:pointer" onclick="tapDayNumber(' + dayNum + ',' + ud + ')">' +
+    '<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Day ' + _dy + '</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;line-height:1;color:' + _col(dayNum) + '">' + dayNum + _star(dayNum) + '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-top:5px">' + ((NUM_DATA[dayNum]||{}).n||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4;font-style:italic">' + ((NUM_DATA[dayNum]||{}).k||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--gold);margin-top:6px;opacity:.7">↗</div></div>' +
+
+    // Month block
+    '<div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:12px 8px;text-align:center;cursor:pointer" onclick="tapMonthEnergy(' + monthEn + ',' + _mo + ',' + _yr + ')">' +
+    '<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Month ' + _mo + '</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;line-height:1;color:' + _col(monthEn) + '">' + monthEn + _star(monthEn) + '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-top:5px">' + (monthEnD.n||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4;font-style:italic">' + (monthEnD.k||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--gold);margin-top:6px;opacity:.7">↗</div></div>' +
+
+    // Year block
+    '<div class="tappable" style="background:var(--bg3);border:1px solid var(--div);border-radius:3px;padding:12px 8px;text-align:center;cursor:pointer" onclick="tapYearEnergy(' + yearEn + ',' + _yr + ')">' +
+    '<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">Year ' + _yr + '</div>' +
+    '<div style="font-family:\'Cormorant Garamond\',serif;font-size:32px;line-height:1;color:' + _col(yearEn) + '">' + yearEn + _star(yearEn) + '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-top:5px">' + (yearEnD.n||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4;font-style:italic">' + (yearEnD.k||'') + '</div>' +
+    '<div style="font-size:10px;color:var(--gold);margin-top:6px;opacity:.7">↗</div></div>' +
+    '</div>' +
+
+    _personalNumHtml +
+    natalLinkHtml +
+
+    '<div class="sec-hook">The <em>Universal Day number</em> is the collective frequency — every date digit reduced to its essence. Day, Month, and Year are the three component lenses. ' + (pd ? 'Your <em>Personal Day ' + pd + '</em> personalises this to your unique blueprint. ' : '') + '(Drayer 2002; Goodwin 1994)</div>' +
+    '<div style="margin:8px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
+    '<span class="citation-badge" onclick="openCitation(\'drayer\')">Drayer 2002</span>' +
+    '<span class="citation-badge" onclick="openCitation(\'usno\')">USNO</span>' +
+    '<button onclick="openScienceBridge(\'numerology\')" style="background:none;border:1px solid rgba(29,158,117,0.3);color:var(--teal);font-size:10px;letter-spacing:.1em;font-family:\'Cinzel\',serif;padding:4px 10px;border-radius:2px;cursor:pointer;margin-left:4px">⬡ Why numbers work ↗</button>' +
+    '</div>' +
+    '<div class="sec-body" id="ai-numerology-body"><p>' + (dispD.m||'') + '</p></div>' +
+    '<div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin:14px 0 8px">Three Windows of the Day</div>' +
+    '<div class="energies">' + energyHtml + '</div>' +
+    '<div style="margin-top:12px"><button class="tap-cta" onclick="tapNumerology(' + dispNum + ')">How does today\'s number energy work for me? <span class="cta-arrow">→</span></button></div>' +
+    '</div>';
 
 
   // AI priorities placeholder
@@ -4968,6 +5152,11 @@ function renderSkeletonReading(dateStr, tier) {
     }</div>
     <div class="sec-body" id="ai-moon-body">
       <p>Moon is ${moonPhase}, day ${Math.round(moonAge)} of the lunar cycle. ${Math.round(toNew)} days to the New Moon.</p>
+    </div>
+    <div style="margin:8px 0 4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span class="citation-badge" onclick="openCitation('usno')">USNO</span>
+      <span class="citation-badge" onclick="openCitation('brady')">Brady 1999</span>
+      <button onclick="openScienceBridge('moon')" style="background:none;border:1px solid rgba(29,158,117,0.3);color:var(--teal);font-size:10px;letter-spacing:.1em;font-family:'Cinzel',serif;padding:4px 10px;border-radius:2px;cursor:pointer;margin-left:4px">⬡ Why the Moon works ↗</button>
     </div>
     <button class="tap-cta" onclick="tapMoon()" style="margin-top:12px;font-size:12px">
       What does this Moon mean for me today? <span class="cta-arrow">→</span>
@@ -5031,6 +5220,11 @@ function renderSkeletonReading(dateStr, tier) {
     <div style="margin-top:14px;padding:9px;background:var(--bg4);border:1px solid var(--div2);border-radius:2px">
       <div style="font-size:12px;color:var(--text3);font-style:italic">Dreamspell: Argüelles (1987) The Mayan Factor — modern system. Verify: tortuga.com/oracle</div>
     </div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+      <span class="citation-badge" onclick="openCitation('arguelles')">Argüelles 1987</span>
+      <span class="citation-badge" onclick="openCitation('sprajc')">Šprajc 2023</span>
+      <button onclick="openScienceBridge('dreamspell')" style="background:none;border:1px solid rgba(29,158,117,0.3);color:var(--teal);font-size:10px;letter-spacing:.1em;font-family:'Cinzel',serif;padding:4px 10px;border-radius:2px;cursor:pointer;margin-left:4px">⬡ Why 260 days? ↗</button>
+    </div>
   </div>`;
 
   // AI week ahead placeholder
@@ -5042,6 +5236,27 @@ function renderSkeletonReading(dateStr, tier) {
   // AI quote placeholder
   html += `<div class="r-section sk-section" id="ai-quote" style="text-align:center;padding:24px">
     ${Array.from({length:3},(_,i)=>`<div class="sk-line" style="width:${[70,55,40][i]}%;margin:0 auto 8px;animation-delay:${i*0.1}s"></div>`).join('')}
+  </div>`;
+
+  // Skeleton footer with scholarly transparency panel
+  html += `<div style="background:var(--bg2);border:1px solid var(--div);border-radius:3px;padding:14px 18px;margin-bottom:16px">
+    <div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">Scholarly Foundations</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      <span class="citation-badge" onclick="openCitation('swiss')">Swiss Ephemeris</span>
+      <span class="citation-badge" onclick="openCitation('tarnas')">Tarnas 2006</span>
+      <span class="citation-badge" onclick="openCitation('greene')">Greene 1976</span>
+      <span class="citation-badge" onclick="openCitation('hand')">Hand 2002</span>
+      <span class="citation-badge" onclick="openCitation('drayer')">Drayer 2002</span>
+      <span class="citation-badge" onclick="openCitation('arguelles')">Argüelles 1987</span>
+      <span class="citation-badge" onclick="openCitation('sprajc')">Šprajc 2023</span>
+      <span class="citation-badge" onclick="openCitation('usno')">USNO</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="openScienceBridge('numerology')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Numbers</button>
+      <button onclick="openScienceBridge('moon')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Moon</button>
+      <button onclick="openScienceBridge('dreamspell')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Dreamspell</button>
+      <button onclick="openScienceBridge('astrology')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Astrology</button>
+    </div>
   </div>`;
 
   // Skeleton footer with privacy link
@@ -5669,6 +5884,85 @@ function fillPhase1Sections(p1) {
   }
 }
 
+// ── Compat Profile Picker ──────────────────────────────────────────
+function openCompatProfilePicker(person) {
+  var modal = document.getElementById('compatPickerModal');
+  var list  = document.getElementById('compatPickerList');
+  var title = document.getElementById('compatPickerTitle');
+  if (!modal || !list) return;
+
+  title.textContent = 'SELECT PROFILE FOR PERSON ' + person;
+  modal.style.display = 'flex';
+
+  var profiles = [];
+  try { profiles = JSON.parse(localStorage.getItem('cdp_profiles_v1') || '[]'); } catch(e) {}
+
+  // Always add "Me" from main profile
+  var me = {};
+  try { me = JSON.parse(localStorage.getItem('cdp_profile') || '{}'); } catch(e) {}
+
+  var allProfiles = [];
+  if (me.name || me.birthDay) {
+    allProfiles.push({
+      id: 'me',
+      name: me.nickname || me.name || 'You',
+      birthDay: me.birthDay, birthMonth: me.birthMonth, birthYear: me.birthYear,
+      birthTime: me.birthTime || '', birthLocation: me.birthLocation || '',
+      relationship: 'My profile'
+    });
+  }
+  allProfiles = allProfiles.concat(profiles);
+
+  if (!allProfiles.length) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text3);font-size:14px;font-style:italic">No saved profiles yet.<br><br><span style="font-size:12px">Add profiles in the Profile tab to use them here.</span></div>';
+    return;
+  }
+
+  window._compatPickerProfiles = allProfiles;
+  window._compatPickerPerson = person;
+  list.innerHTML = allProfiles.map(function(p, idx) {
+    var dob = p.birthDay && p.birthMonth && p.birthYear
+      ? p.birthDay + ' / ' + p.birthMonth + ' / ' + p.birthYear : '';
+    var rel = p.relationship ? '<span style="font-size:10px;color:var(--teal);margin-left:6px">' + p.relationship + '</span>' : '';
+    return '<div onclick="loadCompatProfileByIndex(' + idx + ')" '
+      + 'style="padding:12px 14px;border:1px solid var(--div2);border-radius:3px;margin-bottom:8px;cursor:pointer;transition:border-color .15s" '
+      + 'onmouseover="this.style.borderColor=var(--gold3)" onmouseout="this.style.borderColor=var(--div2)">'
+      + '<div style="font-family:Cormorant Garamond,serif;font-size:17px;color:var(--text);margin-bottom:3px">' + (p.name||'?') + rel + '</div>'
+      + (dob ? '<div style="font-size:11px;color:var(--text3)">' + dob + (p.birthLocation ? ' · ' + p.birthLocation : '') + '</div>' : '')
+      + '</div>';
+  }).join('');
+}
+
+function loadCompatProfileByIndex(idx) {
+  var profiles = window._compatPickerProfiles || [];
+  var person   = window._compatPickerPerson || 'B';
+  var p = profiles[idx];
+  if (!p) return;
+  loadCompatProfile(person, p);
+}
+
+function loadCompatProfile(person, p) {
+  if (typeof p === 'string') { try { p = JSON.parse(p); } catch(e) { return; } }
+  var pfx = 'c' + person + '_';
+  var setVal = function(id, val) {
+    var el = document.getElementById(id);
+    if (el && val !== undefined && val !== null) el.value = val;
+  };
+  setVal(pfx + 'name', p.name || p.nickname || '');
+  setVal(pfx + 'day',  p.birthDay);
+  setVal(pfx + 'month', p.birthMonth);
+  setVal(pfx + 'year',  p.birthYear);
+  setVal(pfx + 'time',  p.birthTime || '');
+  setVal(pfx + 'location', p.birthLocation || '');
+  if (person === 'B') setVal('cB_context', p.relationship || p.context || '');
+  document.getElementById('compatPickerModal').style.display = 'none';
+  // Visual feedback
+  var label = document.querySelector('.compat-person' + (person==='B'?'.person-b':'') + ' .compat-person-label');
+  if (label) {
+    label.innerHTML = 'Person ' + person + ' · <span style="color:var(--teal)">' + (p.name||'Profile loaded') + '</span>';
+  }
+}
+
 // ── Fill in AI sections when the Oracle completes ──────────────────
 function injectUpsellNudge(tier) {
   // Only show for lower tiers — no upsell on Oracle
@@ -5720,7 +6014,7 @@ function injectUpsellNudge(tier) {
 
 
 function injectReadingNav(tier) {
-    btn.style.cssText = "background:none;border:1px solid var(--div);color:var(--text3);font-family:'EB Garamond',serif;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:2px;cursor:pointer;transition:all .2s";
+  const synthEl = document.getElementById('ai-synthesis');
   if (!synthEl || document.getElementById('readingNavBar')) return;
 
   const sections = [
@@ -6663,7 +6957,7 @@ async function fetchInsight(question, followUpChips) {
     ? 'Today\'s Oracle synthesis: ' + currentReading.reading.synthesis.slice(0,200) + '.'
     : '';
   const moonCtx = currentReading?.moon
-    ? 'Moon: ' + currentReading.moon.phase + '. Day ' + currentReading.moon.cycle + ' of cycle.'
+    ? 'Moon: ' + currentReading.moon.phase + '. Day ' + currentReading.moon.cycle||currentReading.moon.cyc + ' of cycle.'
     : 'Moon: ' + clientMoonData.phase + '. Day ' + parseFloat(clientMoonData.cyc).toFixed(1) + ' of cycle.' + (clientMoonData.isBlack?' BLACK MOON.':clientMoonData.isShiva?' SHIVA MOON.':'');
   const kinCtx = currentReading?.kin
     ? 'Dreamspell: ' + currentReading.kin.full + (currentReading.kin.isGAP?' ★ GAP portal.':'') + '.'
@@ -6807,6 +7101,162 @@ function tapDayMonthNumber(dayMonthNum, day, month) {
   );
 }
 
+function tapMonthEnergy(monthEn, month, year) {
+  const firstName = getFirstName();
+  const nd = NUM_DATA[monthEn] || {n:'—', k:'', m:''};
+  const isMaster = [11,22,33,44].includes(monthEn);
+  openDrawer(
+    'Month ' + month + ' · Energy ' + monthEn + ' — ' + nd.n,
+    'The month of ' + month + ' in ' + year + ' carries the numerological energy of ' + monthEn + ' (' + nd.n + '). ' + (nd.m||nd.k||'') + (isMaster?' This is a Master Number month — heightened intensity and potential.':'') + ' ' + getUserContext() + ' What is the underlying theme and invitation of this month\'s ' + monthEn + ' energy for ' + firstName + '? How does it shape the background frequency of every day this month?',
+    [
+      {q: 'What does Month ' + monthEn + ' (' + nd.n + ') specifically ask ' + firstName + ' to focus on or develop this month?', l: 'Monthly focus'},
+      {q: 'How does the Month ' + month + ' energy (' + monthEn + ') interact with today\'s Universal Day for ' + firstName + '?', l: 'Month × Today'},
+      {q: 'What is the shadow or risk of ' + monthEn + ' energy this month that ' + firstName + ' should be aware of?', l: 'Shadow of ' + monthEn}
+    ]
+  );
+}
+
+function tapYearEnergy(yearEn, year) {
+  const firstName = getFirstName();
+  const nd = NUM_DATA[yearEn] || {n:'—', k:'', m:''};
+  const isMaster = [11,22,33,44].includes(yearEn);
+  openDrawer(
+    year + ' · Year Energy ' + yearEn + ' — ' + nd.n,
+    'The year ' + year + ' reduces to ' + yearEn + ' (' + nd.n + '). ' + (nd.m||nd.k||'') + (isMaster?' This is a Master Number year — a year of elevated potential and higher responsibility.':'') + ' ' + getUserContext() + ' What is the overarching theme and lesson of ' + year + ' for ' + firstName + '? How does the ' + yearEn + ' energy shape the entire arc of this year?',
+    [
+      {q: 'What is the single most important theme or lesson of the ' + yearEn + ' year (' + year + ') for ' + firstName + '?', l: 'Year\'s core theme'},
+      {q: 'How does the ' + year + ' Year Energy ' + yearEn + ' interact with ' + firstName + '\'s Personal Year?', l: 'Universal vs Personal Year'},
+      {q: 'What does ' + yearEn + ' (' + nd.n + ') specifically say about relationships and major decisions in ' + year + '?', l: 'Relationships & decisions'}
+    ]
+  );
+}
+
+// ── LANGUAGE TOGGLE BAR sync ─────────────────────────────────────────────────
+function updateLangToggleBar() {
+  var lang = 'ancient';
+  try { lang = localStorage.getItem('cdp_lang') || 'ancient'; } catch(e) {}
+  // Topbar toggle
+  var anc = document.getElementById('tbLangAncient');
+  var mod = document.getElementById('tbLangModern');
+  if (anc && mod) {
+    if (lang === 'ancient') {
+      anc.style.cssText = "font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 10px;border:1px solid var(--gold);border-radius:2px;background:var(--gold);color:#0D1E33;font-weight:700;cursor:pointer;transition:all .2s";
+      mod.style.cssText = "font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 10px;border:1px solid rgba(29,158,117,0.4);border-radius:2px;background:transparent;color:rgba(29,158,117,0.65);cursor:pointer;transition:all .2s";
+    } else {
+      mod.style.cssText = "font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 10px;border:1px solid var(--teal);border-radius:2px;background:var(--teal);color:#0D1E33;font-weight:700;cursor:pointer;transition:all .2s";
+      anc.style.cssText = "font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:5px 10px;border:1px solid rgba(201,160,80,0.4);border-radius:2px;background:transparent;color:rgba(201,160,80,0.65);cursor:pointer;transition:all .2s";
+    }
+  }
+  // Entry screen toggle
+  var ea = document.getElementById('langAncient');
+  var em = document.getElementById('langModern');
+  if (ea && em) {
+    ea.className = lang === 'ancient' ? 'active' : '';
+    em.className = lang === 'modern' ? 'active' : '';
+  }
+}
+
+// ── SCIENCE BRIDGE — threads neuroscience through every reading section ───────
+// This is the delivery mechanism for the landing page's central promise:
+// "ancient wisdom meets modern science." Every framework has a parallel scientific
+// explanation. openScienceBridge() makes that explanation available at every touchpoint.
+const SCIENCE_BRIDGES = {
+  numerology: {
+    title: 'Why Numbers Shape Your Day · The Neuroscience',
+    ancient: 'Pythagorean numerology holds that number is the fundamental substrate of reality — not metaphor, but structure. The frequency of a day is not separate from the events within it; it is their matrix. Drayer (2002) traces this lineage from Pythagoras through the Western esoteric tradition to contemporary practice.',
+    modern: 'Your brain\'s salience network (anterior insula + anterior cingulate cortex) uses predictive priors to decide what to notice. Assigning a numerical frame to a day — a single coherent "day energy" — is a form of attentional priming: you instruct your reticular activating system what to filter for. The research on implementation intentions (Gollwitzer 1999) shows that pre-framing a day\'s quality increases follow-through on goals by 2–3×. Numerology, functionally, is a daily implementation intention generator.',
+    sources: ['drayer', 'usno'],
+    links: [
+      {label: 'Drayer (2002) — Numerology: The Power in Numbers', url: 'https://www.goodreads.com/book/show/1285398.Numerology'},
+      {label: 'Gollwitzer (1999) — Implementation Intentions, American Psychologist', url: 'https://psycnet.apa.org/record/1999-01567-005'},
+      {label: 'Goodwin (1994) — The Complete Numerology Guide', url: 'https://www.worldcat.org/title/complete-numerology-guide'}
+    ]
+  },
+  moon: {
+    title: 'Why the Moon Affects You · The Science',
+    ancient: 'Every tradition — Vedic, Western, Chinese, Mayan — tracked the lunar cycle as a fundamental rhythm of life. The moon does not merely illuminate the night; it governs tides, biological cycles, and the quality of time itself. The New Moon is the void — the fertile beginning. The Full Moon is peak illumination — what cannot be hidden shows itself.',
+    modern: 'The lunar cycle\'s influence on biology is documented across multiple mechanisms. Hormonal timing: melatonin secretion is suppressed by lunar-phase-correlated light (Cajochen et al., 2013, Current Biology). Sleep architecture: polysomnographic studies show measurably reduced deep sleep at full moon regardless of light exposure. Menstrual cycle synchrony with lunar period (avg 29.5 days) is documented across multiple cultures (Helfrich-Förster et al., 2021, Science Advances). The Black Moon and Shiva Moon mark the two most hormonally volatile days — the liminal threshold before and the surge after the new moon.',
+    sources: ['usno', 'brady'],
+    links: [
+      {label: 'Cajochen et al. (2013) — Lunar Cycle Effects on Sleep, Current Biology', url: 'https://doi.org/10.1016/j.cub.2013.06.029'},
+      {label: 'Helfrich-Förster et al. (2021) — Women\'s Menstrual Cycles & Lunar Rhythm, Science Advances', url: 'https://doi.org/10.1126/sciadv.abe1358'},
+      {label: 'USNO Moon Phase Data', url: 'https://aa.usno.navy.mil/data/MoonPhases'},
+      {label: 'Brady (1999) — Predictive Astrology', url: 'https://www.goodreads.com/book/show/1048742.Predictive_Astrology'}
+    ]
+  },
+  dreamspell: {
+    title: 'Why the 260-Day Calendar Works · The Evidence',
+    ancient: 'The tzolk\'in is a 260-day sacred calendar — the most precisely documented continuous calendrical tradition on Earth. It has been kept unbroken by K\'iche\' Maya daykeepers for at least 2,500 years. The Dreamspell adaptation (Argüelles 1987) brings the 260-day count into a galactic framework, mapping 20 solar seals and 13 tones onto a cycle that mirrors human gestation, the Venus synodic period, and eclipse seasons.',
+    modern: 'The 260-day period is not arbitrary. Šprajc, Inomata & Aveni (2023, Science Advances) confirm its origins at 1100–750 BCE, demonstrating it encodes the zenithal passage of the sun at 14.8°N latitude — the latitude of major Mesoamerican ceremonial centres. The period also approximates: human gestation (266 days), Venus inferior conjunction cycle (263 days), and 3 eclipse half-years (261.75 days). Argüelles\' Dreamspell (1987) is a 20th-century modern synthesis — explicitly distinct from the ancient K\'iche\' tradition — but the 260-day mathematical structure it uses is grounded in genuine astronomical fact.',
+    sources: ['arguelles', 'sprajc'],
+    links: [
+      {label: 'Šprajc et al. (2023) — Origins of 260-Day Calendar, Science Advances', url: 'https://doi.org/10.1126/sciadv.abq7675'},
+      {label: 'Argüelles (1987) — The Mayan Factor', url: 'https://www.goodreads.com/book/show/1208048.The_Mayan_Factor'},
+      {label: 'Tortuga — Kin Verification', url: 'https://www.tortuga.com/oracle/'},
+      {label: 'NMAI Smithsonian — Maya Calendar Resource', url: 'https://americanindian.si.edu/nk360/'}
+    ]
+  },
+  astrology: {
+    title: 'Why Planetary Cycles Matter · The Evidence',
+    ancient: 'Western psychological astrology is not prediction — it is pattern recognition applied to time. The planets do not cause events; they are measurable markers of cyclical solar-system states that correlate with human experience at scale. Greene (1976) and Tarnas (2006) provide the most rigorous frameworks for understanding these cycles as developmental, not deterministic.',
+    modern: 'Tarnas (2006, Cosmos and Psyche) presents the most data-dense case: tracking Saturn-Neptune, Uranus-Pluto, and Saturn-Uranus conjunctions against documented historical turning points across 2,500 years of cultural and political history. The correlations are statistically improbable as coincidence. The mechanism is not fully understood — but solar radiation variation, geomagnetic field fluctuation correlated with planetary positions, and seasonal solar angle shifts are all measurable physical phenomena that influence human biology and behaviour. Astrology may be measuring something real via a symbolic proxy.',
+    sources: ['tarnas', 'greene', 'hand', 'swiss'],
+    links: [
+      {label: 'Tarnas (2006) — Cosmos and Psyche', url: 'https://www.goodreads.com/book/show/44452.Cosmos_and_Psyche'},
+      {label: 'Greene (1976) — Saturn: A New Look at an Old Devil', url: 'https://www.goodreads.com/book/show/433399.Saturn'},
+      {label: 'Astrodienst Swiss Ephemeris', url: 'https://www.astro.com/swisseph/'},
+      {label: 'JPL Horizons Planetary Data', url: 'https://ssd.jpl.nasa.gov/horizons/'}
+    ]
+  }
+};
+
+function openScienceBridge(topic) {
+  var bridge = SCIENCE_BRIDGES[topic];
+  if (!bridge) return;
+  var isM = localStorage.getItem('cdp_lang') === 'modern';
+  var firstName = getFirstName();
+  var explanation = isM ? bridge.modern : bridge.ancient;
+
+  // Build links HTML
+  var linksHtml = bridge.links.map(function(l) {
+    return '<a href="' + l.url + '" target="_blank" rel="noopener" style="display:block;color:var(--teal);font-size:13px;margin-bottom:6px;text-decoration:none;border-bottom:1px solid rgba(29,158,117,0.2);padding-bottom:5px">'
+      + '↗ ' + l.label + '</a>';
+  }).join('');
+
+  // Build source badges
+  var sourceBadges = bridge.sources.map(function(k) {
+    var s = CDP_SOURCES[k];
+    return s ? '<span class="citation-badge" onclick="openCitation(\'' + k + '\')" style="margin-right:6px;margin-bottom:4px">' + s.label + '</span>' : '';
+  }).join('');
+
+  var fullContent = explanation + '\n\n**Sources:**\n' + bridge.sources.map(function(k) {
+    return CDP_SOURCES[k] ? CDP_SOURCES[k].full : '';
+  }).filter(Boolean).join('\n');
+
+  // Show in drawer with sources embedded
+  var drawerTitle = bridge.title;
+  openDrawer(drawerTitle,
+    fullContent + ' ' + getUserContext() + ' How does this specific framework apply to ' + firstName + '\'s reading today?',
+    [
+      {q: 'What is the single strongest piece of evidence that ' + topic + ' tracks something real in ' + firstName + '\'s experience?', l: 'Strongest evidence'},
+      {q: 'How does the ' + (isM ? 'neuroscience' : 'traditional wisdom') + ' of this framework change what ' + firstName + ' should actually do today?', l: 'Practical implication'},
+      {q: 'What would a sceptic say about ' + topic + ', and what is the most honest response?', l: 'Sceptic\'s question'}
+    ]
+  );
+
+  // Append links panel to drawer after it opens
+  setTimeout(function() {
+    var db = document.getElementById('drawerBody');
+    if (!db) return;
+    var linksPanel = document.createElement('div');
+    linksPanel.style.cssText = 'margin-top:20px;padding-top:16px;border-top:1px solid var(--div)';
+    linksPanel.innerHTML = '<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Sources & Further Reading</div>'
+      + linksHtml
+      + '<div style="margin-top:12px">' + sourceBadges + '</div>';
+    db.appendChild(linksPanel);
+  }, 400);
+}
+
 function tapNumerology(num, name) {
   const firstName = getFirstName();
   openDrawer(`Numerology · ${num} ${name}`, `Today's Universal Day is ${num} (${name}). ${firstName}'s Personal Day is ${currentReading?.num?.pd||num}. ${getUserContext()} What does this number specifically ask of ${firstName} today? How does it interact with their Life Path ${currentReading?.num?.lp||''}?`, [
@@ -6925,7 +7375,7 @@ function openDecisionEngine() {
           resize:none;line-height:1.6;outline:none;transition:border-color .2s"
           oninput="this.style.borderColor='var(--gold3)'"></textarea>
       </div>
-      <div style="margin-bottom:20px">
+      <div style="margin-bottom:14px">
         <label style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:8px">Compare with alternative date? (optional)</label>
         <input type="date" id="deAltDate"
           style="background:var(--bg3);border:1px solid var(--div);color:var(--text3);
@@ -6972,7 +7422,7 @@ async function runDecisionEngine() {
     'TODAY: ' + TODAY,
     'Universal Day ' + (num.ud||'?') + ' (' + (NUM_DATA[num.ud]?.n||'') + ')',
     'Personal Day ' + (num.pd||'?') + ' (' + (NUM_DATA[num.pd]?.n||'') + ')',
-    'Moon: ' + (moon.phase||'?') + ' — day ' + (moon.cycle||'?') + ', ' + (moon.toNew||'?') + 'd to New Moon',
+    'Moon: ' + (moon.phase||'?') + ' — day ' + (moon.cycle||moon.cyc||'?') + ', ' + (moon.toNew||'?') + 'd to New Moon',
     moon.isBlack ? '⚠️ BLACK MOON — threshold. Avoid major launches.' : '',
     moon.isShiva ? '✨ SHIVA MOON — auspicious for new beginnings.' : '',
     'Kin: ' + (kin.full||'?') + (kin.isGAP ? ' ★ GAP Portal' : ''),
@@ -7475,10 +7925,10 @@ function clientMoon(ds){
   else if(cyc<23.5){emoji='🌗';phase='Last Quarter';}
   else{emoji='🌘';phase='Waning Crescent';}
   const toNew=cyc<0.5?0:LUNAR_C-cyc;
-  // BLACK MOON: 2 days before new moon — toNew <= 2.0 days
-  const isBlack=toNew>=0&&toNew<=2.0;
-  // SHIVA MOON: 2 days after new moon — cyc 0.5-2.5 days
-  const isShiva=cyc>=0.5&&cyc<=2.5;
+  // BLACK MOON: 2 days before new moon — toNew 0.6–2.6 days
+  const isBlack=toNew>=0.6&&toNew<=2.6;
+  // SHIVA MOON: 2 days after new moon — cyc 1.0–2.5 days
+  const isShiva=cyc>=1.0&&cyc<=2.5;
   const isNewMoon=cyc<0.5||cyc>29.0;
   const isFullMoon=cyc>=14.0&&cyc<=16.0;
   return{emoji,phase,cyc,toNew,isBlack,isShiva,isNewMoon,isFullMoon};
@@ -7726,7 +8176,18 @@ function saveDayCardPDF(ds, dLabel) {
     ${card.innerHTML.replace(/class="no-capture[^"]*"/g,'').replace(/<button[^>]*>.*?<\/button>/gs,'').replace(/onclick="[^"]*"/g,'')}
   </div>
   <div class="footer">✦ cosmicdailyplanner.com · Generated ${new Date().toLocaleDateString('en-GB')}</div>
-  </body></html>`);
+  
+<!-- COMPAT PROFILE PICKER MODAL -->
+<div id="compatPickerModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;width:min(420px,100%);max-height:80vh;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:var(--gold)" id="compatPickerTitle">SELECT PROFILE</span>
+      <button onclick="document.getElementById('compatPickerModal').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div id="compatPickerList" style="overflow-y:auto;flex:1;padding:12px 16px"></div>
+  </div>
+</div>
+</body></html>`);
   w.document.close();
 }
 
@@ -7956,20 +8417,34 @@ let currentUser = null;
 
 function initSupabase() {
   try {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    sb.auth.onAuthStateChange(async (event, session) => {
-      currentUser = session?.user || null;
-      updateAuthUI();
-      if (currentUser) {
-        const am = document.getElementById('authModal'); if (am) am.classList.remove('open');
-        await syncProfileFromSupabase();
-        await loadReadingHistoryFromSupabase();
+    // Detect if localStorage is properly available (blocked in InPrivate/Edge)
+    var _lsOk = false;
+    try { localStorage.setItem('_cdp_test','1'); localStorage.removeItem('_cdp_test'); _lsOk = true; } catch(e) {}
+    // If OAuth callback (access_token in hash), force session detection regardless of storage
+    var _hasOAuthToken = window.location.hash && window.location.hash.indexOf('access_token=') > -1;
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      auth: {
+        persistSession: _lsOk,
+        detectSessionInUrl: _hasOAuthToken || _lsOk, // always detect OAuth token
+        autoRefreshToken: _lsOk,
+        storageKey: 'cdp_auth_v1'
       }
+    });
+    sb.auth.onAuthStateChange(async (event, session) => {
+      try {
+        currentUser = session?.user || null;
+        updateAuthUI();
+        if (currentUser) {
+          const am = document.getElementById('authModal'); if (am) am.classList.remove('open');
+          await syncProfileFromSupabase().catch(()=>{});
+          await loadReadingHistoryFromSupabase().catch(()=>{});
+        }
+      } catch(e) { /* auth state change error — non-fatal */ }
     });
     sb.auth.getSession().then(({ data: { session } }) => {
       currentUser = session?.user || null;
       updateAuthUI();
-    });
+    }).catch(() => { /* session fetch failed (e.g. tracking prevention) */ });
   } catch(e) {
     console.warn('Supabase init failed:', e.message);
   }
@@ -8221,14 +8696,18 @@ async function loadReadingHistoryFromSupabase() {
 // EMAIL CAPTURE
 // ══════════════════════════════════════════════════════════
 function maybeShowEmailCapture() {
-  // Don't show if: already signed in, already captured, already dismissed
+  // Don't show if: signed in, already captured, dismissed this session, or dismissed ever
   if (currentUser) return;
   if (localStorage.getItem('cdp_email_captured')) return;
   if (localStorage.getItem('cdp_email_dismissed')) return;
-  // Show after a short delay so reading renders first
+  if (sessionStorage.getItem('cdp_ec_shown')) return; // once per browser session
+  sessionStorage.setItem('cdp_ec_shown', '1');
+  // Show after 45s — user has read and engaged, not immediately overlaying the reading
   setTimeout(() => {
-    document.getElementById('emailCaptureModal').classList.add('open');
-  }, 3500);
+    if (!currentUser && !localStorage.getItem('cdp_email_captured')) {
+      document.getElementById('emailCaptureModal').classList.add('open');
+    }
+  }, 45000);
 }
 
 function dismissEmailCapture() {
@@ -8442,7 +8921,7 @@ ${bodyHTML}
       </div>
 
       <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--teal);margin-bottom:8px">READING LANGUAGE</div>
-      <p style="margin-bottom:24px">On the entry screen, choose <em>Ancient</em> for the traditional cosmic language of archetypes and energetic fields, or <em>Modern</em> for the same insights translated into neuroscience: salience networks, circadian rhythms, interoception and neuroplasticity.</p>
+      <p style="margin-bottom:24px">On the entry screen, choose <em>Tradition</em> for the traditional cosmic language of archetypes and energetic fields, or <em>Science</em> for the same insights translated into neuroscience: salience networks, circadian rhythms, interoception and neuroplasticity.</p>
 
       <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--teal);margin-bottom:8px">PROFILES</div>
       <p style="margin-bottom:24px">Use the Profiles button (☿ in the top bar) to save multiple people — family, friends, colleagues. Select a profile before a reading to receive it for that person. Use Compatibility to read two profiles together.</p>
@@ -8671,6 +9150,17 @@ window.addEventListener('load', function() {
   updateProfileIndicator();
 });
 <\/script>
+
+<!-- COMPAT PROFILE PICKER MODAL -->
+<div id="compatPickerModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;width:min(420px,100%);max-height:80vh;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:var(--gold)" id="compatPickerTitle">SELECT PROFILE</span>
+      <button onclick="document.getElementById('compatPickerModal').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div id="compatPickerList" style="overflow-y:auto;flex:1;padding:12px 16px"></div>
+  </div>
+</div>
 </body>
 </html>`);
   w.document.close();
@@ -9426,7 +9916,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   initSupabase();
   loadProfileUI();
   renderCalendar();
-  if (!checkResumeJob()) {
+  // Read mode from URL — if landing page sent us here with ?mode=xxx, start immediately
+  const _urlMode = new URLSearchParams(window.location.search).get('mode');
+  const _modeMap = { quick:'quick', free:'free', standard:'standard', mystic:'mystic', deep:'deep' };
+  if (_urlMode && _modeMap[_urlMode]) {
+    selectMode(_modeMap[_urlMode]);
+    startWithMode(true); // skip selector, go straight to reading
+  } else if (!checkResumeJob()) {
     showModeSelector();
   }
 });
@@ -9451,160 +9947,99 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </div>
 
 <!-- ══ INVITE GATE ══ -->
-<div id="cdp-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#07111a 0%,#0d1b2a 60%,#0a1218 100%);overflow-y:auto">
-  <div style="width:100%;max-width:480px;margin:auto">
+<div id="cdp-gate" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px;background:rgba(8,16,26,0.96);backdrop-filter:blur(8px)">
+  <div style="width:100%;max-width:460px;margin:auto;position:relative">
 
-    <!-- Step 0: Overview (shown first) -->
-    <div id="g-overview" style="background:rgba(13,27,42,0.95);border:1px solid rgba(201,160,80,0.22);border-radius:6px;padding:40px 36px 36px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.55)">
-      <div style="font-size:36px;margin-bottom:16px;filter:drop-shadow(0 0 14px rgba(201,160,80,0.3))">✦</div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:#e8c97a;letter-spacing:.06em;margin-bottom:5px">Cosmic Daily Planner</div>
-      <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(240,237,230,0.45);margin-bottom:28px">Your personalised daily Oracle</div>
-      <div style="width:44px;height:1px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:0 auto 28px"></div>
-
-      <div style="font-size:16px;color:rgba(240,237,230,0.75);line-height:1.85;margin-bottom:28px;text-align:left">
-        Every morning, the Oracle synthesises four precise frameworks into a single, deeply personal reading — written for where you actually are in your life, not a generic horoscope.
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;text-align:left">
-        <div style="background:rgba(201,160,80,0.06);border:1px solid rgba(201,160,80,0.14);border-radius:3px;padding:14px">
-          <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#c9a84c;margin-bottom:5px">Astronomy</div>
-          <div style="font-size:14px;color:rgba(240,237,230,0.65);line-height:1.55">Swiss Ephemeris planetary positions — verified to the degree</div>
-        </div>
-        <div style="background:rgba(129,205,182,0.05);border:1px solid rgba(129,205,182,0.14);border-radius:3px;padding:14px">
-          <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#81CDB6;margin-bottom:5px">Numerology</div>
-          <div style="font-size:14px;color:rgba(240,237,230,0.65);line-height:1.55">Pythagorean Life Path, Personal Day, three energies of your day</div>
-        </div>
-        <div style="background:rgba(200,160,255,0.05);border:1px solid rgba(200,160,255,0.14);border-radius:3px;padding:14px">
-          <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#C8A0FF;margin-bottom:5px">Dreamspell</div>
-          <div style="font-size:14px;color:rgba(240,237,230,0.65);line-height:1.55">Daily Kin, tone, Galactic Activation Portals — Law of Time</div>
-        </div>
-        <div style="background:rgba(201,160,80,0.04);border:1px solid rgba(201,160,80,0.12);border-radius:3px;padding:14px">
-          <div style="font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#c9a84c;margin-bottom:5px">Lunar</div>
-          <div style="font-size:14px;color:rgba(240,237,230,0.65);line-height:1.55">Moon phase, cycle position, Black Moon and Shiva days</div>
-        </div>
-      </div>
-
-      <div style="font-size:15px;color:rgba(240,237,230,0.6);margin-bottom:6px;font-style:italic;line-height:1.7">
-        The Oracle speaks to your actual life — your projects, relationships, and decisions — not the life of a generic Scorpio.
-      </div>
-      <div style="font-size:13px;color:rgba(240,237,230,0.35);margin-bottom:28px">Also: Compatibility readings · Ask the Oracle anything · Week ahead · Daily card</div>
-
-      <!-- Primary CTA: Join waitlist -->
-      <button onclick="document.getElementById('g-overview').style.display='none';document.getElementById('g-waitlist').style.display='block'"
-        style="width:100%;padding:15px;background:linear-gradient(135deg,rgba(201,160,80,.22),rgba(42,127,122,.22));border:1px solid #c9a84c;border-radius:3px;color:#e8c97a;font-family:'EB Garamond',serif;font-size:14px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-bottom:10px">
-        ✦ Request Early Access
+    <!-- Skip link — top right, always visible -->
+    <div style="text-align:right;margin-bottom:12px">
+      <button onclick="gateSkip()" style="background:none;border:none;color:rgba(240,237,230,0.3);font-size:12px;cursor:pointer;letter-spacing:.08em;font-family:'Cinzel',serif;padding:4px 8px" onmouseover="this.style.color='rgba(240,237,230,0.6)'" onmouseout="this.style.color='rgba(240,237,230,0.3)'">
+        skip for now →
       </button>
-
-      <!-- Secondary CTA: have a code -->
-      <button onclick="document.getElementById('g-overview').style.display='none';document.getElementById('g-card').style.display='block'"
-        style="width:100%;padding:11px;background:transparent;border:1px solid rgba(201,160,80,0.25);border-radius:3px;color:rgba(240,237,230,0.5);font-family:'EB Garamond',serif;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;margin-bottom:16px">
-        I already have an invitation code →
-      </button>
-
-      <div style="font-size:11px;color:rgba(240,237,230,0.25);line-height:1.6">Private Beta · cosmicdailyplanner.com</div>
     </div>
 
-    <!-- Waitlist panel -->
-    <div id="g-waitlist" style="display:none;background:rgba(13,27,42,0.95);border:1px solid rgba(201,160,80,0.25);border-radius:6px;padding:44px 36px 36px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.55)">
-      <div id="g-waitlist-form">
-        <div style="font-size:32px;margin-bottom:16px">✦</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:#e8c97a;margin-bottom:8px">Join the Beta</div>
-        <div style="font-size:14px;color:rgba(240,237,230,0.55);line-height:1.75;margin-bottom:28px">
-          We are opening access now. Enter your name and email and your invitation code will arrive within minutes.
-        </div>
-        <div style="text-align:left;margin-bottom:12px">
-          <label style="display:block;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#c9a84c;opacity:.75;margin-bottom:7px">Your name</label>
-          <input id="wl-name" type="text" placeholder="First name" autocomplete="given-name"
-            style="width:100%;padding:12px 14px;background:rgba(10,18,28,.85);border:1px solid rgba(201,160,80,0.2);border-radius:3px;color:#f0ede6;font-family:'EB Garamond',serif;font-size:15px;outline:none;margin-bottom:10px">
-          <label style="display:block;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#c9a84c;opacity:.75;margin-bottom:7px">Email address</label>
-          <input id="wl-email" type="email" placeholder="your@email.com" autocomplete="email"
-            onkeydown="if(event.key==='Enter')submitWaitlist()"
-            style="width:100%;padding:12px 14px;background:rgba(10,18,28,.85);border:1px solid rgba(201,160,80,0.2);border-radius:3px;color:#f0ede6;font-family:'EB Garamond',serif;font-size:15px;outline:none">
-        </div>
-        <button id="wl-btn" onclick="submitWaitlist()"
-          style="width:100%;padding:13px;background:linear-gradient(135deg,rgba(201,160,80,.2),rgba(42,127,122,.2));border:1px solid #c9a84c;border-radius:3px;color:#e8c97a;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-bottom:10px">
-          Send Me My Invitation ✦
-        </button>
-        <div id="wl-msg" style="font-size:12px;min-height:16px;color:#e07070;margin-bottom:10px"></div>
-        <span onclick="document.getElementById('g-waitlist').style.display='none';document.getElementById('g-overview').style.display='block'"
-          style="font-size:11px;color:rgba(240,237,230,0.3);cursor:pointer;text-decoration:underline;text-underline-offset:3px">← Back</span>
-        <div style="margin-top:20px;padding-top:14px;border-top:1px solid rgba(201,160,80,0.1);font-size:8px;letter-spacing:.08em;color:rgba(240,237,230,0.25);line-height:1.7">
-          Your email is used only to send your invitation. No spam, ever.<br>
-          <a href="/privacy.html" target="_blank" style="color:rgba(240,237,230,0.25);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
-        </div>
-      </div>
-      <div id="g-waitlist-success" style="display:none;text-align:center">
-        <div style="font-size:48px;margin-bottom:16px">✦</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#e8c97a;margin-bottom:12px">You are on the list</div>
-        <div style="font-size:14px;color:rgba(240,237,230,0.55);line-height:1.75;margin-bottom:20px">
-          Your invitation code is <strong style="color:#e8c97a;letter-spacing:.1em">COSMIC2026</strong><br>
-          We have also sent it to your email.
-        </div>
-        <button onclick="document.getElementById('g-waitlist').style.display='none';document.getElementById('g-card').style.display='block';document.getElementById('g-input').value='COSMIC2026'"
-          style="width:100%;padding:13px;background:linear-gradient(135deg,rgba(201,160,80,.2),rgba(42,127,122,.2));border:1px solid #c9a84c;border-radius:3px;color:#e8c97a;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">
-          Enter the Oracle Now →
-        </button>
-      </div>
-    </div>
+    <!-- Main card -->
+    <div style="background:rgba(13,22,36,0.98);border:1px solid rgba(201,160,80,0.25);border-radius:6px;padding:28px 24px">
 
-    <!-- Step 1: Invite code (hidden initially) -->
-    <div id="g-card" style="display:none;background:rgba(13,27,42,0.95);border:1px solid rgba(201,160,80,0.25);border-radius:6px;padding:44px 36px 36px;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.55)">
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.35em;color:rgba(201,160,80,0.6);margin-bottom:14px;text-transform:uppercase">Cosmic Daily Planner</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:#e8e4da;font-weight:300;line-height:1.3;margin-bottom:10px">Welcome to the Beta</div>
+        <div style="font-size:13px;color:rgba(240,237,230,0.45);line-height:1.65;max-width:340px;margin:0 auto">Swiss Ephemeris astronomy · Pythagorean numerology · Dreamspell · Lunar cycles — synthesised into one deeply personal daily reading.</div>
+      </div>
+
+      <!-- Beta notice -->
+      <div style="background:rgba(201,160,80,0.07);border:1px solid rgba(201,160,80,0.18);border-radius:3px;padding:8px 12px;margin-bottom:16px;font-size:11px;color:rgba(240,237,230,0.5);line-height:1.6">
+        🔬 <strong style="color:rgba(201,160,80,0.7)">Beta version</strong> — you may encounter rough edges. Your feedback shapes the final product.
+      </div>
+
+      <!-- Form -->
       <div id="g-form">
-        <div style="font-size:38px;margin-bottom:18px;filter:drop-shadow(0 0 14px rgba(201,160,80,0.3))">✦</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;color:#e8c97a;letter-spacing:.06em;margin-bottom:5px">Cosmic Daily Planner</div>
-        <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,237,230,0.45);margin-bottom:28px">Private Beta · By Invitation</div>
-        <div style="width:44px;height:1px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:0 auto 24px"></div>
-        <label style="display:block;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#c9a84c;opacity:.75;margin-bottom:9px;text-align:left">Enter your invitation code</label>
-        <input id="g-input" type="text" placeholder="e.g. COSMIC2026" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false"
-          style="width:100%;padding:13px 16px;background:rgba(10,18,28,.85);border:1px solid rgba(201,160,80,0.25);border-radius:3px;color:#f0ede6;font-family:'EB Garamond',serif;font-size:16px;letter-spacing:.14em;text-align:center;text-transform:uppercase;outline:none;margin-bottom:12px">
-        <button id="g-btn" onclick="gateCheck()" style="width:100%;padding:13px;background:linear-gradient(135deg,rgba(201,160,80,.18),rgba(42,127,122,.18));border:1px solid #c9a84c;border-radius:3px;color:#e8c97a;font-family:'EB Garamond',serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer">Enter the Oracle</button>
-        <div id="g-msg" style="margin-top:13px;font-size:11px;min-height:16px;color:#e07070;line-height:1.5"></div>
-        <div style="margin-top:16px">
-          <span onclick="document.getElementById('g-overview').style.display='block';document.getElementById('g-card').style.display='none'"
-            style="font-size:11px;color:rgba(240,237,230,0.35);cursor:pointer;text-decoration:underline;text-underline-offset:3px">← What is Cosmic Daily Planner?</span>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,0.35);display:block;margin-bottom:5px">Your name <span style="opacity:.5;font-size:9px;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="g-name" type="text" placeholder="What shall the Oracle call you?" maxlength="60" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(240,237,230,0.12);border-radius:3px;padding:10px 14px;color:#e8e4da;font-family:'EB Garamond',serif;font-size:15px;box-sizing:border-box;outline:none" onfocus="this.style.borderColor='rgba(201,160,80,0.4)'" onblur="this.style.borderColor='rgba(240,237,230,0.12)'">
         </div>
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(201,160,80,0.1);font-size:8px;letter-spacing:.08em;color:rgba(240,237,230,0.32);line-height:1.7">
-          Cosmic Daily Planner · Private Beta 2026<br>cosmicdailyplanner.com
-          <br><a href="/privacy.html" target="_blank" style="color:rgba(240,237,230,0.32);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,0.35);display:block;margin-bottom:5px">Email <span style="opacity:.5;font-size:9px;text-transform:none;letter-spacing:0">(optional — for updates)</span></label>
+          <input id="g-email" type="email" placeholder="your@email.com" maxlength="120" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(240,237,230,0.12);border-radius:3px;padding:10px 14px;color:#e8e4da;font-family:'EB Garamond',serif;font-size:15px;box-sizing:border-box;outline:none" onfocus="this.style.borderColor='rgba(201,160,80,0.4)'" onblur="this.style.borderColor='rgba(240,237,230,0.12)'">
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(240,237,230,0.35);display:block;margin-bottom:5px">Invitation code <span style="opacity:.5;font-size:9px;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="g-code" type="text" placeholder="e.g. COSMIC2026" maxlength="24" autocapitalize="characters" style="width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(240,237,230,0.12);border-radius:3px;padding:10px 14px;color:#e8e4da;font-family:'Cinzel',serif;font-size:13px;letter-spacing:.15em;box-sizing:border-box;outline:none" onfocus="this.style.borderColor='rgba(201,160,80,0.4)'" onblur="this.style.borderColor='rgba(240,237,230,0.12)'">
+        </div>
+
+        <!-- Consent checkboxes -->
+        <div style="margin-bottom:14px">
+          <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin-bottom:10px">
+            <input id="g-beta-consent" type="checkbox" checked style="margin-top:3px;accent-color:#C9A050;flex-shrink:0">
+            <span style="font-size:12px;color:rgba(240,237,230,0.45);line-height:1.55">I understand this is a beta and may have rough edges. I'm happy to help shape it.</span>
+          </label>
+          <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+            <input id="g-updates" type="checkbox" checked style="margin-top:3px;accent-color:#C9A050;flex-shrink:0">
+            <span style="font-size:12px;color:rgba(240,237,230,0.45);line-height:1.55">Notify me when new features ship — no spam, just meaningful updates.</span>
+          </label>
+        </div>
+
+        <div id="g-msg" style="font-size:12px;color:#e07070;margin-bottom:10px;min-height:16px"></div>
+
+        <button onclick="gateEnter()" id="g-btn" style="width:100%;background:rgba(201,160,80,0.9);border:none;color:#0d1520;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.18em;padding:13px;border-radius:3px;cursor:pointer;text-transform:uppercase;transition:background .2s" onmouseover="this.style.background='rgba(201,160,80,1)'" onmouseout="this.style.background='rgba(201,160,80,0.9)'">
+          Begin My Reading ✦
+        </button>
+
+        <div style="text-align:center;margin-top:14px">
+          <button onclick="gateSkip()" style="background:none;border:none;color:rgba(240,237,230,0.25);font-size:11px;cursor:pointer;font-family:'EB Garamond',serif;text-decoration:underline;text-underline-offset:3px" onmouseover="this.style.color='rgba(240,237,230,0.5)'" onmouseout="this.style.color='rgba(240,237,230,0.25)'">
+            I'd rather skip for now
+          </button>
         </div>
       </div>
-      <div id="g-success" style="display:none;text-align:center">
-        <div style="font-size:48px;margin-bottom:16px">🌀</div>
+
+      <!-- Success state -->
+      <div id="g-success" style="display:none;text-align:center;padding:20px 0">
+        <div style="font-size:44px;margin-bottom:16px">🌀</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:#e8c97a;margin-bottom:8px">Welcome, Seeker</div>
-        <div style="font-size:13px;color:rgba(240,237,230,0.5);line-height:1.7">Your invitation is accepted.<br>The oracle is opening…</div>
+        <div style="font-size:13px;color:rgba(240,237,230,0.5);line-height:1.7">Your reading is opening…</div>
       </div>
+
+    </div>
+
+    <!-- Privacy link -->
+    <div style="text-align:center;margin-top:12px">
+      <a href="/privacy.html" target="_blank" style="font-size:10px;color:rgba(240,237,230,0.2);text-decoration:underline;text-underline-offset:2px">Privacy Policy</a>
     </div>
 
   </div>
 </div>
+</div>
 
 <script>
-// ══ INVITE GATE ══ Change INVITE_CODE to update. Redeploy to activate.
+// ══ INVITE GATE v2 — frictionless with optional email collection ══
 (function(){
-  var INVITE_CODE = 'COSMIC2026';
-  var KEY = 'cdp_gate_v1';
-  var LOCK_KEY = 'cdp_gate_lock';
-  var ATT_KEY = 'cdp_gate_v1_att';
-  var MAX = 99;
-  var LOCK_MIN = 60;
+  var KEY = 'cdp_gate_v2';
 
   function admitted() {
-    return true; // CDP v8 — gate removed, landing page is the gateway
+    return true; // Gate removed — landing page (index.html) is the gateway
   }
-  function locked() {
-    try {
-      var d = JSON.parse(localStorage.getItem(LOCK_KEY)||'{}');
-      if (d.until && Date.now() < d.until) return true;
-      if (d.until) localStorage.removeItem(LOCK_KEY);
-      return false;
-    } catch(e) { return false; }
-  }
-  function getAttempts() { try { return parseInt(localStorage.getItem(ATT_KEY)||'0',10); } catch(e) { return 0; } }
-  function addAttempt() {
-    var n = getAttempts()+1;
-    localStorage.setItem(ATT_KEY, String(n));
-    if (n >= MAX) localStorage.setItem(LOCK_KEY, JSON.stringify({until: Date.now()+LOCK_MIN*60000}));
-    return n;
+  function setAdmitted() {
+    try { localStorage.setItem(KEY, '1'); } catch(e) {}
   }
   function admit(anim) {
     var g = document.getElementById('cdp-gate');
@@ -9612,399 +10047,84 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (anim) {
       g.style.transition = 'opacity 0.5s ease';
       g.style.opacity = '0';
-      setTimeout(function(){ g.style.display='none'; }, 520);
+      setTimeout(function(){ g.style.display = 'none'; }, 520);
     } else {
       g.style.display = 'none';
     }
   }
 
-  window.gateCheck = function() {
-    if (admitted()) { admit(true); return; }
-    var inp = document.getElementById('g-input');
-    var btn = document.getElementById('g-btn');
-    var msg = document.getElementById('g-msg');
-    if (!inp || !btn || !msg) return;
-    var val = (inp.value||'').trim().toUpperCase();
-    msg.style.color = '#e07070'; msg.textContent = '';
-    if (!val) { msg.textContent = 'Please enter your invitation code.'; return; }
-    if (locked()) { msg.textContent = 'Too many attempts. Please wait '+LOCK_MIN+' minutes.'; return; }
-    btn.disabled = true;
-    btn.textContent = 'Consulting the oracle…';
-    setTimeout(function() {
-      if (val === INVITE_CODE) {
-        localStorage.setItem(KEY, JSON.stringify({ok:true, code:INVITE_CODE, ts:Date.now()}));
-        localStorage.removeItem(ATT_KEY);
-        localStorage.removeItem(LOCK_KEY);
-        document.getElementById('g-form').style.display = 'none';
-        document.getElementById('g-success').style.display = 'block';
-        setTimeout(function(){ admit(true); }, 1600);
-      } else {
-        var n = addAttempt();
-        var left = MAX - n;
-        btn.disabled = false; btn.textContent = 'Enter the Oracle';
-        inp.style.borderColor = '#e07070';
-        setTimeout(function(){ inp.style.borderColor = 'rgba(201,160,80,0.25)'; }, 600);
-        if (left <= 0) msg.textContent = 'Too many attempts. Please wait '+LOCK_MIN+' minutes.';
-        else if (left === 1) msg.textContent = 'Incorrect code. One attempt remaining.';
-        else msg.textContent = 'Code not recognised. '+left+' attempts remaining.';
-      }
-    }, 700);
+  window.gateSkip = function() {
+    try { setAdmitted(); } catch(e) {}
+    try { admit(true); } catch(e) {
+      var g = document.getElementById('cdp-gate');
+      if (g) g.style.display = 'none';
+    }
   };
 
+  window.gateEnter = function() {
+    // Collect values
+    var name  = (document.getElementById('g-name')  ? document.getElementById('g-name').value  : '').trim();
+    var email = (document.getElementById('g-email') ? document.getElementById('g-email').value : '').trim();
+    var code  = (document.getElementById('g-code')  ? document.getElementById('g-code').value  : '').trim().toUpperCase();
+    var wantsUpdates  = document.getElementById('g-updates')      ? document.getElementById('g-updates').checked      : true;
+    var betaConsent   = document.getElementById('g-beta-consent') ? document.getElementById('g-beta-consent').checked : true;
+    var btn = document.getElementById('g-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
+
+    // Save to profile if name given
+    if (name) {
+      try {
+        var p = JSON.parse(localStorage.getItem('cdp_profile') || '{}');
+        if (!p.name) { p.name = name; localStorage.setItem('cdp_profile', JSON.stringify(p)); }
+      } catch(e) {}
+    }
+
+    // OPEN IMMEDIATELY — no waiting for network
+    setAdmitted();
+    var form = document.getElementById('g-form');
+    var succ = document.getElementById('g-success');
+    if (form) form.style.display = 'none';
+    if (succ) succ.style.display = 'block';
+    setTimeout(function(){ admit(true); }, 1200);
+
+    // Fire-and-forget Supabase save — runs in background after gate opens
+    if (email) {
+      setTimeout(function() {
+        try {
+          if (typeof sb !== 'undefined' && sb && sb.from) {
+            sb.from('waitlist').upsert({
+              email: email,
+              name: name || null,
+              invite_code: code || null,
+              wants_updates: wantsUpdates,
+              beta_consent: betaConsent,
+              source: 'gate-v2',
+              created_at: new Date().toISOString()
+            }, { onConflict: 'email' }).then(function(){
+              console.log('Gate: user saved');
+            }).catch(function(e){
+              console.warn('Gate save (bg):', e.message);
+            });
+          }
+        } catch(e) { console.warn('Gate save error:', e.message); }
+      }, 100);
+    }
+  };
+
+  // Show gate to new visitors; skip if already admitted OR arriving from landing page
   document.addEventListener('DOMContentLoaded', function() {
-    if (admitted()) { admit(false); return; }
-    var inp = document.getElementById('g-input');
-    if (!inp) return;
-    inp.addEventListener('keydown', function(e) { if (e.key==='Enter') window.gateCheck(); });
-    inp.addEventListener('input', function(e) {
-      var v = e.target.value, u = v.toUpperCase();
-      if (v !== u) { var p = e.target.selectionStart; e.target.value = u; e.target.setSelectionRange(p,p); }
-      var m = document.getElementById('g-msg'); if (m) m.textContent = '';
-      e.target.style.borderColor = 'rgba(201,160,80,0.25)';
+    var urlHasMode = window.location.search.includes('mode=') || window.location.search.includes('mode=');
+    if (admitted() || urlHasMode) {
+      if (urlHasMode) setAdmitted(); // mark as admitted so future visits skip too
+      admit(false);
+    }
+    // Enter on Cmd/Ctrl+Enter
+    document.addEventListener('keydown', function(e) {
+      if ((e.key === 'Enter') && !document.getElementById('cdp-gate').style.display) {
+        gateEnter();
+      }
     });
   });
-
-  window.submitWaitlist = async function() {
-    var nameEl = document.getElementById('wl-name');
-    var emailEl = document.getElementById('wl-email');
-    var btn = document.getElementById('wl-btn');
-    var msg = document.getElementById('wl-msg');
-    var name = (nameEl ? nameEl.value.trim() : '');
-    var email = (emailEl ? emailEl.value.trim() : '');
-    if (!email || !email.includes('@')) {
-      if (msg) { msg.style.color='#e07070'; msg.textContent = 'Please enter a valid email address.'; }
-      return;
-    }
-    if (btn) { btn.disabled = true; btn.textContent = 'Sending your invitation…'; }
-    if (msg) msg.textContent = '';
-    try {
-      // Save to Supabase waitlist table
-      var SUPABASE_URL = 'https://rbezcpwevlycslhnbtry.supabase.co';
-      var SUPABASE_KEY = 'sb_publishable_tA2czthtFFN61dJpVuYeOA_v9NGONwO';
-      var res = await fetch(SUPABASE_URL + '/rest/v1/waitlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({
-          email: email,
-          source: 'gate-waitlist',
-          invite_code: 'COSMIC2026',
-          name: name || null
-        })
-      });
-      // Send magic link with welcome message via Supabase Auth
-      if (window.supabase) {
-        var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        await client.auth.signInWithOtp({
-          email: email,
-          options: {
-            emailRedirectTo: 'https://cosmicdailyplanner.com',
-            data: { invite_code: 'COSMIC2026', name: name }
-          }
-        });
-      }
-      // Show success
-      var form = document.getElementById('g-waitlist-form');
-      var success = document.getElementById('g-waitlist-success');
-      if (form) form.style.display = 'none';
-      if (success) success.style.display = 'block';
-    } catch(e) {
-      // Even if Supabase fails, show success and give them the code
-      var form = document.getElementById('g-waitlist-form');
-      var success = document.getElementById('g-waitlist-success');
-      if (form) form.style.display = 'none';
-      if (success) success.style.display = 'block';
-    }
-  };
-})();
-
-function printMyEnergy() {
-  const el = document.getElementById('sctxContent');
-  if (!el) return;
-  const printWin = window.open('', '_blank', 'width=900,height=700');
-  if (!printWin) { window.print(); return; }
-  printWin.document.write('<!DOCTYPE html><html><head><title>My Cosmic Energy</title>');
-  printWin.document.write('<style>body{font-family:Georgia,serif;color:#111;background:#fff;padding:36px 48px;max-width:800px;margin:0 auto;font-size:15px;line-height:1.7}');
-  printWin.document.write('h1,h2{font-family:Georgia,serif;color:#333}');
-  printWin.document.write('.ctx-section{margin-bottom:28px;page-break-inside:avoid}');
-  printWin.document.write('.ctx-section-label{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#999;margin-bottom:6px}');
-  printWin.document.write('.ctx-section-title{font-size:20px;margin-bottom:10px;color:#222}');
-  printWin.document.write('@media print{button,.tap-cta{display:none!important}}');
-  printWin.document.write('</style></head><body>');
-  const clone = el.cloneNode(true);
-  clone.querySelectorAll('button,.tap-cta,.tier-upgrade-btn,[onclick]').forEach(b => { b.removeAttribute('onclick'); b.style.cursor='default'; });
-  clone.querySelectorAll('button,.tap-cta,.tier-upgrade-btn').forEach(b => b.remove());
-  printWin.document.write('<h2 style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#999;margin-bottom:4px">Cosmic Daily Planner</h2>');
-  printWin.document.write('<h1 style="font-size:28px;margin-bottom:4px">My Cosmic Energy Profile</h1>');
-  printWin.document.write('<p style="color:#999;font-size:13px;margin-bottom:32px;border-bottom:1px solid #eee;padding-bottom:16px">cosmicdailyplanner.com</p>');
-  printWin.document.write(clone.innerHTML);
-  printWin.document.write('</body></html>');
-  printWin.document.close();
-  setTimeout(() => printWin.print(), 600);
-}
-
-
-// ── Card element click handlers (data-attribute approach) ──
-document.addEventListener('click', function(e) {
-  const reflectEl = e.target.closest('#cardReflectEl');
-  if (reflectEl) {
-    const mode = reflectEl.dataset.mode || 'day';
-    const timeLabel = mode === 'morning' ? 'MORNING REFLECTION' : mode === 'afternoon' ? 'AFTERNOON REFLECTION' : 'EVENING REFLECTION';
-    const text = reflectEl.childNodes[0]?.textContent?.trim() || '';
-    openDrawer(timeLabel,
-      text + ' ' + getUserContext() + ' What does this ' + mode + ' energy specifically ask of ' + (getFirstName()||'you') + ' today?',
-      [{q:'What should I focus on in the next 2 hours?',l:'Next 2 hours'},
-       {q:'What should I avoid this ' + mode + '?',l:'What to avoid'}]);
-    return;
-  }
-  const numEl = e.target.closest('#cardNumEl');
-  if (numEl) {
-    const num = numEl.dataset.num || '';
-    const name = numEl.dataset.name || '';
-    const label = numEl.dataset.label || 'Numerology';
-    openDrawer(label + ' · ' + name,
-      label + ' ' + num + ': ' + name + '. ' + getUserContext() + ' How does this number energy shape decisions and timing today?',
-      [{q:'What is the gift of ' + num + ' energy today?',l:'The gift'},
-       {q:'What is the shadow of ' + num + ' to watch for?',l:'The shadow'}]);
-  }
-});
-
-
-
-// ── CDP v8 — Entry screen + tier switcher ────────────────────────────────
-
-var cdpEntryMode = 'quick'; // default
-var cdpLang = localStorage.getItem('cdp_lang') || 'ancient';
-
-var TIER_DEFS = [
-  {mode:'free',    icon:'✦', name:'Daily Snapshot', badge:'FREE',          price:'£0',      time:'Instant', tc:'#A0AEC0'},
-  {mode:'quick',   icon:'⚡', name:'Full Reading',   badge:'SEEKER · £9/MO', price:'£9/mo',  time:'~15s',    tc:'#F97316'},
-  {mode:'standard',icon:'☽', name:'Monthly Arc',    badge:'INITIATE · £29/MO',price:'£29/mo',time:'2–4 min', tc:'#2BBF8D'},
-  {mode:'mystic',  icon:'◉', name:'Yearly Reading', badge:'MYSTIC · £79/MO', price:'£79/mo', time:'3–5 min', tc:'#9B6DFF'},
-  {mode:'deep',    icon:'◈', name:'Oracle Deep Dive',badge:'ORACLE',         price:'£50k/yr', time:'5–10 min',tc:'#C9A84C'},
-];
-
-function showEntryScreen(mode) {
-  cdpEntryMode = mode || cdpEntryMode;
-  // Suppress old mode selector
-  document.getElementById('modeSelector').style.display = 'none';
-  // Update badge
-  var t = TIER_DEFS.find(function(x){return x.mode===cdpEntryMode;}) || TIER_DEFS[1];
-  document.getElementById('entryTierBadge').style.color = t.tc;
-  document.getElementById('entryTierBadge').style.borderColor = t.tc;
-  document.getElementById('entryTierBadge').textContent = t.icon + ' ' + t.name + ' · ' + t.badge;
-  // Build tier picker
-  var list = document.getElementById('entryTierList');
-  list.innerHTML = '';
-  TIER_DEFS.forEach(function(td){
-    var div = document.createElement('div');
-    div.className = 'entry-tier-opt' + (td.mode===cdpEntryMode?' sel':'');
-    div.style.cssText = '--tc:'+td.tc;
-    div.setAttribute('data-mode', td.mode);
-    div.onclick = function(){ selectEntryTier(td.mode); };
-    div.innerHTML = '<span class="eto-icon" style="color:'+td.tc+'">'+td.icon+'</span>'
-      +'<span class="eto-name">'+td.name+'</span>'
-      +'<span class="eto-badge">'+td.badge+'</span>'
-      +'<span class="eto-time">'+td.time+'</span>';
-    list.appendChild(div);
-  });
-  // Restore saved name/dob
-  var savedName = localStorage.getItem('cdp_name') || '';
-  var savedDob  = localStorage.getItem('cdp_dob')  || '';
-  if (savedName) document.getElementById('entryName').value = savedName;
-  if (savedDob) {
-    var dobParts = savedDob.split('/');
-    if (dobParts.length === 3) {
-      var dayEl = document.getElementById('entryDay');
-      var monEl = document.getElementById('entryMonth');
-      var yrEl  = document.getElementById('entryYear');
-      if (dayEl) dayEl.value = parseInt(dobParts[0],10);
-      if (monEl) monEl.value = parseInt(dobParts[1],10);
-      if (yrEl)  yrEl.value  = parseInt(dobParts[2],10);
-    }
-    var hint = document.getElementById('entryDobHint');
-    if (hint) hint.style.display = 'none';
-  }
-  // Restore birth time
-  var savedBH = localStorage.getItem('cdp_bh') || '';
-  var savedBM = localStorage.getItem('cdp_bmin') || '';
-  if (savedBH) { var bh = document.getElementById('entryBirthHour'); if(bh) bh.value = savedBH; }
-  if (savedBM) { var bm = document.getElementById('entryBirthMin');  if(bm) bm.value = savedBM; }
-  // Restore locations
-  var savedBP = localStorage.getItem('cdp_birth_place') || '';
-  var savedLoc = localStorage.getItem('cdp_location') || '';
-  if (savedBP) { var bp = document.getElementById('entryBirthPlace'); if(bp) bp.value = savedBP; }
-  if (savedLoc){ var lc = document.getElementById('entryLocation');   if(lc) lc.value = savedLoc; }
-  // Set language toggle
-  setLang(cdpLang, true);
-  // Show entry screen
-  var el = document.getElementById('cdpEntry');
-  el.style.display = 'flex';
-  setTimeout(function(){ el.classList.add('visible'); }, 30);
-}
-
-function selectEntryTier(mode) {
-  cdpEntryMode = mode;
-  document.querySelectorAll('.entry-tier-opt').forEach(function(el){
-    el.classList.toggle('sel', el.onclick.toString().indexOf("'"+mode+"'") > -1);
-  });
-  var t = TIER_DEFS.find(function(x){return x.mode===mode;}) || TIER_DEFS[1];
-  document.getElementById('entryTierBadge').style.color = t.tc;
-  document.getElementById('entryTierBadge').style.borderColor = t.tc;
-  document.getElementById('entryTierBadge').textContent = t.icon + ' ' + t.name + ' · ' + t.badge;
-  // Re-render with correct sel class
-  document.querySelectorAll('.entry-tier-opt').forEach(function(el,i){
-    el.classList.toggle('sel', TIER_DEFS[i].mode === mode);
-  });
-  toggleEntryTiers(); // close picker
-}
-
-function toggleEntryTiers() {
-  var p = document.getElementById('entryTierPicker');
-  p.style.display = p.style.display === 'none' ? 'block' : 'none';
-  document.querySelector('.entry-change').textContent = p.style.display === 'none' ? 'Change depth ↓' : 'Close ↑';
-}
-
-function skipDob() {
-  document.getElementById('entryDay').value = '';
-  document.getElementById('entryMonth').value = '';
-  document.getElementById('entryYear').value = '';
-  document.getElementById('entryDobHint').style.display = 'none';
-}
-
-function setLang(lang, silent) {
-  cdpLang = lang;
-  if (!silent) localStorage.setItem('cdp_lang', lang);
-  document.getElementById('langAncient').classList.toggle('active', lang === 'ancient');
-  document.getElementById('langModern').classList.toggle('active', lang === 'modern');
-}
-
-function beginFromEntry() {
-  var nickname  = (document.getElementById('entryNickname')||{value:''}).value.trim();
-  var name      = document.getElementById('entryName').value.trim();
-  var day       = document.getElementById('entryDay').value;
-  var month     = document.getElementById('entryMonth').value;
-  var year      = document.getElementById('entryYear').value;
-  var birthHour   = document.getElementById('entryBirthHour').value;
-  var birthMin    = document.getElementById('entryBirthMin').value;
-  var birthPlace= document.getElementById('entryBirthPlace').value.trim();
-  var location  = document.getElementById('entryLocation').value.trim();
-  var intention = document.getElementById('entryIntention').value.trim();
-  // Save to localStorage
-  if (nickname)   localStorage.setItem('cdp_nickname', nickname);
-  if (name)       localStorage.setItem('cdp_name', name);
-  if (intention)  localStorage.setItem('cdp_intention', intention);
-  else            localStorage.removeItem('cdp_intention');
-  if (birthHour) localStorage.setItem('cdp_bh', birthHour);
-  if (birthMin)  localStorage.setItem('cdp_bmin', birthMin);
-  if (birthPlace) localStorage.setItem('cdp_birth_place', birthPlace);
-  if (location)   localStorage.setItem('cdp_location', location);
-  localStorage.setItem('cdp_lang', cdpLang);
-  // Save DOB if all three parts provided
-  if (day && month && year) {
-    localStorage.setItem('cdp_bd', day);
-    localStorage.setItem('cdp_bm', month);
-    localStorage.setItem('cdp_by', year);
-    localStorage.setItem('cdp_dob', day+'/'+month+'/'+year);
-    // Merge into cdp_profile so the app's profile system picks it up
-    try {
-      var prof = JSON.parse(localStorage.getItem('cdp_profile') || '{}');
-      prof.birthDay   = parseInt(day,10);
-      prof.birthMonth = parseInt(month,10);
-      prof.birthYear  = parseInt(year,10);
-      if (nickname) prof.nickname = nickname;
-      if (name) prof.name = name;
-      if (birthHour && birthMin) prof.birthTime = birthHour.padStart(2,'0') + ':' + birthMin.padStart(2,'0');
-      if (birthPlace) prof.birthLocation = birthPlace;
-      if (location)   prof.location = location;
-      localStorage.setItem('cdp_profile', JSON.stringify(prof));
-    } catch(e) {}
-  } else {
-    localStorage.removeItem('cdp_dob');
-    // Still save name/location to profile
-    try {
-      var prof = JSON.parse(localStorage.getItem('cdp_profile') || '{}');
-      if (name) prof.name = name;
-      if (birthPlace) prof.birthLocation = birthPlace;
-      if (location)   prof.location = location;
-      localStorage.setItem('cdp_profile', JSON.stringify(prof));
-    } catch(e) {}
-  }
-  // Mark entry as done for returning users
-  localStorage.setItem('cdp_entry_done', '1');
-  // Hide entry screen
-  var el = document.getElementById('cdpEntry');
-  el.classList.remove('visible');
-  setTimeout(function(){ el.style.display = 'none'; }, 400);
-  // Show tier bar
-  document.getElementById('cdpTierBar').style.display = 'flex';
-  updateTierBar(cdpEntryMode);
-  // Pass language preference to reading system
-  window.cdpReadingLang = cdpLang;
-  // Start reading
-  selectMode(cdpEntryMode);
-  startWithMode(true);
-}
-
-function updateTierBar(mode) {
-  document.querySelectorAll('.tsw-btn').forEach(function(btn){
-    var active = btn.getAttribute('data-mode') === mode;
-    btn.classList.toggle('active', active);
-  });
-}
-
-function switchTier(mode) {
-  var t = TIER_DEFS.find(function(x){return x.mode===mode;}) || TIER_DEFS[1];
-  if (confirm('Switch to ' + t.name + '?')) {
-    cdpEntryMode = mode;
-    updateTierBar(mode);
-    selectMode(mode);
-    startWithMode(true);
-  }
-}
-
-// Override showModeSelector to use the new entry screen
-function showModeSelector() { showEntryScreen(cdpEntryMode); }
-
-// Auto-start from landing page URL parameter
-(function(){
-  try {
-    var m = new URLSearchParams(window.location.search).get('mode');
-    // Suppress old mode selector flash immediately
-    var s = document.createElement('style');
-    s.textContent = '#modeSelector{display:none!important}';
-    document.head.appendChild(s);
-    function init() {
-      try {
-        if (m && ['free','quick','standard','mystic','deep'].indexOf(m) > -1) {
-          cdpEntryMode = m;
-        }
-        // Only show entry screen if not already admitted (returning user with full profile)
-        var hasName = localStorage.getItem('cdp_name');
-        var hasDob  = localStorage.getItem('cdp_dob');
-        var hasSkipped = localStorage.getItem('cdp_entry_done');
-        if (hasSkipped && hasName) {
-          // Returning user — skip entry screen, go straight to reading
-          document.getElementById('modeSelector').style.display = 'none';
-          document.getElementById('cdpTierBar').style.display = 'flex';
-          updateTierBar(cdpEntryMode);
-          selectMode(cdpEntryMode);
-          startWithMode(true);
-        } else {
-          showEntryScreen(cdpEntryMode);
-        }
-      } catch(e) { console.warn('CDP init error:', e); }
-    }
-    if (document.readyState === 'complete') {
-      setTimeout(init, 200);
-    } else {
-      window.addEventListener('load', function(){ setTimeout(init, 200); });
-    }
-  } catch(e){ console.warn('CDP v8 init:', e); }
 })();
 </script>
 
@@ -10053,7 +10173,7 @@ function showModeSelector() { showEntryScreen(cdpEntryMode); }
       </div>
 
       <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--teal);margin-bottom:8px">READING LANGUAGE</div>
-      <p style="margin-bottom:24px">On the entry screen, choose <em>Ancient</em> for the traditional cosmic language of archetypes and energetic fields, or <em>Modern</em> for the same insights translated into neuroscience: salience networks, circadian rhythms, interoception and neuroplasticity.</p>
+      <p style="margin-bottom:24px">On the entry screen, choose <em>Tradition</em> for the traditional cosmic language of archetypes and energetic fields, or <em>Science</em> for the same insights translated into neuroscience: salience networks, circadian rhythms, interoception and neuroplasticity.</p>
 
       <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.14em;color:var(--teal);margin-bottom:8px">PROFILES</div>
       <p style="margin-bottom:24px">Use the Profiles button (☿ in the top bar) to save multiple people — family, friends, colleagues. Select a profile before a reading to receive it for that person. Use Compatibility to read two profiles together.</p>
@@ -10312,5 +10432,27 @@ window.addEventListener('load', function() {
   updateProfileIndicator();
 });
 </script>
+
+<!-- COMPAT PROFILE PICKER MODAL -->
+<div id="compatPickerModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;width:min(420px,100%);max-height:80vh;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:var(--gold)" id="compatPickerTitle">SELECT PROFILE</span>
+      <button onclick="document.getElementById('compatPickerModal').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div id="compatPickerList" style="overflow-y:auto;flex:1;padding:12px 16px"></div>
+  </div>
+</div>
+
+<!-- COMPAT PROFILE PICKER MODAL -->
+<div id="compatPickerModal" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border:1px solid var(--div);border-radius:4px;width:min(420px,100%);max-height:80vh;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--div);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:var(--gold)" id="compatPickerTitle">SELECT PROFILE</span>
+      <button onclick="document.getElementById('compatPickerModal').style.display='none'" style="background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div id="compatPickerList" style="overflow-y:auto;flex:1;padding:12px 16px"></div>
+  </div>
+</div>
 </body>
 </html>
