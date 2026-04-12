@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cosmic Daily Planner — Your Personalised Daily Oracle</title>
+<title>Cosmic Daily Planner · Your Personalised Daily Oracle</title>
 <meta name="description" content="A daily Oracle unlike anything else. Swiss Ephemeris astrology, Pythagorean numerology, Dreamspell, lunar cycles and biorhythms synthesised into one deeply personal reading. Written for where you actually are in your life.">
 <meta name="keywords" content="daily oracle, personalised astrology, numerology reading, dreamspell, cosmic planner, daily horoscope, biorhythms, lunar cycle">
 <meta name="robots" content="index, follow">
@@ -13,13 +13,13 @@
 <!-- Open Graph — controls how link looks when shared on WhatsApp, Facebook, iMessage -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://cosmicdailyplanner.com">
-<meta property="og:title" content="Cosmic Daily Planner — Your Personalised Daily Oracle">
+<meta property="og:title" content="Cosmic Daily Planner · Your Personalised Daily Oracle">
 <meta property="og:description" content="Something genuinely different. Astrology, numerology, Dreamspell and biorhythms synthesised into one precise, personal daily reading. Not a horoscope. Your actual story.">
 <meta property="og:image" content="https://cosmicdailyplanner.com/og-image.jpg">
 
 <!-- Twitter / X card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Cosmic Daily Planner — Your Personalised Daily Oracle">
+<meta name="twitter:title" content="Cosmic Daily Planner · Your Personalised Daily Oracle">
 <meta name="twitter:description" content="Something genuinely different. Five frameworks. One precise, personal daily reading. Not a horoscope — your actual story.">
 <meta name="twitter:image" content="https://cosmicdailyplanner.com/og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -125,7 +125,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .wgt-icon{font-size:26px;margin-bottom:7px}
 .wgt-label{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
 .wgt-val{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold);font-weight:400;line-height:1.3}
-.wgt-sub{font-size:14px;color:var(--text3);margin-top:3px}
+.wgt-sub{font-size:14px;color:var(--text2);margin-top:3px}
 .r-loading{text-align:center;padding:80px 20px}
 .load-moon{font-size:52px;animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
@@ -601,6 +601,20 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
   padding:1px 5px;margin-left:4px;cursor:pointer;vertical-align:middle;
   font-family:'EB Garamond',serif;opacity:.65;transition:opacity .2s;white-space:nowrap}
 .citation-badge:hover{opacity:1}
+
+/* ── SCIENCE BRIDGE button ── */
+.sci-bridge-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--teal);
+  background:rgba(29,158,117,0.08);
+  border:1px solid rgba(29,158,117,0.45);
+  border-radius:20px;padding:5px 13px;cursor:pointer;
+  transition:all .2s;margin:4px 4px 0 0;
+  vertical-align:middle;white-space:nowrap}
+.sci-bridge-btn:hover{
+  background:rgba(29,158,117,0.18);
+  border-color:var(--teal);color:#fff}
 
 /* ── DECISION ENGINE chip ── */
 .chip-decision{border-color:rgba(201,160,80,0.4)!important;
@@ -3503,7 +3517,7 @@ function calcSig() {
   }
   if(sun==='Unknown') sun = sunSigns[m-1].s;
 
-  document.getElementById('sigKin').textContent = `Birth Kin ${kin} — ${col} ${KIN_TONES[ti]} ${KIN_SEALS[si]}`;
+  document.getElementById('sigKin').textContent = `Birth Kin ${kin} · ${col} ${KIN_TONES[ti]} ${KIN_SEALS[si]}`;
   document.getElementById('sigLP').textContent = `Life Path ${lp} · Personal Year ${curYear}: ${py} · Sun: ${sun}`;
   document.getElementById('sigDisplay').style.display = 'block';
 
@@ -3849,7 +3863,7 @@ async function loadReading(dateStr, tier) {
       + '<div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Moon</div>'
       + '<div style="font-size:34px;line-height:1;margin-bottom:4px">' + (moon.emoji||'☽') + '</div>'
       + '<div style="font-size:12px;color:var(--text3)">' + (moon.phase||'') + '</div>'
-      + '<div style="font-size:11px;color:var(--text3);opacity:.6;margin-top:2px">Day ' + Math.round(moon.cyc) + ' of 29</div>'
+      + '<div style="font-size:11px;color:var(--text2);opacity:.8;margin-top:2px">Day ' + Math.round(moon.cyc) + ' of 29</div>'
       + '</div>'
       + '<div style="background:var(--bg2);padding:20px 14px;text-align:center">'
       + '<div style="font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Dreamspell</div>'
@@ -3907,7 +3921,7 @@ async function loadReading(dateStr, tier) {
     const wakeData = await wakeRes.json();
     // Check for missing API key — surface immediately rather than waiting 8 minutes
     if (wakeData.apiKey && wakeData.apiKey.includes('MISSING')) {
-      if (skStatusText) skStatusText.textContent = '⚠ Server configuration issue — contact support';
+      if (skStatusText) skStatusText.textContent = '⚠ Server configuration issue. Please contact support.';
       console.error('ANTHROPIC_API_KEY is missing from Railway environment variables');
       return;
     }
@@ -3915,13 +3929,13 @@ async function loadReading(dateStr, tier) {
   } catch(wakeErr) {
     if (wakeErr.message === 'wake_timeout') {
       // Server is waking up — show friendly message and retry once
-      if (skStatusText) skStatusText.textContent = 'Server waking up — this takes about 15 seconds on first load…';
+      if (skStatusText) skStatusText.textContent = 'Server waking up. This takes about 15 seconds on first load…';
       if (skProgressBar) skProgressBar.style.width = '5%';
       await new Promise(r => setTimeout(r, 8000));
       try {
         const retry = await fetch(API_BASE + '/api/health');
         if (!retry.ok) throw new Error('still_not_ready');
-        if (skStatusText) skStatusText.textContent = 'Server ready — composing your reading…';
+        if (skStatusText) skStatusText.textContent = 'Server ready. Composing your reading…';
       } catch(retryErr) {
         // Server truly unreachable — show clear error
         const sd = document.getElementById('stageDisplay');
@@ -3965,7 +3979,7 @@ async function loadReading(dateStr, tier) {
           const skTxt = document.getElementById('skStatusText');
           if (skTxt) {
             skTxt.style.opacity = '0';
-            setTimeout(() => { skTxt.textContent = 'Core reading ready — deep analysis composing…'; skTxt.style.transition='opacity .4s'; skTxt.style.opacity='1'; }, 300);
+            setTimeout(() => { skTxt.textContent = 'Core reading ready. Deep analysis composing…'; skTxt.style.transition='opacity .4s'; skTxt.style.opacity='1'; }, 300);
           }
           const sd = document.getElementById('stageDisplay');
           if (sd) { sd.style.opacity='0'; setTimeout(()=>{ if(sd){ sd.textContent='Deep analysis and synthesis in progress…'; sd.style.opacity='1'; } },400); }
@@ -4078,7 +4092,7 @@ async function loadReading(dateStr, tier) {
         const elText = document.getElementById('elapsedText');
         const elBar  = document.getElementById('elapsedBar');
         if (elNote) { elNote.style.display = 'block'; }
-        if (elText) elText.textContent = timeStr + ' — still composing…';
+        if (elText) elText.textContent = timeStr + ' ... still composing';
         if (elBar)  elBar.style.width = pct + '%';
 
         // ── PHASE 1 ARRIVED: render actionable core immediately ──────
@@ -4093,7 +4107,7 @@ async function loadReading(dateStr, tier) {
           const skTxt = document.getElementById('skStatusText');
           if (skTxt) {
             skTxt.style.opacity = '0';
-            setTimeout(() => { skTxt.textContent = 'Priorities ready — deep analysis composing…'; skTxt.style.transition='opacity .4s'; skTxt.style.opacity='1'; }, 300);
+            setTimeout(() => { skTxt.textContent = 'Priorities ready. Deep analysis composing…'; skTxt.style.transition='opacity .4s'; skTxt.style.opacity='1'; }, 300);
           }
           // Fill in phase 1 sections with fade
           fillPhase1Sections(p1);
@@ -4929,31 +4943,31 @@ function renderSkeletonReading(dateStr, tier) {
         ${isMD?'★':''}</div>
       <div class="wgt-val" style="${isMD?'color:var(--master)':''}">${dispNum}</div>
       <div class="wgt-name">${dispD.n}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.3;font-style:italic">${dispD.k||''}</div>
-      <div style="font-size:10px;color:rgba(201,160,80,0.7);margin-top:5px">↗ tap for insight</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.3;font-style:italic">${dispD.k||''}</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>
     <div class="wgt tappable" style="cursor:pointer" title="Tap for lunar insight"
       onclick="openWgtMoon('${moonPhase}','${wgtMoonQ.replace(/'/g,String.fromCharCode(92,39))}',${isBlack?1:0},${isShiva?1:0})">
       <div class="wgt-label">Moon</div>
       <div class="wgt-icon">${moonEmoji}</div>
       <div class="wgt-val" style="font-size:13px;line-height:1.3">${moonPhase}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;font-style:italic">${isBlack?'Liminal threshold — pause & reflect':isShiva?'Fertile renewal window':'Day ' + Math.round(moonAge) + ' of 29'}</div>
-      <div style="font-size:10px;color:rgba(201,160,80,0.7);margin-top:5px">↗ tap for insight</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">${isBlack?'Liminal threshold · pause and reflect':isShiva?'Fertile renewal window':'Day ' + Math.round(moonAge) + ' of 29'}</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>
     <div class="wgt tappable" style="cursor:pointer" title="Tap for Dreamspell insight"
       onclick="openWgtKin('${kinFull}','${wgtKinQ.replace(/'/g,String.fromCharCode(92,39))}',${isGAP?1:0})">
       <div class="wgt-label">Kin</div>
       <div class="wgt-icon">${isGAP?'★':'◈'}</div>
       <div class="wgt-val" style="font-size:11px;line-height:1.4">${kinFull}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:3px;font-style:italic">${isGAP?'Portal day — synchronicities amplified':'Your Dreamspell archetype today'}</div>
-      <div style="font-size:9px;color:var(--teal);margin-top:5px">↗ tap for insight</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">${isGAP?'Portal day · synchronicities amplified':'Your Dreamspell archetype today'}</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>
     ${lp ? `<div class="wgt tappable" style="cursor:pointer" title="Tap for Life Path insight"
       onclick="openDrawer('Life Path ${lp} · ${lpD.n}', '${wgtLPQ.replace(/'/g,"\'")}', [{q:'What is the vocational direction and natural strengths of Life Path ${lp}?',l:'Vocation & strengths'},{q:'What is the shadow pattern of Life Path ${lp} to know and work with?',l:'Shadow pattern'},{q:'How does Life Path ${lp} interact with Personal Year ${py||'?'}?',l:'LP × Personal Year'}])">
       <div class="wgt-label">Life Path</div>
       <div class="wgt-val" style="${[11,22,33,44].includes(lp)?'color:var(--master)':''}">${lp}</div>
       <div class="wgt-name">${lpD.n}</div>
-      <div style="font-size:9px;color:var(--gold3);margin-top:5px">↗</div>
+      <div style="font-size:10px;color:var(--gold);opacity:.7;margin-top:6px">↗ tap for insight</div>
     </div>` : '<div class="wgt"><div class="wgt-label">Profile</div><div class="wgt-name" style="font-size:13px;margin-top:8px">Add birth date<br>for personal readings</div></div>'}
   </div>`;
 
@@ -5107,11 +5121,11 @@ function renderSkeletonReading(dateStr, tier) {
     _personalNumHtml +
     natalLinkHtml +
 
-    '<div class="sec-hook">The <em>Universal Day number</em> is the collective frequency — every date digit reduced to its essence. Day, Month, and Year are the three component lenses. ' + (pd ? 'Your <em>Personal Day ' + pd + '</em> personalises this to your unique blueprint. ' : '') + '(Drayer 2002; Goodwin 1994)</div>' +
+    '<div class="sec-hook">The <em>Universal Day number</em> is the collective frequency: every date digit reduced to its essence. Day, Month, and Year are the three component lenses. ' + (pd ? 'Your <em>Personal Day ' + pd + '</em> personalises this to your unique blueprint. ' : '') + '(Drayer 2002; Goodwin 1994)</div>' +
     '<div style="margin:8px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">' +
     '<span class="citation-badge" onclick="openCitation(\'drayer\')">Drayer 2002</span>' +
     '<span class="citation-badge" onclick="openCitation(\'usno\')">USNO</span>' +
-    '<button onclick="openScienceBridge(\'numerology\')" style="background:none;border:1px solid rgba(29,158,117,0.3);color:var(--teal);font-size:10px;letter-spacing:.1em;font-family:\'Cinzel\',serif;padding:4px 10px;border-radius:2px;cursor:pointer;margin-left:4px">⬡ Why numbers work ↗</button>' +
+    '<button onclick="openScienceBridge(\'numerology\')" class="sci-bridge-btn">⬡ Why numbers work ↗</button>' +
     '</div>' +
     '<div class="sec-body" id="ai-numerology-body"><p>' + (dispD.m||'') + '</p></div>' +
     '<div style="font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--text3);margin:14px 0 8px">Three Windows of the Day</div>' +
@@ -5156,7 +5170,7 @@ function renderSkeletonReading(dateStr, tier) {
     <div style="margin:8px 0 4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <span class="citation-badge" onclick="openCitation('usno')">USNO</span>
       <span class="citation-badge" onclick="openCitation('brady')">Brady 1999</span>
-      <button onclick="openScienceBridge('moon')" style="background:none;border:1px solid rgba(29,158,117,0.3);color:var(--teal);font-size:10px;letter-spacing:.1em;font-family:'Cinzel',serif;padding:4px 10px;border-radius:2px;cursor:pointer;margin-left:4px">⬡ Why the Moon works ↗</button>
+      <button onclick="openScienceBridge('moon')" class="sci-bridge-btn">⬡ Why the Moon works ↗</button>
     </div>
     <button class="tap-cta" onclick="tapMoon()" style="margin-top:12px;font-size:12px">
       What does this Moon mean for me today? <span class="cta-arrow">→</span>
@@ -5210,7 +5224,7 @@ function renderSkeletonReading(dateStr, tier) {
     <div class="sec-hl tappable" onclick="tapDreamspell()" style="cursor:pointer">
       ◈ Kin ${kinNum} — ${kinFull}${isGAP?'<span class="gap-badge">★ Portal</span>':''}
     </div>
-    ${dsHookText ? `<div class="sec-hook">${dsHookText}${isGAP?' <em>★ Today is a Galactic Activation Portal — heightened sensitivity, unusual synchronicities.</em>':''}</div>` : ''}
+    ${dsHookText ? `<div class="sec-hook">${dsHookText}${isGAP?' <em>★ Today is a Galactic Activation Portal. Heightened sensitivity, unusual synchronicities.</em>':''}</div>` : ''}
     <div class="sec-body" id="ai-dreamspell-body">
       <p>Tone ${ti+1} (${KT[ti]}) · Seal: ${KS[si]} · ${KC[si%4]}.</p>
     </div>
@@ -5218,12 +5232,12 @@ function renderSkeletonReading(dateStr, tier) {
       What does my Kin mean for me today? <span class="cta-arrow">→</span>
     </button>
     <div style="margin-top:14px;padding:9px;background:var(--bg4);border:1px solid var(--div2);border-radius:2px">
-      <div style="font-size:12px;color:var(--text3);font-style:italic">Dreamspell: Argüelles (1987) The Mayan Factor — modern system. Verify: tortuga.com/oracle</div>
+      <div style="font-size:12px;color:var(--text3);font-style:italic">Dreamspell: Argüelles (1987) The Mayan Factor. Modern system. Verify: tortuga.com/oracle</div>
     </div>
     <div style="margin-top:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
       <span class="citation-badge" onclick="openCitation('arguelles')">Argüelles 1987</span>
       <span class="citation-badge" onclick="openCitation('sprajc')">Šprajc 2023</span>
-      <button onclick="openScienceBridge('dreamspell')" style="background:none;border:1px solid rgba(29,158,117,0.3);color:var(--teal);font-size:10px;letter-spacing:.1em;font-family:'Cinzel',serif;padding:4px 10px;border-radius:2px;cursor:pointer;margin-left:4px">⬡ Why 260 days? ↗</button>
+      <button onclick="openScienceBridge('dreamspell')" class="sci-bridge-btn">⬡ Why 260 days? ↗</button>
     </div>
   </div>`;
 
@@ -5252,10 +5266,10 @@ function renderSkeletonReading(dateStr, tier) {
       <span class="citation-badge" onclick="openCitation('usno')">USNO</span>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button onclick="openScienceBridge('numerology')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Numbers</button>
-      <button onclick="openScienceBridge('moon')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Moon</button>
-      <button onclick="openScienceBridge('dreamspell')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Dreamspell</button>
-      <button onclick="openScienceBridge('astrology')" style="background:none;border:1px solid rgba(29,158,117,0.25);color:var(--teal);font-size:10px;letter-spacing:.08em;font-family:'Cinzel',serif;padding:5px 10px;border-radius:2px;cursor:pointer">⬡ Astrology</button>
+      <button onclick="openScienceBridge('numerology')" class="sci-bridge-btn">⬡ Numbers</button>
+      <button onclick="openScienceBridge('moon')" class="sci-bridge-btn">⬡ Moon</button>
+      <button onclick="openScienceBridge('dreamspell')" class="sci-bridge-btn">⬡ Dreamspell</button>
+      <button onclick="openScienceBridge('astrology')" class="sci-bridge-btn">⬡ Astrology</button>
     </div>
   </div>`;
 
@@ -5374,7 +5388,7 @@ function openShareCard(btnEl) {
     const btn = btnEl || document.querySelector('button[onclick*="openShareCard"]');
     if (btn) {
       const orig = btn.textContent;
-      btn.textContent = 'Reading still composing — try again in a moment';
+      btn.textContent = 'Reading still composing. Try again in a moment';
       btn.style.opacity = '0.6';
       setTimeout(() => { btn.textContent = orig; btn.style.opacity = ''; }, 3000);
     }
@@ -6491,8 +6505,8 @@ function renderReading(data, dateStr) {
   // 6. NUMEROLOGY
   html += `<div class="r-section">
     <div class="sec-label">Numerology of the Day</div>
-    <div class="sec-hl tappable" onclick="tapNumerology(${num?.ud||'—'},'${num?.udM?.n||''}')" style="cursor:pointer">${r.numerology?.headline||`Universal Day ${num?.ud} — ${num?.udM?.n||''}`}</div>
-    <div class="sec-hook">The <em>Universal Day number</em> is today's collective frequency — everyone on the planet is moving through it. Your <em>Personal Day</em> is the intersection of that frequency with your unique numerological blueprint. The overlap between the two is where your day's deepest signal lives.</div>`;
+    <div class="sec-hl tappable" onclick="tapNumerology(${num?.ud||'—'},'${num?.udM?.n||''}')" style="cursor:pointer">${r.numerology?.headline||`Universal Day ${num?.ud} · ${num?.udM?.n||''}`}</div>
+    <div class="sec-hook">The <em>Universal Day number</em> is today's collective frequency. Everyone on the planet is moving through it. Your <em>Personal Day</em> is the intersection of that frequency with your unique numerological blueprint. The overlap between the two is where your day's deepest signal lives.</div>`;
   if (r.numerology?.body) {
     html += `<div class="sec-body">${prose(r.numerology.body)}</div>`;
   } else {
@@ -6564,8 +6578,8 @@ function renderReading(data, dateStr) {
 
   if (r.astrology?.main_transit_headline || r.astrology?.main_transit_body) {
     html += `<div class="r-section">
-      <div class="sec-label">Western Astrology — Today's Transits</div>
-      <div class="sec-hook" style="margin-bottom:10px">Transits are the conversation between today's sky and your natal chart. <em>"Your Moon"</em> refers to where the Moon was when you were born — a permanent part of your chart. <em>"The Moon"</em> refers to where it is in the sky today. When today's planets touch your natal positions, it's personally meaningful. When they don't, the transit is still the collective weather — worth knowing.</div>
+      <div class="sec-label">Western Astrology · Today's Transits</div>
+      <div class="sec-hook" style="margin-bottom:10px">Transits are the conversation between today's sky and your natal chart. <em>"Your Moon"</em> refers to where the Moon was when you were born, a permanent part of your chart. <em>"The Moon"</em> refers to where it is in the sky today. When today's planets touch your natal positions, it's personally meaningful. When they don't, the transit is still the collective weather. Worth knowing.</div>
       <div class="sec-hl">${r.astrology?.main_transit_headline||''}</div>
       <div class="sec-body">${prose(r.astrology?.main_transit_body||r.astrology?.main_transit||'')}</div>
     </div>`;
@@ -6573,7 +6587,7 @@ function renderReading(data, dateStr) {
 
   if (r.astrology?.saturn_neptune) {
     html += `<div class="r-section" style="border-left:2px solid var(--gold3);padding:14px 18px">
-      <div class="sec-label">∞ Saturn–Neptune backdrop — see Cosmic Context for full detail</div>
+      <div class="sec-label">∞ Saturn·Neptune backdrop · see Cosmic Context for full detail</div>
       <div style="font-size:15px;color:var(--text2);line-height:1.7;margin:6px 0 10px">${prose(r.astrology.saturn_neptune).replace(/<\/p><p>/g,'</p><p>').split('<\/p>').slice(0,1).join('</p>')}</div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
         <button class="tap-cta" style="font-size:11px" onclick="openDrawer('Saturn–Neptune — Your Context', 'Saturn conjunct Neptune at 0° Aries exact 2026. '+getUserContext()+' How is this civilisational transit specifically relevant to '+getFirstName()+'s current situation and life arc right now?', [{q:'What is Saturn-Neptune asking me to dissolve or rebuild?',l:'Dissolve or rebuild'}])">
@@ -6637,13 +6651,13 @@ function renderReading(data, dateStr) {
   html += `<div class="r-section">
     <div class="sec-label">Dreamspell · Law of Time</div>
     <div class="sec-hl tappable" onclick="tapDreamspell()" style="cursor:pointer">◈ ${r.dreamspell?.headline||kin?.full||''}${kin?.isGAP?`<span class="gap-badge">★ Portal</span>`:''}</div>
-    ${dsHook ? `<div class="sec-hook">${dsHook}${kin?.isGAP?' <em>Today is a Galactic Activation Portal — heightened sensitivity, unusual synchronicities. Pay close attention.</em>':''}</div>` : ''}
+    ${dsHook ? `<div class="sec-hook">${dsHook}${kin?.isGAP?' <em>Today is a Galactic Activation Portal. Heightened sensitivity, unusual synchronicities. Pay close attention.</em>':''}</div>` : ''}
     <div class="sec-body">${r.dreamspell?.body ? prose(r.dreamspell.body) : `<p>Kin ${kin?.kinNum||''} — ${kin?.full||''}. Tone ${kin?.toneNum||''} (${kin?.tone||''}) · Seal: ${kin?.seal||''}.</p>`}</div>
     <button class="tap-cta" onclick="tapDreamspell()">
       What does my Kin mean for me today? <span class="cta-arrow">→</span>
     </button>
     <div style="margin-top:14px;padding:9px;background:var(--bg4);border:1px solid var(--div2);border-radius:2px">
-      <div style="font-size:12px;color:var(--text3);font-style:italic">${r.dreamspell?.disclaimer||"Dreamspell: Argüelles (1987) The Mayan Factor — a modern 20th-century system, distinct from the living K'iche Maya tzolkʼin. Verify: tortuga.com/oracle"}</div>
+      <div style="font-size:12px;color:var(--text3);font-style:italic">${r.dreamspell?.disclaimer||"Dreamspell: Argüelles (1987) The Mayan Factor. A modern 20th-century system, distinct from the living K'iche Maya tzolkʼin. Verify: tortuga.com/oracle"}</div>
     </div>
   </div>`;
 
@@ -6651,7 +6665,7 @@ function renderReading(data, dateStr) {
     const pData = r.planetary_positions || r.key_planets || [];
     html += `<div class="r-section">
       <div class="sec-label">Planetary Positions</div>
-      <div class="sec-hook" style="margin-bottom:12px">These are where the planets actually are in the sky today, calculated from Swiss Ephemeris data. <em>Tap any planet</em> to receive a personalised interpretation — what this position means specifically for you, your work, and your relationships right now.</div>
+      <div class="sec-hook" style="margin-bottom:12px">These are where the planets actually are in the sky today, calculated from Swiss Ephemeris data. <em>Tap any planet</em> to receive a personalised interpretation of what this position means specifically for you, your work, and your relationships right now.</div>
       <div class="planet-grid" id="planetGrid">`;
     planets.forEach((p, i) => {
       const note = pData[i]?.note || '';
@@ -8744,7 +8758,7 @@ async function submitEmailCapture() {
   } catch(e) {
     // Save locally even if Supabase fails
     localStorage.setItem('cdp_email_captured', email);
-    msg.textContent = '✦ Saved — thank you.';
+    msg.textContent = '✦ Saved. Thank you.';
     msg.className = 'ec-msg ok';
     setTimeout(() => {
       document.getElementById('emailCaptureModal').classList.remove('open');
