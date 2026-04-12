@@ -110,7 +110,7 @@ body.light{--bg:#F5F0E8;--bg2:#EDE6D6;--bg3:#E4DBC8;--bg4:#F8F4EC;
 .screen{display:none}.screen.on{display:block}
 
 /* ══ READING SCREEN ══ */
-#sr{max-width:1400px;margin:0 auto;padding:0 24px 120px;scroll-padding-top:120px}
+#sr{max-width:1400px;margin:0 auto;padding:0 24px 120px;scroll-padding-top:120px;box-sizing:border-box}
 .r-head{text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--div);margin-bottom:28px}
 .r-meta{font-size:15px;letter-spacing:.35em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
 .r-date{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,48px);color:var(--gold);
@@ -1232,7 +1232,7 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
   body{overflow-x:hidden}
 
   /* Reading screen padding */
-  #sr{padding:0 10px 100px!important}
+  #sr{padding:0 6px 100px!important;width:100vw!important;box-sizing:border-box!important}
   .r-section{padding:14px 12px!important;margin-bottom:12px}
   .r-head{padding:20px 0 16px!important}
   .r-date{font-size:clamp(22px,6vw,32px)!important}
@@ -1246,14 +1246,15 @@ select.entry-input option{background:#0D1E33;color:#E8EDF4}
   .energies{grid-template-columns:1fr!important}
 
   /* Week ahead - 2 col, contained */
-  .week-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;
-    gap:6px!important;overflow:hidden!important;width:100%!important}
+  .week-grid{display:flex!important;flex-direction:column!important;gap:6px!important;width:100%!important}
   .week-day{min-width:0!important;overflow:hidden!important;word-break:break-word!important;
-    padding:8px 6px!important;font-size:12px!important}
-  .week-day-name{font-size:9px!important;white-space:normal!important}
+    padding:10px 14px!important;font-size:13px!important;
+    display:grid!important;grid-template-columns:80px 1fr!important;gap:8px!important;text-align:left!important}
+  .week-day-name{font-size:11px!important;white-space:normal!important;justify-content:flex-start!important}
 
   /* Biorhythms - single col, no overflow */
-  .bio-grid{display:flex!important;flex-direction:column!important;gap:8px!important}
+  .bio-grid{display:grid!important;grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .bio-card:last-child:nth-child(odd){grid-column:1/-1!important}
   .bio-card{min-width:0!important;width:100%!important;box-sizing:border-box!important}
 
   /* Numerology blocks - full width */
@@ -6126,12 +6127,11 @@ function renderReading(data, dateStr) {
   const mLabel = MODE_LABELS[selectedMode] || MODE_LABELS.standard;
   const _nextTierKey = {free:'quick',quick:'standard',standard:'mystic',mystic:'deep'}[selectedMode];
   const _nextTierName = {quick:'Full Reading',standard:'Monthly Arc',mystic:'Yearly Reading',deep:'Oracle Deep Dive'}[_nextTierKey]||'';
-  html += `<div style="text-align:center;margin-bottom:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-    <button class="mode-chip" onclick="changeModeAndReload()" title="Change reading depth" style="color:var(--gold);border-color:rgba(201,160,80,0.35)">
-      ⟳ ${mLabel.label} · change depth
-    </button>
-    ${_nextTierKey ? `<button onclick="selectMode('${_nextTierKey}');startWithMode()" style="background:rgba(201,160,80,0.1);border:1px solid rgba(201,160,80,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer">✦ Try ${_nextTierName}</button>` : ''}
-  </div>`;
+  if (_nextTierKey) {
+    html += `<div style="text-align:center;margin-bottom:8px">
+      <button onclick="selectMode('${_nextTierKey}');startWithMode()" style="background:rgba(201,160,80,0.1);border:1px solid rgba(201,160,80,0.4);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:.12em;padding:6px 14px;border-radius:2px;cursor:pointer">✦ Try ${_nextTierName} — go deeper</button>
+    </div>`;
+  }
 
   if (profile.birthDay && profile.birthYear && num?.lp) {
     const lpD = NUM_DATA[num.lp] || {n:'—'};
@@ -9164,43 +9164,48 @@ function renderCompatResult(data) {
   }
 
   // Biorhythms — structured cards
-  if (bioA && bioB) {
-    const bioTypes = [{key:'physical',label:'Physical',cycle:'23d'},{key:'emotional',label:'Emotional',cycle:'28d'},{key:'intellectual',label:'Intellectual',cycle:'33d'}];
-    const bCards = bioTypes.map(bt => {
-      const vA = bioA[bt.key]||0, vB = bioB[bt.key]||0;
-      const col = vA > 20 ? 'var(--teal)' : vA < -20 ? '#ff9999' : 'var(--gold)';
-      const colB = vB > 20 ? 'var(--teal)' : vB < -20 ? '#ff9999' : 'var(--gold)';
-      return `<div class="compat-bio-card">
-        <div class="compat-bio-label">${bt.label} · ${bt.cycle}</div>
-        <div style="display:flex;justify-content:space-around;margin:8px 0">
+  if (bioSynastry && bioSynastry.length) {
+    const safeBioQ = (r.biorhythm_today||'What do the biorhythm cycles say about their dynamic today?').replace(/'/g,"\'").slice(0,200);
+    const bCards = bioSynastry.map(b => {
+      const aCol = (b.aPct||0) > 20 ? 'var(--teal)' : (b.aPct||0) < -20 ? '#ff9999' : 'var(--gold)';
+      const bColr = (b.bPct||0) > 20 ? 'var(--teal)' : (b.bPct||0) < -20 ? '#ff9999' : 'var(--gold)';
+      return `<div class="compat-bio-card" style="cursor:pointer"
+        onclick="openDrawer('${b.cycle||''} Biorhythm','${safeBioQ}',[{q:'How should they plan around this cycle?',l:'Planning tip'}])">
+        <div class="compat-bio-label">${b.cycle||''}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0">
           <div style="text-align:center">
             <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${nameA||'A'}</div>
-            <div class="compat-bio-val" style="color:${col}">${vA > 0 ? '+' : ''}${Math.round(vA)}%</div>
+            <div class="compat-bio-val" style="color:${aCol}">${(b.aPct||0) > 0 ? '+' : ''}${b.aPct||0}%</div>
           </div>
           <div style="text-align:center">
             <div style="font-size:11px;color:var(--text3);margin-bottom:2px">${nameB||'B'}</div>
-            <div class="compat-bio-val" style="color:${colB}">${vB > 0 ? '+' : ''}${Math.round(vB)}%</div>
+            <div class="compat-bio-val" style="color:${bColr}">${(b.bPct||0) > 0 ? '+' : ''}${b.bPct||0}%</div>
           </div>
         </div>
-        <div class="compat-bio-desc">${bioSynastry?.[bt.key]||''}</div>
+        <div class="compat-bio-desc">${b.dynamic||''}</div>
       </div>`;
     }).join('');
-    html += `<div class="compat-section">
-      <div class="compat-section-label">Biorhythms Today</div>
-      <div class="compat-bio-row">${bCards}</div>
+    html += `<div class="compat-section tappable" onclick="openDrawer('Biorhythms Today','${safeBioQ}',[{q:'When are their cycles most aligned this month?',l:'Best alignment'},{q:'How does this affect their dynamic today?',l:'Today\'s dynamic'}])">
+      <div class="compat-section-label">Biorhythms Today · tap to go deeper</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${bCards}</div>
+      ${r.biorhythm_today ? '<div style="font-size:14px;color:var(--text3);line-height:1.7;margin-top:12px">'+r.biorhythm_today.slice(0,300)+'</div>' : ''}
     </div>`;
   }
 
   // Synastry aspects — grid layout
   if (synAspects?.length) {
     const aspectCards = synAspects.slice(0,6).map(a => {
-      const safeAQ = (a.interpretation||'').replace(/'/g,"\'").slice(0,200);
-      const stars = Math.round(a.strength||3);
+      // Server returns: aspect (name), interpretation OR body, strength
+      const aspName = a.aspect || a.name || '';
+      const aspBody = a.interpretation || a.body || a.description || '';
+      const safeAQ = aspBody.replace(/'/g,"\'").slice(0,200);
+      const safeAN = aspName.replace(/'/g,"\'");
+      const stars = Math.min(5, Math.max(1, Math.round(a.strength||3)));
       return `<div class="compat-aspect tappable"
-        onclick="openDrawer('${(a.aspect||'').replace(/'/g,"\'")}','${safeAQ} — What does this aspect mean for their day-to-day relationship?',[{q:'How do they navigate this?',l:'How to navigate'},{q:'What\'s the gift in this tension?',l:'The gift'}])">
-        <div class="compat-aspect-name">${a.aspect||''}</div>
+        onclick="openDrawer('${safeAN}','${safeAQ} — What does this aspect mean for their day-to-day relationship?',[{q:'How do they navigate this?',l:'How to navigate'},{q:'What is the gift in this tension?',l:'The gift'},{q:'How has this aspect shaped the last year?',l:'Last year'}])">
+        <div class="compat-aspect-name">${aspName}</div>
         <div class="compat-aspect-stars">${'●'.repeat(stars)}${'○'.repeat(5-stars)}</div>
-        <div class="compat-aspect-body">${(a.interpretation||'').slice(0,120)}${a.interpretation?.length>120?'…':''}</div>
+        <div class="compat-aspect-body">${aspBody.slice(0,140)}${aspBody.length>140?'…':''}</div>
       </div>`;
     }).join('');
     html += `<div class="compat-section">
