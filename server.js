@@ -144,7 +144,7 @@ function numReduce(n) {
       theme: 'Communication & Connection',
       energy: 'Expressive · Social · Generative',
       guidance: 'Great moment to be creative and artistic, to deal with relationships in general, meetings, connections with people, marketing, social media.',
-      shadow: 'Scattered energy — commit to one creative focus.',
+      shadow: 'Scattered energy. Commit to one creative focus.',
       keywords: ['creativity', 'communication', 'joy', 'self-expression'],
       best_for: ['creative projects', 'social media', 'presentations', 'networking events'],
       special: false
@@ -154,7 +154,7 @@ function numReduce(n) {
       theme: 'Structure & Integrity',
       energy: 'Grounding · Disciplined · Honest',
       guidance: 'Time to work hard with honesty. Truth, correction, integrity, morality, fairness, uprightness.',
-      shadow: 'Rigidity — build structure without becoming inflexible.',
+      shadow: 'Rigidity. Build structure without becoming inflexible.',
       keywords: ['discipline', 'stability', 'honesty', 'perseverance'],
       best_for: ['system building', 'planning', 'due diligence', 'truth-telling conversations'],
       special: false
@@ -164,7 +164,7 @@ function numReduce(n) {
       theme: 'Change & Learning',
       energy: 'Dynamic · Curious · Versatile',
       guidance: 'Intelligence, learning new things, relationships, connections with people, meetings, marketing, social media.',
-      shadow: 'Restlessness — embrace change without abandoning depth.',
+      shadow: 'Restlessness. Embrace change without abandoning depth.',
       keywords: ['freedom', 'adaptability', 'curiosity', 'movement'],
       best_for: ['learning', 'travel', 'pivots', 'diverse meetings', 'new research'],
       special: false
@@ -174,7 +174,7 @@ function numReduce(n) {
       theme: 'Beauty, Family & Service',
       energy: 'Nurturing · Artistic · Responsible',
       guidance: 'Art, creativity, gentleness, tenderness, helping, assisting and being kind with others. Good day to be in family, couple or among friends.',
-      shadow: 'Over-giving — nourish others from fullness, not depletion.',
+      shadow: 'Over-giving. Nourish others from fullness, not depletion.',
       keywords: ['compassion', 'beauty', 'responsibility', 'home'],
       best_for: ['family time', 'creative arts', 'community', 'healing conversations'],
       special: false
@@ -183,8 +183,8 @@ function numReduce(n) {
       title: '✦ Karmic Portal',
       theme: 'Mystery, Depth & Inner Knowing',
       energy: 'Introspective · Mystical · Intense',
-      guidance: 'The Portals of the Universal Forces Are Open. This is a karmic and magical number. This day tends to be intense — either challenging or amazing depending on how attuned you are with your true Self. An opportunity to connect with the highest realms, enjoy aloneness and creativity.',
-      shadow: 'Isolation and over-analysis — open to the mystical without retreating entirely.',
+      guidance: 'The Portals of the Universal Forces Are Open. This is a karmic and magical number. This day tends to be intense: either challenging or amazing depending on how attuned you are with your true Self. An opportunity to connect with the highest realms, enjoy aloneness and creativity.',
+      shadow: 'Isolation and over-analysis. Open to the mystical without retreating entirely.',
       keywords: ['wisdom', 'solitude', 'investigation', 'spiritual depth'],
       best_for: ['deep research', 'meditation', 'solo creative work', 'inner guidance'],
       special: true,
@@ -195,7 +195,7 @@ function numReduce(n) {
       theme: 'Business, Karma & Mastery',
       energy: 'Ambitious · Executive · Karmic',
       guidance: 'Excellent day to deal with projects, business, focus, trades, career, work, structuring, money.',
-      shadow: 'Power misused returns as obstacle — act with integrity.',
+      shadow: 'Power misused returns as obstacle. Act with integrity.',
       keywords: ['success', 'authority', 'abundance', 'karma'],
       best_for: ['business deals', 'financial planning', 'career moves', 'executive decisions'],
       special: false
@@ -205,18 +205,18 @@ function numReduce(n) {
       theme: 'Completion & Universal Love',
       energy: 'Transcendent · Compassionate · Cosmic',
       guidance: 'The Portals of the Universal Forces and Cosmic Energies Are Open. This is a very special day. Favorable for resting, channeling higher sources, being alone, enjoying a peaceful and flowing day. Special meetings might happen.',
-      shadow: 'Difficulty releasing the old — trust that completion creates space.',
+      shadow: 'Difficulty releasing the old. Trust that completion creates space.',
       keywords: ['completion', 'compassion', 'release', 'universal wisdom'],
       best_for: ['completion of cycles', 'acts of service', 'spiritual practice', 'letting go'],
       special: true,
       special_label: 'Cosmic Portal Day'
     },
     11: {
-      title: '✦✦ Master Number 11 — The Illuminator',
+      title: '✦✦ Master Number 11 · The Illuminator',
       theme: 'Spiritual Insight & Higher Vision',
       energy: 'Illuminating · Intuitive · Elevated',
       guidance: 'Master Number Day. The Portals of the Universal Forces Are Open. Can be a magic and different experience; be aware of the energy of this day. Depending on how attuned you are with your true Self, this day can be challenging or amazing. An opportunity to connect with the highest realms, enjoy aloneness, have special meetings. This is definitely a special and unique day.',
-      shadow: 'Nervous system overload — ground the vision in practical small steps.',
+      shadow: 'Nervous system overload. Ground the vision in practical small steps.',
       keywords: ['illumination', 'intuition', 'inspiration', 'higher ideals'],
       best_for: ['inspired creative leaps', 'visionary planning', 'spiritual practices', 'channeling insights'],
       special: true,
@@ -225,11 +225,11 @@ function numReduce(n) {
       base_energy: 2
     },
     22: {
-      title: '✦✦ Master Number 22 — The Master Builder',
+      title: '✦✦ Master Number 22 · The Master Builder',
       theme: 'Visionary Structure & World Work',
       energy: 'Architectural · Disciplined · Transcendent',
       guidance: 'Master Number Day. The Portals of the Universal Forces Are Open. This day brings an energy related to projects, business and work — it carries a similar energy of the number 4. Depending on how attuned you are with your true Self, this day can be challenging or amazing. An opportunity to connect with the highest realms, to enjoy aloneness, to have special meetings. This is definitely a special and unique day.',
-      shadow: 'Paralysis by perfectionism — begin the build even if the blueprint is incomplete.',
+      shadow: 'Paralysis by perfectionism. Begin the build even if the blueprint is incomplete.',
       keywords: ['mastery', 'legacy', 'architecture', 'vision made real'],
       best_for: ['major project launches', 'strategic architecture', 'legacy decisions', 'building systems'],
       special: true,
@@ -238,11 +238,11 @@ function numReduce(n) {
       base_energy: 4
     },
     33: {
-      title: '✦✦ Master Number 33 — The Master Teacher',
+      title: '✦✦ Master Number 33 · The Master Teacher',
       theme: 'Compassionate Service & Cosmic Teaching',
       energy: 'Selfless · Healing · Divinely Creative',
       guidance: 'Master Number Day. The Portals of the Universal Forces Are Open. This day tends to be intense — either karmic/challenging or amazing depending on how attuned you are. An opportunity to connect with the highest realms, enjoy aloneness and have special meetings. Favorable for channeling higher sources and listening to your intuition.',
-      shadow: 'Martyrdom — teach by illumination, not self-sacrifice.',
+      shadow: 'Martyrdom. Teach by illumination, not self-sacrifice.',
       keywords: ['compassion', 'healing', 'teaching', 'creative mastery'],
       best_for: ['teaching', 'healing arts', 'community leadership', 'inspired creative work'],
       special: true,
@@ -251,11 +251,11 @@ function numReduce(n) {
       base_energy: 6
     },
     44: {
-      title: '✦✦ Master Number 44 — The Master Manifestor',
+      title: '✦✦ Master Number 44 · The Master Manifestor',
       theme: 'Material Mastery & Cosmic Business',
       energy: 'Grounding · Manifesting · Divinely Structured',
       guidance: 'Master Number Day. The Portals of the Universal Forces Are Open. This number carries the energy of number 8 — profoundly related to business, project, work and money. This day tends to be intense — either challenging or amazing. An opportunity to connect with the highest realms, be surprised by special unexpected meetings. Favorable for channeling higher sources and paying close attention to your intuition, especially when related to work, business and projects.',
-      shadow: 'Over-materialisation — remember the cosmic thread running through all of it.',
+      shadow: 'Over-materialisation. Remember the cosmic thread running through all of it.',
       keywords: ['manifestation', 'mastery', 'cosmic business', 'legacy wealth'],
       best_for: ['major financial decisions', 'long-term strategic moves', 'building for legacy', 'inspired business'],
       special: true,
@@ -397,8 +397,8 @@ function moonEnrichment(dateStr) {
     toNew: parseFloat(toNew.toFixed(2)),
     isBlackMoon: isBlack,
     isShivaMoon: isShiva,
-    blackMoonGuidance: isBlack ? 'Black Moon window — liminal, tricky, reflective. Avoid major initiations; review, release, prepare. Discernment essential.' : null,
-    shivaMoonGuidance: isShiva ? 'Shiva Moon window — blissful renewal after the reset. Fertile for new intentions and inspired beginnings.' : null
+    blackMoonGuidance: isBlack ? 'Black Moon window: liminal, tricky, reflective. Avoid major initiations; review, release, prepare. Discernment essential.' : null,
+    shivaMoonGuidance: isShiva ? 'Shiva Moon window: blissful renewal after the reset. Fertile for new intentions and inspired beginnings.' : null
   };
 }
 
@@ -413,11 +413,11 @@ function getMoon(dateStr){
   const cyc=((days%LUNAR)+LUNAR)%LUNAR;
   const pct=Math.round(cyc/LUNAR*100);
   let phase,emoji,desc;
-  if(cyc<1.5){phase='New Moon';emoji='🌑';desc='Dark time — seed intention in silence';}
+  if(cyc<1.5){phase='New Moon';emoji='🌑';desc='Dark time. Seed intention in silence';}
   else if(cyc<7.5){phase='Waxing Crescent';emoji='🌒';desc='Build momentum, plant seeds';}
   else if(cyc<8.5){phase='First Quarter';emoji='🌓';desc='Decisive action, push through resistance';}
   else if(cyc<14.5){phase='Waxing Gibbous';emoji='🌔';desc='Refine, polish, prepare for release';}
-  else if(cyc<16.5){phase='Full Moon';emoji='🌕';desc='Illumination — what is real becomes visible';}
+  else if(cyc<16.5){phase='Full Moon';emoji='🌕';desc='Illumination. What is real becomes visible';}
   else if(cyc<22.5){phase='Waning Gibbous';emoji='🌖';desc='Harvest, integrate, share wisdom';}
   else if(cyc<23.5){phase='Last Quarter';emoji='🌗';desc:'Reassess, release what no longer serves';}
   else{phase='Waning Crescent';emoji='🌘';desc='Rest, reflect, prepare for rebirth';}
@@ -498,17 +498,17 @@ function reduce(n){
 }
 const NUM={
   1:{n:'New Beginnings',k:'Initiation · leadership · independence',
-    morning:'Morning calls for bold initiation — begin something, assert your direction with confidence.',
+    morning:'Morning calls for bold initiation. Begin something, assert your direction with confidence.',
     afternoon:'Afternoon sustains the initiating impulse. Push independently through resistance.',
     evening:'Evening resonates with independence. Reflect on what you have started and what leadership asks of you.'},
   2:{n:'Partnership',k:'Cooperation · balance · receptivity',
     morning:'Morning asks for deep listening and receptivity. Collaborate, do not compete.',
     afternoon:'Afternoon favours partnership decisions and sensitive negotiations.',
-    evening:'Evening is for tending relationships — what balance needs restoring?'},
+    evening:'Evening is for tending relationships. What balance needs restoring?'},
   3:{n:'Creative Expression',k:'Joy · communication · creative flow',
-    morning:'Morning overflows with creative potential. Speak, write, create — the channel is open.',
+    morning:'Morning overflows with creative potential. Speak, write, create. The channel is open.',
     afternoon:'Afternoon sustains expressive momentum. Ideas multiply with sharing.',
-    evening:'Evening calls for joyful communication — connect, share what is alive in you.'},
+    evening:'Evening calls for joyful communication. Connect, share what is alive in you.'},
   4:{n:'Foundation & Order',k:'Structure · discipline · patient building',
     morning:'Morning energy is grounded and methodical. Lay foundations, build systems.',
     afternoon:'Afternoon rewards steady focus. Practical effort accumulates.',
@@ -528,27 +528,27 @@ const NUM={
   8:{n:'Power & Abundance',k:'Authority · material mastery · accountability',
     morning:'Morning carries authority and material weight. Decisions today have consequence.',
     afternoon:'Afternoon amplifies executive capacity. Speak clearly, act decisively.',
-    evening:'Evening is for taking stock — what has been built, what has been earned?'},
+    evening:'Evening is for taking stock. What has been built, what has been earned?'},
   9:{n:'Completion & Compassion',k:'Wisdom · generosity · release · universal love',
     morning:'Morning is open and cosmic. Special encounters and completions arrive unbidden.',
     afternoon:'Afternoon calls for generosity and letting go.',
     evening:'Evening is for release. Close cycles, forgive, and prepare for what is next.'},
   11:{n:'Master Illuminator',k:'Spiritual vision · intuition · higher purpose',master:true,
-    morning:'Master Morning — the portals are open. Spiritual insight and high intuition are available before the noise of the day begins.',
-    afternoon:'Master Afternoon — unusual clarity and vision. What is offered is rare.',
-    evening:'Master Evening — integration of the day\'s revelations. Something important has arrived; be still enough to receive it.'},
+    morning:'Master Morning: the portals are open. Spiritual insight and high intuition are available before the noise of the day begins.',
+    afternoon:'Master Afternoon: unusual clarity and vision. What is offered is rare.',
+    evening:'Master Evening: integration of the day\'s revelations. Something important has arrived; be still enough to receive it.'},
   22:{n:'Master Builder',k:'Large-scale vision · practical idealism · manifestation',master:true,
-    morning:'Master Morning — practical idealism at its peak. Major projects respond to clear, committed focus.',
-    afternoon:'Master Afternoon — civilisational-scale energy is available. Build with intention.',
-    evening:'Master Evening — reflect on what you are truly building over the long arc.'},
+    morning:'Master Morning: practical idealism at its peak. Major projects respond to clear, committed focus.',
+    afternoon:'Master Afternoon: civilisational-scale energy is available. Build with intention.',
+    evening:'Master Evening: reflect on what you are truly building over the long arc.'},
   33:{n:'Master Teacher',k:'Healing · compassion · selfless guidance',master:true,
-    morning:'Master Morning — compassionate service and healing are amplified.',
-    afternoon:'Master Afternoon — teach, guide, and give freely.',
-    evening:'Master Evening — what has your generosity created today? Receive the reflection.'},
+    morning:'Master Morning: compassionate service and healing are amplified.',
+    afternoon:'Master Afternoon: teach, guide, and give freely.',
+    evening:'Master Evening: what has your generosity created today? Receive the reflection.'},
   44:{n:'Master Organiser',k:'Systemic mastery · material achievement · divine structure',master:true,
-    morning:'Master Morning — structural clarity and material achievement are supported.',
-    afternoon:'Master Afternoon — deep systems thinking opens. Pay close attention to business and money.',
-    evening:'Master Evening — review the architecture of your long-term vision.'},
+    morning:'Master Morning: structural clarity and material achievement are supported.',
+    afternoon:'Master Afternoon: deep systems thinking opens. Pay close attention to business and money.',
+    evening:'Master Evening: review the architecture of your long-term vision.'},
 };
 
 function getNumerology(dateStr,bDay,bMonth,bYear){
@@ -710,7 +710,7 @@ function callAPI(model, maxTok, sys, user) {
 // Called by generateReading() — replaces the old ad-hoc profileBlock.
 // ══════════════════════════════════════════════════════════════════
 function buildProfileContext(p, recentHistory = []) {
-  if (!p || Object.keys(p).length === 0) return 'No personal profile provided — give a universal reading grounded in the cosmic data.';
+  if (!p || Object.keys(p).length === 0) return 'No personal profile provided. Give a universal reading grounded in the cosmic data.';
 
   const lines = [];
 
@@ -765,7 +765,7 @@ function buildProfileContext(p, recentHistory = []) {
   if (p.context) lines.push(`Personal context: ${p.context}`);
 
   // Today's intention
-  if (p.intention) lines.push(`Today's intention: ${p.intention} — weave this into the synthesis, priorities, and shadow work.`);
+  if (p.intention) lines.push(`Today's intention: ${p.intention}. Weave this into the synthesis, priorities, and shadow work.`);
 
   // Hormonal phase (client-computed, privacy-safe — no raw dates sent, just phase name and Oracle guidance)
   if (p.cycleContext) {
@@ -797,7 +797,7 @@ function buildProfileContext(p, recentHistory = []) {
   // Inject last 3 reading summaries for genuine cross-session continuity
   if (recentHistory && recentHistory.length > 0) {
     lines.push('');
-    lines.push('RECENT SESSIONS — use for continuity and pattern recognition:');
+    lines.push('RECENT SESSIONS: use for continuity and pattern recognition:');
     recentHistory.slice(0, 3).forEach((h, i) => {
       const label = i === 0 ? 'Most recent reading' : `${i + 1} sessions ago`;
       const date = h.reading_date || h.date || '';
@@ -817,7 +817,7 @@ function buildProfileContext(p, recentHistory = []) {
 // ══════════════════════════════════════════════════════════════════
 async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHistory = [], _planets, _moon, _kin, _num, _aspects) {
   const _langNote = (profile && profile.readingLang === 'modern')
-    ? '\n\nLANGUAGE MODE — MODERN SCIENTIFIC: Translate every cosmic insight into neuroscience terms. Frame numerology as cognitive priming (salience network), lunar cycles as circadian biology, shadow work as interoceptive signal (Barrett 2017), transits as predictive framework shifts. Name the mechanism. The ancient framework is the scaffold; the language is neuroscience.'
+    ? '\n\nLANGUAGE MODE: MODERN SCIENTIFIC. Translate every cosmic insight into neuroscience terms. Frame numerology as cognitive priming (salience network), lunar cycles as circadian biology, shadow work as interoceptive signal (Barrett 2017), transits as predictive framework shifts. Name the mechanism. The ancient framework is the scaffold; the language is neuroscience.'
     : '';
   // Accept pre-calculated data from two-phase flow to avoid recalculating
   const planets = _planets || buildPlanets(dateStr);
@@ -833,24 +833,24 @@ async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHis
   const profileBlock = buildProfileContext(p, recentHistory);
 
   // Build birth kin string from calculated num
-  const birthKinStr = num.birthKin ? `Kin ${num.birthKin.kin} — ${num.birthKin.full}` : 'not calculated';
+  const birthKinStr = num.birthKin ? `Kin ${num.birthKin.kin} · ${num.birthKin.full}` : 'not calculated';
 
   const pTable = planets.map(pl => `${pl.name}: ${pl.degStr}`).join('\n');
   const aList = aspects.slice(0,6).map(a => `${'●'.repeat(a.str)}${'○'.repeat(5-a.str)} ${a.desc}`).join('\n');
 
   const moonAlert = moon.isBlack
-    ? `★ BLACK MOON (2 days before New Moon) — tricky, introspective threshold. ${firstName} should not initiate major actions today; observe and prepare instead.`
+    ? `★ BLACK MOON (2 days before New Moon): tricky, introspective threshold. ${firstName} should not initiate major actions today; observe and prepare instead.`
     : moon.isShiva
-      ? `★ SHIVA MOON (2 days after New Moon) — blissful, regenerative. Auspicious for new actions, new conversations, and fresh starts for ${firstName}.`
+      ? `★ SHIVA MOON (2 days after New Moon): blissful, regenerative. Auspicious for new actions, new conversations, and fresh starts for ${firstName}.`
       : '';
 
-  const satNep = `Saturn ${planets[6].degStr} conjunct Neptune ${planets[8].degStr} — historically significant (Tarnas 2006): last Aries conjunction ~1522 (Magellan circumnavigation, Luther's Reformation), then 1917 (WWI/Russian Revolution), 1952, 1989 (Berlin Wall fall). In Aries = genesis, not reform. Dissolution of old structures meeting new idealism.`;
+  const satNep = `Saturn ${planets[6].degStr} conjunct Neptune ${planets[8].degStr}. Historically significant (Tarnas 2006): last Aries conjunction ~1522 (Magellan circumnavigation, Luther's Reformation), then 1917 (WWI/Russian Revolution), 1952, 1989 (Berlin Wall fall). In Aries = genesis, not reform. Dissolution of old structures meeting new idealism.`;
 
-  const uranus = `Uranus ${planets[7].degStr} — approaching Gemini ingress ~April 26 2026. Financial structures, communication architectures, and valuations disrupted and liberated.`;
+  const uranus = `Uranus ${planets[7].degStr}: approaching Gemini ingress ~April 26 2026. Financial structures, communication architectures, and valuations disrupted and liberated.`;
 
   const mars = planets[4].sign === 'Pisces'
-    ? `Mars ${planets[4].degStr} — in Pisces, drive is inward and visionary. Physical energy best metabolised through creative and strategic work rather than force.`
-    : `Mars ${planets[4].degStr} — in Aries, drive is ignited. Decisive action rewarded. Watch for overextension.`;
+    ? `Mars ${planets[4].degStr} — in Pisces. Drive is inward and visionary. Physical energy best metabolised through creative and strategic work rather than force.`
+    : `Mars ${planets[4].degStr} — in Aries. Drive is ignited. Decisive action rewarded. Watch for overextension.`;
 
   const weekAheadJSON = weekAhead.map((w,i) => i===0
     ? `{"date":"${w.date}","day":"${w.dayStr}","kin":"${w.kin}","ud":${w.ud},"isGAP":${w.isGAP},"note":"<Today — 2-sentence summary>"}`
@@ -859,15 +859,15 @@ async function generateReading(dateStr, profile = {}, tier = 'oracle', recentHis
 
   // ── TIER-SPECIFIC SCOPE ──
   const tierScope = {
-    free: `TIER: Free — Generate ONLY: synthesis (1 sentence), Universal Day number + name + one sentence meaning, moon phase + sign, today's Kin, one "For Today" action. JSON must have: synthesis, numerology:{headline, body(1 paragraph)}, moon_section:{headline, body(1 paragraph)}, dreamspell:{headline}, closing_line. Nothing else. Keep total output under 500 tokens.`,
-    seeker: `TIER: Seeker — Generate a focused reading. Required JSON fields ONLY: synthesis (3 sentences), numerology:{headline,body(2 sentences),three_energies:{morning,afternoon,evening each with num+name+guidance}}, moon_section:{headline,body(2 sentences)}, astrology:{main_transit_headline,main_transit_body(2 sentences)}, dreamspell:{headline,body(2 sentences)}, priorities:[3 items with title+rationale(2 sentences)+action], shadow_work(2 sentences), focus_on:[4 items], ease_off:[4 items], time_windows:{morning,afternoon,evening each 1 sentence}, closing_line, sources. NO week_ahead. NO daily_gift. Total output under 1800 tokens.`,
-    initiate: `TIER: Initiate — Generate full reading with all fields except: omit daily_gift.meditation and deep saturn_neptune historical analysis. Keep prose fields to 3 sentences each. Include week_ahead.`,
-    mystic: `TIER: Mystic — Generate complete reading with all fields. Include natal chart context. Keep prose fields to 3-4 sentences. Full week_ahead. Full daily_gift.`,
-    oracle: `TIER: Oracle Deep Dive — Generate the highest quality reading. Every prose field must be rich and specific to this person. Numerology: 3-sentence headline, 2-paragraph body with scholarly grounding. Moon section: 2-paragraph body. Main transit: 2-paragraph body with specific life application. Dreamspell: 2-paragraph body. Priorities: 3 items with 3-4 sentence rationale each. Shadow work: 3-4 sentences. Time windows: 3 sentences each. Week ahead: 7 days with 2-sentence personalised notes per day. Include: closing_line, daily_gift (quote+attribution), sources.`
+    free: `TIER: Free. Generate ONLY: synthesis (1 sentence), Universal Day number + name + one sentence meaning, moon phase + sign, today's Kin, one "For Today" action. JSON must have: synthesis, numerology:{headline, body(1 paragraph)}, moon_section:{headline, body(1 paragraph)}, dreamspell:{headline}, closing_line. Nothing else. Keep total output under 500 tokens.`,
+    seeker: `TIER: Seeker. Generate a focused reading. Required JSON fields ONLY: synthesis (3 sentences), numerology:{headline,body(2 sentences),three_energies:{morning,afternoon,evening each with num+name+guidance}}, moon_section:{headline,body(2 sentences)}, astrology:{main_transit_headline,main_transit_body(2 sentences)}, dreamspell:{headline,body(2 sentences)}, priorities:[3 items with title+rationale(2 sentences)+action], shadow_work(2 sentences), focus_on:[4 items], ease_off:[4 items], time_windows:{morning,afternoon,evening each 1 sentence}, closing_line, sources. NO week_ahead. NO daily_gift. Total output under 1800 tokens.`,
+    initiate: `TIER: Initiate. Generate full reading with all fields except: omit daily_gift.meditation and deep saturn_neptune historical analysis. Keep prose fields to 3 sentences each. Include week_ahead.`,
+    mystic: `TIER: Mystic. Generate complete reading with all fields. Include natal chart context. Keep prose fields to 3-4 sentences. Full week_ahead. Full daily_gift.`,
+    oracle: `TIER: Oracle Deep Dive. Generate the highest quality reading. Every prose field must be rich and specific to this person. Numerology: 3-sentence headline, 2-paragraph body with scholarly grounding. Moon section: 2-paragraph body. Main transit: 2-paragraph body with specific life application. Dreamspell: 2-paragraph body. Priorities: 3 items with 3-4 sentence rationale each. Shadow work: 3-4 sentences. Time windows: 3 sentences each. Week ahead: 7 days with 2-sentence personalised notes per day. Include: closing_line, daily_gift (quote+attribution), sources.`
   };
   const scope = tierScope[tier] || tierScope.oracle;
 
-  const sys = `You are the Oracle at Cosmic Daily Planner (cosmicdailyplanner.com) — a rigorous, personalised daily cosmic planner synthesising Swiss Ephemeris astronomy, Pythagorean numerology, Western psychological astrology, and Dreamspell/Law of Time.${_langNote}
+  const sys = `You are the Oracle at Cosmic Daily Planner (cosmicdailyplanner.com): a rigorous, personalised daily cosmic planner synthesising Swiss Ephemeris astronomy, Pythagorean numerology, Western psychological astrology, and Dreamspell/Law of Time.${_langNote}
 
 YOUR VOICE: The best Jungian analyst meets the Swiss Ephemeris. Precise. Personal. Grounded. Emotionally intelligent.
 
@@ -878,14 +878,14 @@ CRITICAL RULES:
 — Address the reader by their first name (${firstName}) throughout. Use ONLY the personal context they have provided — do not invent details about their life.
 — If personal context is provided (companies, family, projects, relationships, roles, active threads), reference it specifically and by name. If not provided, speak universally but still specifically to the cosmic weather.
 — If RECENT SESSIONS are provided in the profile, use them for genuine continuity: reference what was present before, notice patterns, acknowledge what has shifted. The Oracle has memory.
-— Dreamspell is ALWAYS labelled: Argüelles (1987) The Mayan Factor — modern 20th-century system, distinct from ancient K'iche' Maya tradition maintained by Guatemalan daykeepers.
+— Dreamspell is ALWAYS labelled: Argüelles (1987) The Mayan Factor. Modern 20th-century system, distinct from ancient K'iche' Maya tradition maintained by Guatemalan daykeepers.
 — No deterministic predictions. Speak in possibilities and tendencies.
 — Every section must be grounded in the actual planetary data and personal context provided.
 — BIORHYTHMS: If BIORHYTHMS TODAY is present in the profile, integrate it meaningfully. A physical score below -60% means depleted vitality — flag it in time windows and priorities. A critical day (zero crossing) is a transition requiring care. Do not merely mention it — let it shape the energy guidance concretely.
 — HORMONAL PHASE: If HORMONAL PHASE is present, treat it as a legitimate biological rhythm equal in weight to moon phase. Reference it in time windows, priorities, and shadow work — speak to how this phase shapes energy, decision-making, and relational sensitivity today.
-— NATAL vs TRANSIT: Always distinguish clearly. Say "today's Moon is in X" or "the Moon transits X today" for current sky positions. Say "your natal Moon in X" for birth chart placements. Never conflate the two — this confusion destroys credibility with experienced users.
+— NATAL vs TRANSIT: Always distinguish clearly. Say "today's Moon is in X" or "the Moon transits X today" for current sky positions. Say "your natal Moon in X" for birth chart placements. Never conflate the two. This confusion destroys credibility with experienced users.
 — RESPOND ONLY WITH VALID JSON. No markdown fences. No preamble. No text outside the JSON object.
-— CRITICAL: The JSON MUST be syntactically complete and valid. Every opened brace and bracket must be closed. If approaching length limit, shorten EARLIER sections first — but always close the JSON properly.
+. CRITICAL: The JSON MUST be syntactically complete and valid. Every opened brace and bracket must be closed. If approaching length limit, shorten EARLIER sections first — but always close the JSON properly.
 — SCHOLARLY SOURCES: Šprajc et al. 2023 (Science Advances); Aldana 2022; Tarnas 2006 Cosmos & Psyche; Greene 1976 Saturn; Hand 2002 Planets in Transit; Brady 1999; Brennan 2017; Drayer 2002 Numerology; Kahn 2001 Pythagoras.`;
 
   const user = `PROFILE:
@@ -927,7 +927,7 @@ ${mars}
 WEEK AHEAD DATA (pre-calculated — use these exact dates, Kins, and UDs):
 ${weekAhead.map(w => `${w.dayStr}: ${w.kin} | UD${w.ud}${w.isGAP ? ' GAP' : ''}`).join('\n')}
 
-Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no preamble — JSON object only):
+Generate the FULL ORACLE READING as valid JSON (no markdown, no fences, no preamble. JSON object only):
 {
   "synthesis": "<2-3 sentence italic opening — synthesise ALL four frameworks into the single deepest truth for ${firstName} today. Weave the Dreamspell Kin, Universal Day, dominant transit, and moon phase into one resonant, specific, memorable statement. This is the headline they carry all day.>",
   "numerology": {
@@ -1059,7 +1059,7 @@ async function generatePhase1(dateStr, profile, tier, planets, moon, kin, num, a
 
   const sys1 = `You are the Oracle at Cosmic Daily Planner. PHASE 1 — generate only the actionable core sections. Fast, precise, personal.
 ${scope1}
-Rules: Address ${firstName} by name. Use only provided data. RESPOND WITH VALID JSON ONLY — no markdown, no preamble.`;
+Rules: Address ${firstName} by name. Use only provided data. RESPOND WITH VALID JSON ONLY. No markdown, no preamble.`;
 
   const user1 = `DATE: ${dateStr}
 PROFILE: ${profileBlock}
