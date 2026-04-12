@@ -161,7 +161,7 @@ body{background:var(--navy2);color:var(--text);
   margin-bottom:40px;line-height:1.7}
 .field{margin-bottom:20px}
 .field-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.3em;
-  text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:block}
+  text-transform:uppercase;color:var(--text2);margin-bottom:8px;display:block}
 .field-input{width:100%;background:rgba(13,30,51,0.8);
   border:1px solid rgba(240,230,204,0.15);border-radius:2px;
   padding:12px 16px;color:var(--text);font-family:'EB Garamond',serif;font-size:17px;
@@ -170,12 +170,21 @@ body{background:var(--navy2);color:var(--text);
 .field-input::placeholder{color:var(--text3)}
 textarea.field-input{resize:vertical;min-height:100px;line-height:1.7}
 .radio-group{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.check-group{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.check-opt{position:relative}
+.check-opt input{position:absolute;opacity:0;width:0;height:0}
+.check-opt label{display:block;text-align:center;padding:10px 8px;
+  border:1px solid rgba(240,230,204,0.2);cursor:pointer;
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--text2);transition:all .2s}
+.check-opt input:checked + label{border-color:var(--teal);color:var(--teal);
+  background:rgba(29,158,117,0.08)}
 .radio-opt{position:relative}
 .radio-opt input{position:absolute;opacity:0;width:0;height:0}
 .radio-opt label{display:block;text-align:center;padding:10px 8px;
-  border:1px solid rgba(240,230,204,0.15);cursor:pointer;
+  border:1px solid rgba(240,230,204,0.2);cursor:pointer;
   font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;text-transform:uppercase;
-  color:var(--text3);transition:all .2s}
+  color:var(--text2);transition:all .2s}
 .radio-opt input:checked + label{border-color:var(--gold);color:var(--gold);
   background:rgba(201,160,80,0.08)}
 .agreement{background:rgba(13,30,51,0.7);border:1px solid var(--div);
@@ -465,10 +474,10 @@ textarea.field-input{resize:vertical;min-height:100px;line-height:1.7}
       ║  1. Go to formspree.io and sign in                       ║
       ║  2. Create a form called "CDP Beta Applications"         ║
       ║  3. Copy the 8-character form ID (e.g. xkgnpqrb)        ║
-      ║  4. Replace YOUR_FORMSPREE_ID below with that ID         ║
+      ║  4. Replace xyklgprv below with that ID         ║
       ╚══════════════════════════════════════════════════════════╝
       -->
-      <form id="betaForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+      <form id="betaForm" action="https://formspree.io/f/xyklgprv" method="POST">
 
         <div class="field">
           <label class="field-label" for="name">Your name</label>
@@ -482,21 +491,50 @@ textarea.field-input{resize:vertical;min-height:100px;line-height:1.7}
             placeholder="We will send your invite here" required autocomplete="email">
         </div>
 
+        <!-- Q1: Who are you -->
         <div class="field">
-          <label class="field-label">Your background</label>
-          <div class="radio-group">
-            <div class="radio-opt">
-              <input type="radio" name="background" id="bg_spirit" value="Spiritual practice">
-              <label for="bg_spirit">Spiritual practice</label>
-            </div>
-            <div class="radio-opt">
-              <input type="radio" name="background" id="bg_science" value="Science / data">
-              <label for="bg_science">Science / data</label>
-            </div>
-            <div class="radio-opt">
-              <input type="radio" name="background" id="bg_both" value="Both" checked>
-              <label for="bg_both">Both</label>
-            </div>
+          <label class="field-label">Which best describes you? <span style="opacity:.5;font-size:.8em">(choose all that apply)</span></label>
+          <div class="check-group">
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_founder" value="Founder / Executive"><label for="seg_founder">Founder / Executive</label></div>
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_coach" value="Coach / Therapist / Guide"><label for="seg_coach">Coach / Therapist / Guide</label></div>
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_creative" value="Creative / Artist"><label for="seg_creative">Creative / Artist</label></div>
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_science" value="Healthcare / Science professional"><label for="seg_science">Healthcare / Science professional</label></div>
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_spirit" value="Spiritual practitioner"><label for="seg_spirit">Spiritual practitioner</label></div>
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_student" value="Student / Early career"><label for="seg_student">Student / Early career</label></div>
+            <div class="check-opt"><input type="checkbox" name="segment" id="seg_curious" value="Curious individual"><label for="seg_curious">Curious individual</label></div>
+          </div>
+        </div>
+
+        <!-- Q2: Experience with guidance frameworks -->
+        <div class="field">
+          <label class="field-label">Your experience with astrology, numerology or similar frameworks</label>
+          <div class="radio-group" style="grid-template-columns:repeat(2,1fr)">
+            <div class="radio-opt"><input type="radio" name="experience" id="exp_new" value="New to all of this"><label for="exp_new">New to all of this</label></div>
+            <div class="radio-opt"><input type="radio" name="experience" id="exp_casual" value="Casually curious" checked><label for="exp_casual">Casually curious</label></div>
+            <div class="radio-opt"><input type="radio" name="experience" id="exp_regular" value="Regular personal practice"><label for="exp_regular">Regular personal practice</label></div>
+            <div class="radio-opt"><input type="radio" name="experience" id="exp_pro" value="Professional or trained practitioner"><label for="exp_pro">Professional or trained</label></div>
+          </div>
+        </div>
+
+        <!-- Q3: Science lens -->
+        <div class="field">
+          <label class="field-label">How much does research and science inform your personal decisions?</label>
+          <div class="radio-group" style="grid-template-columns:repeat(2,1fr)">
+            <div class="radio-opt"><input type="radio" name="science_lens" id="sci_low" value="Not much"><label for="sci_low">Not much</label></div>
+            <div class="radio-opt"><input type="radio" name="science_lens" id="sci_some" value="Somewhat" checked><label for="sci_some">Somewhat</label></div>
+            <div class="radio-opt"><input type="radio" name="science_lens" id="sci_sig" value="Significantly"><label for="sci_sig">Significantly</label></div>
+            <div class="radio-opt"><input type="radio" name="science_lens" id="sci_cent" value="Central to how I think"><label for="sci_cent">Central to how I think</label></div>
+          </div>
+        </div>
+
+        <!-- Q4: Willingness to contribute -->
+        <div class="field">
+          <label class="field-label">Would you be willing to help shape the product further?</label>
+          <div class="radio-group" style="grid-template-columns:repeat(2,1fr)">
+            <div class="radio-opt"><input type="radio" name="contribute" id="con_survey" value="Yes, a survey"><label for="con_survey">Yes, a survey</label></div>
+            <div class="radio-opt"><input type="radio" name="contribute" id="con_focus" value="Yes, a focus group call"><label for="con_focus">Yes, a focus group call</label></div>
+            <div class="radio-opt"><input type="radio" name="contribute" id="con_both" value="Yes, both" checked><label for="con_both">Yes, both</label></div>
+            <div class="radio-opt"><input type="radio" name="contribute" id="con_no" value="Not right now"><label for="con_no">Not right now</label></div>
           </div>
         </div>
 
@@ -504,15 +542,6 @@ textarea.field-input{resize:vertical;min-height:100px;line-height:1.7}
           <label class="field-label" for="why">Why do you want access?</label>
           <textarea class="field-input" id="why" name="why" rows="4"
             placeholder="A sentence or two is fine. What draws you to this?" required></textarea>
-        </div>
-
-        <div class="field">
-          <label class="field-label" for="context">
-            What's alive for you right now?
-            <span style="opacity:.5;font-size:.8em;letter-spacing:.1em">(optional)</span>
-          </label>
-          <textarea class="field-input" id="context" name="context" rows="3"
-            placeholder="A project, a transition, a question you are carrying..."></textarea>
         </div>
 
         <div class="agreement">
@@ -580,7 +609,7 @@ document.getElementById('betaForm').addEventListener('submit', function(e) {
   var err  = document.getElementById('formError');
   var form = this;
 
-  if (form.action.indexOf('YOUR_FORMSPREE_ID') !== -1) {
+  if (form.action.indexOf('xyklgprv') !== -1) {
     err.innerHTML = 'The form is not yet connected. Please email '
       + '<a href="mailto:oracle@cosmicdailyplanner.com" style="color:var(--teal)">'
       + 'oracle@cosmicdailyplanner.com</a> to apply.';
